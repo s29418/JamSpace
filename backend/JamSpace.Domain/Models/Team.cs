@@ -4,6 +4,7 @@ public class Team
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
+    public string? TeamPictureUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     
     public Guid CreatedById { get; set; }

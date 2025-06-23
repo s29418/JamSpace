@@ -22,7 +22,7 @@ namespace JamSpace.Infrastructure.Migrations
                     Bio = table.Column<string>(type: "text", nullable: true),
                     ProfilePictureUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Location = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    CreatedAt = table.Column<byte[]>(type: "timestamp", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SpotifyUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     SoundcloudUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
@@ -37,7 +37,8 @@ namespace JamSpace.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CreatedAt = table.Column<byte[]>(type: "timestamp", nullable: false),
+                    TeamPictureUrl = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -60,7 +61,7 @@ namespace JamSpace.Infrastructure.Migrations
                     InvitedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     InvitedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    CreatedAt = table.Column<byte[]>(type: "timestamp", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

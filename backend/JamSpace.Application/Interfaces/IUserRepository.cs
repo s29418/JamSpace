@@ -1,6 +1,9 @@
-﻿namespace JamSpace.Application.Interfaces;
+﻿using DefaultNamespace;
 
-public class IUserRepository
+namespace JamSpace.Application.Interfaces;
+
+public interface IUserRepository
 {
-    
+    Task<User?> GetByEmailAsync(string email);
+    Task AddAsync(User user);
 }

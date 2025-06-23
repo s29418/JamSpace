@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JamSpace.Domain\JamSpace.Domain.csproj" />
+    <ProjectReference Include="..\JamSpace.Application\JamSpace.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

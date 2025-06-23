@@ -1,6 +1,8 @@
 ﻿namespace DefaultNamespace;
 
-public class AuthResultDto
-{
-    
-}
+public record AuthResultDto(
+    Guid Id,
+    string Username,
+    string Email,
+    string Token
+);

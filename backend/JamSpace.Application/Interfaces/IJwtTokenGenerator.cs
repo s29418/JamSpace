@@ -1,6 +1,8 @@
-﻿namespace JamSpace.Application.Interfaces;
+﻿using DefaultNamespace;
 
-public class IJwtTokenGenerator
+namespace JamSpace.Application.Interfaces;
+
+public interface IJwtTokenGenerator
 {
-    
+    string GenerateToken(User user);
 }

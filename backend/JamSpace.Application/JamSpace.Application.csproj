@@ -2,7 +2,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JamSpace.Domain\JamSpace.Domain.csproj" />
-    <ProjectReference Include="..\JamSpace.Infrastructure\JamSpace.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="MediatR" Version="11.1.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
   </ItemGroup>
 
   <PropertyGroup>

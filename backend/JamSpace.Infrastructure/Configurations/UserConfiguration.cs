@@ -32,8 +32,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Location)
             .HasMaxLength(50);
 
-        builder.Property(u => u.CreatedAt)
-            .HasColumnType("timestamp");
+        builder.Property(u => u.CreatedAt);
 
         builder.Property(u => u.SpotifyUrl)
             .HasMaxLength(255);

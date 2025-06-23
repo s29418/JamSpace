@@ -15,8 +15,7 @@ public class TeamInviteConfiguration : IEntityTypeConfiguration<TeamInvite>
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.Property(ti => ti.CreatedAt)
-            .HasColumnType("timestamp");
+        builder.Property(ti => ti.CreatedAt);
 
         builder.HasOne(ti => ti.Team)
             .WithMany()

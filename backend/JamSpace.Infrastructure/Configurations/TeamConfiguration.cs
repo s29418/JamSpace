@@ -15,8 +15,7 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
             .IsRequired()
             .HasMaxLength(100);
 
-        builder.Property(t => t.CreatedAt)
-            .HasColumnType("timestamp");
+        builder.Property(t => t.CreatedAt);
         
         builder.Property(t => t.TeamPictureUrl)
             .HasMaxLength(255);

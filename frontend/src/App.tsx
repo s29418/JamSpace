@@ -1,26 +1,27 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import NavigationBar from './components/NavigationBar';
+
+const Placeholder = ({ label }: { label: string }) => (
+    <div style={{ backgroundColor: '#121212', height: '100vh', color: 'white', padding: '2rem' }}>
+        <h1>{label}</h1>
+    </div>
+);
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <Router>
+            <NavigationBar />
+            <Routes>
+                <Route path="/" element={<Placeholder label="Strona główna" />} />
+                <Route path="/profile" element={<Placeholder label="Profil" />} />
+                <Route path="/team" element={<Placeholder label="Zespół" />} />
+                <Route path="/chat" element={<Placeholder label="Czat" />} />
+                <Route path="/search" element={<Placeholder label="Wyszukaj" />} />
+                <Route path="/notifications" element={<Placeholder label="Powiadomienia" />} />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;

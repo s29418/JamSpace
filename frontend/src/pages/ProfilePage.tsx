@@ -38,7 +38,7 @@ const ProfilePage = () => {
 
     if (username) {
         return (
-            <div style={{ color: 'white', padding: '2rem' }}>
+            <div>
                 <h2>Welcome, {username}!</h2>
                 <button onClick={handleLogout}>Log out</button>
             </div>
@@ -46,7 +46,7 @@ const ProfilePage = () => {
     }
 
     return (
-        <div style={{ color: 'white', padding: '2rem' }}>
+        <div>
             {isLoginView ? (
                 <>
                     <LoginForm onLogin={checkLogin} />
@@ -54,7 +54,6 @@ const ProfilePage = () => {
                         Don’t have an account?{' '}
                         <span
                             onClick={() => setIsLoginView(false)}
-                            style={{ color: '#26cdd4', cursor: 'pointer', textDecoration: 'underline' }}
                         >
               Sign up!
             </span>
@@ -67,7 +66,6 @@ const ProfilePage = () => {
                         Already have an account?{' '}
                         <span
                             onClick={() => setIsLoginView(true)}
-                            style={{ color: '#26cdd4', cursor: 'pointer', textDecoration: 'underline' }}
                         >
               Log in!
             </span>

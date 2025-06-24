@@ -1,0 +1,54 @@
+.wrapper {
+    padding: 32px 128px;
+    color: white;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 32px;
+    margin-bottom: 24px;
+}
+
+.createButton, .form button {
+    color: #26cdd4;
+    background-color: rgba(38, 205, 212, 0.07);
+    border: 1px solid #26cdd4;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.createButton:hover, .form button:hover {
+    background-color: rgba(38, 205, 212, 0.2);
+}
+
+.form {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.form input {
+    flex: 1;
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: #1a1a1a;
+    color: white;
+    font-size: 24px;
+}
+
+.lineBreak {
+    border: none;
+    height: 1px;
+    background-color: #707070;
+    margin: 32px 0;
+}

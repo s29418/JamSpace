@@ -1,26 +1,28 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import NavigationBar from './components/NavigationBar';
+import ProfilePage from "./pages/ProfilePage";
+
+const Placeholder = ({ label }: { label: string }) => (
+    <div style={{ backgroundColor: '#121212', height: '80vh', color: 'white', padding: '2rem' }}>
+        <h1>{label}</h1>
+    </div>
+);
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <Router>
+            <NavigationBar />
+            <Routes>
+                <Route path="/" element={<Placeholder label="Home" />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/team" element={<Placeholder label="Team" />} />
+                <Route path="/chat" element={<Placeholder label="Chat" />} />
+                <Route path="/search" element={<Placeholder label="Search" />} />
+                <Route path="/notifications" element={<Placeholder label="Notifications" />} />
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;

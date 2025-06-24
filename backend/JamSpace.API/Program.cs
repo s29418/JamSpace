@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using DefaultNamespace;
+using JamSpace.API.Middleware;
 using JamSpace.Application.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -117,6 +118,7 @@ if (app.Environment.IsDevelopment())
 // =====================================
 // 9. MIDDLEWARE
 // =====================================
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication(); // <- JWT auth
 app.UseAuthorization();
 

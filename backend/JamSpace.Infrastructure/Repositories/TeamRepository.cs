@@ -19,7 +19,8 @@ public class TeamRepository : ITeamRepository
         _db.TeamMembers.Add(new TeamMember
         {
             Team = team,
-            UserId = creatorUserId
+            UserId = creatorUserId,
+            Role = "Owner"
         });
 
         await _db.SaveChangesAsync();
@@ -33,8 +34,13 @@ public class TeamRepository : ITeamRepository
         return await _db.Teams
             .Include(t => t.CreatedBy)
             .Include(t => t.Members)
-            .ThenInclude(m => m.User)
+                .ThenInclude(m => m.User)
             .FirstOrDefaultAsync(t => t.Id == id);
+    }
+    
+    public async Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId)
+    {
+        return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == userId);
     }
 
     public Task InviteUserAsync(Guid teamId, Guid invitedUserId)

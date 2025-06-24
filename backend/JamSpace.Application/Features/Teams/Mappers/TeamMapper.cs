@@ -14,10 +14,12 @@ public static class TeamMapper
             TeamPictureUrl = team.TeamPictureUrl,
             CreatedAt = team.CreatedAt,
             CreatedByUserName = team.CreatedBy?.UserName ?? "Unknown",
-            Members = team.Members.Select(m => new TeamMemberDto
+            Members = team.Members
+                .Select(m => new TeamMemberDto
             {
                 UserId = m.User.Id,
-                Username = m.User.UserName
+                Username = m.User.UserName,
+                Role = m.Role.ToString()
             }).ToList()
         };
     }

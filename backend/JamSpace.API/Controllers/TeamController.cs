@@ -2,12 +2,13 @@
 using System.Security.Claims;
 using JamSpace.Application.Features.Teams.Create;
 using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.GetDetails;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/teams")]
 public class TeamController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -26,10 +27,27 @@ public class TeamController : ControllerBase
 
         if (userIdClaim is null)
             return Unauthorized();
-
+        
         var userId = Guid.Parse(userIdClaim);
 
         var result = await _mediator.Send(new CreateTeamWithUserCommand(cmd, userId));
         return Ok(result);
     }
+    
+    [HttpGet("{id}")]
+    [Authorize]
+    public async Task<ActionResult<TeamDto>> GetTeamById(Guid id)
+    {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdClaim is null)
+            return Unauthorized();
+
+        var userId = Guid.Parse(userIdClaim);
+
+        var result = await _mediator.Send(new GetTeamByIdQuery(id, userId));
+        return Ok(result);
+    }
+    
 }

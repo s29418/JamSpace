@@ -1,4 +1,5 @@
 ﻿using DefaultNamespace;
+using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Interfaces;
 using JamSpace.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -78,5 +79,53 @@ public class TeamRepository : ITeamRepository
         _db.TeamInvites.Add(invite);
         await _db.SaveChangesAsync(ct);
     }
+    
+    public async Task<List<TeamInvite>> GetMyPendingInvitesAsync(Guid userId, CancellationToken ct)
+    {
+        return await _db.TeamInvites
+            .Where(i => i.InvitedUserId == userId && i.Status == InviteStatus.Pending)
+            .Include(i => i.Team)
+            .Include(i => i.InvitedByUser)
+            .ToListAsync(ct);
+    }
+
+    public async Task AcceptInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
+    {
+        var invite = await _db.TeamInvites
+            .Include(i => i.Team)
+            .FirstOrDefaultAsync(i => i.Id == inviteId && i.InvitedUserId == userId, ct);
+
+        if (invite is null)
+            throw new NotFoundException("Invite not found.");
+
+        if (invite.Status != InviteStatus.Pending)
+            throw new InvalidOperationException("Invite is no longer pending.");
+
+        invite.Status = InviteStatus.Accepted;
+
+        _db.TeamMembers.Add(new TeamMember
+        {
+            TeamId = invite.TeamId,
+            UserId = userId
+        });
+
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task RejectInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
+    {
+        var invite = await _db.TeamInvites
+            .FirstOrDefaultAsync(i => i.Id == inviteId && i.InvitedUserId == userId, ct);
+
+        if (invite is null)
+            throw new NotFoundException("Invite not found.");
+
+        if (invite.Status != InviteStatus.Pending)
+            throw new InvalidOperationException("Invite is no longer pending.");
+
+        invite.Status = InviteStatus.Rejected;
+        await _db.SaveChangesAsync(ct);
+    }
+
 
 }

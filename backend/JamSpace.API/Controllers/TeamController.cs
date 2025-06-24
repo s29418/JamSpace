@@ -1,9 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using JamSpace.Application.Features.Teams.AcceptTeamInvite;
 using JamSpace.Application.Features.Teams.Create;
 using JamSpace.Application.Features.Teams.Dtos;
 using JamSpace.Application.Features.Teams.GetDetails;
+using JamSpace.Application.Features.Teams.GetMyPendingInvites;
 using JamSpace.Application.Features.Teams.GetMyTeams;
+using JamSpace.Application.Features.Teams.RejectTeamInvite;
 using JamSpace.Application.Features.Teams.SendTeamInvite;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -86,5 +89,52 @@ public class TeamController : ControllerBase
         await _mediator.Send(new SendTeamInviteCommand(userId, teamId, invitingUserId));
         return Ok();
     }
+    
+    [HttpGet("invite")]
+    [Authorize]
+    public async Task<ActionResult<List<TeamInviteDto>>> GetMyInvites()
+    {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdClaim is null)
+            return Unauthorized();
+
+        var userId = Guid.Parse(userIdClaim);
+
+        var invites = await _mediator.Send(new GetMyPendingInvitesQuery(userId));
+        return Ok(invites);
+    }
+    
+    [HttpPost("invite/{id}/accept")]
+    [Authorize]
+    public async Task<IActionResult> AcceptInvite(Guid id)
+    {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdClaim is null)
+            return Unauthorized();
+
+        var userId = Guid.Parse(userIdClaim);
+        await _mediator.Send(new AcceptTeamInviteCommand(id, userId));
+        return Ok();
+    }
+
+    [HttpPost("invite/{id}/reject")]
+    [Authorize]
+    public async Task<IActionResult> RejectInvite(Guid id)
+    {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdClaim is null)
+            return Unauthorized();
+
+        var userId = Guid.Parse(userIdClaim);
+        await _mediator.Send(new RejectTeamInviteCommand(id, userId));
+        return Ok();
+    }
+
     
 }

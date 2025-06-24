@@ -3,9 +3,14 @@ using System.Security.Claims;
 using JamSpace.Application.Features.Teams.Create;
 using JamSpace.Application.Features.Teams.Dtos;
 using JamSpace.Application.Features.Teams.GetDetails;
+using JamSpace.Application.Features.Teams.GetMyTeams;
+using JamSpace.Application.Features.Teams.SendTeamInvite;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+
+namespace JamSpace.API.Controllers;
 
 [ApiController]
 [Route("api/teams")]
@@ -48,6 +53,38 @@ public class TeamController : ControllerBase
 
         var result = await _mediator.Send(new GetTeamByIdQuery(id, userId));
         return Ok(result);
+    }
+    
+    [HttpGet("my")]
+    [Authorize]
+    public async Task<ActionResult<List<TeamDto>>> GetMyTeams()
+    {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdClaim is null)
+            return Unauthorized();
+
+        var userId = Guid.Parse(userIdClaim);
+        var result = await _mediator.Send(new GetMyTeamsQuery(userId));
+
+        return Ok(result);
+    }
+    
+    [HttpPost("invite/{userId}")]
+    [Authorize]
+    public async Task<IActionResult> SendInvite(Guid userId, [FromBody] Guid teamId)
+    {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdClaim is null)
+            return Unauthorized();
+
+        var invitingUserId = Guid.Parse(userIdClaim);
+
+        await _mediator.Send(new SendTeamInviteCommand(userId, teamId, invitingUserId));
+        return Ok();
     }
     
 }

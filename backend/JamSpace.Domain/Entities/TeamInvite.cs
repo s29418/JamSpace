@@ -1,4 +1,6 @@
-﻿namespace DefaultNamespace;
+﻿using JamSpace.Domain.Enums;
+
+namespace DefaultNamespace;
 
 public class TeamInvite
 {
@@ -13,6 +15,6 @@ public class TeamInvite
     public Guid InvitedByUserId { get; set; }
     public User InvitedByUser { get; set; } = null!;
 
-    public string Status { get; set; } = "pending"; // pending / accepted / rejected
+    public InviteStatus Status { get; set; } = InviteStatus.Pending;
     public DateTime CreatedAt { get; set; }
 }

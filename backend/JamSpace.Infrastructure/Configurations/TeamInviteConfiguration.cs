@@ -12,8 +12,9 @@ public class TeamInviteConfiguration : IEntityTypeConfiguration<TeamInvite>
         builder.HasKey(ti => ti.Id);
 
         builder.Property(ti => ti.Status)
-            .IsRequired()
-            .HasMaxLength(50);
+            .HasConversion<string>()
+            .HasMaxLength(50)
+            .IsRequired();
 
         builder.Property(ti => ti.CreatedAt);
 

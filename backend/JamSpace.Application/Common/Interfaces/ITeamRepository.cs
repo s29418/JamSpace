@@ -7,5 +7,7 @@ public interface ITeamRepository
     Task<Guid> CreateTeamAsync(Team team, Guid creatorUserId);
     Task<Team?> GetTeamByIdAsync(Guid id);
     Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId);
-    Task InviteUserAsync(Guid teamId, Guid invitedUserId);
+    Task<List<Team>> GetTeamsByUserIdAsync(Guid userId, CancellationToken ct);
+    Task SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct);
+    
 }

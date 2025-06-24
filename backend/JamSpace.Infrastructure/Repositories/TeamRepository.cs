@@ -1,5 +1,6 @@
 ﻿using DefaultNamespace;
 using JamSpace.Application.Interfaces;
+using JamSpace.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace JamSpace.Infrastructure.Repositories;
@@ -42,9 +43,40 @@ public class TeamRepository : ITeamRepository
     {
         return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == userId);
     }
-
-    public Task InviteUserAsync(Guid teamId, Guid invitedUserId)
+    
+    public async Task<List<Team>> GetTeamsByUserIdAsync(Guid userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        return await _db.Teams
+            .Where(t => t.Members.Any(m => m.UserId == userId))
+            .Include(t => t.CreatedBy)
+            .Include(t => t.Members)
+            .ThenInclude(m => m.User)
+            .ToListAsync(ct);
     }
+
+    public async Task SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct)
+    {
+        var alreadyExists = await _db.TeamInvites.AnyAsync(
+            i => i.TeamId == teamId 
+                 && i.InvitedUserId == invitedUserId 
+                 && i.Status == InviteStatus.Pending,
+            ct);
+
+        if (alreadyExists)
+            return;
+
+        var invite = new TeamInvite
+        {
+            Id = Guid.NewGuid(),
+            TeamId = teamId,
+            InvitedUserId = invitedUserId,
+            InvitedByUserId = invitedByUserId,
+            CreatedAt = DateTime.UtcNow,
+            Status = InviteStatus.Pending
+        };
+
+        _db.TeamInvites.Add(invite);
+        await _db.SaveChangesAsync(ct);
+    }
+
 }

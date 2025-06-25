@@ -54,6 +54,16 @@ public class TeamRepository : ITeamRepository
             .ThenInclude(m => m.User)
             .ToListAsync(ct);
     }
+    
+    public async Task<Guid?> GetUserIdByUsernameAsync(string username, CancellationToken ct)
+    {
+        var user = await _db.Users
+            .Where(u => u.UserName == username)
+            .Select(u => new { u.Id })
+            .FirstOrDefaultAsync(ct);
+
+        return user?.Id;
+    }
 
     public async Task SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct)
     {

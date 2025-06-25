@@ -22,6 +22,7 @@ public class GetMyPendingInvitesHandler : IRequestHandler<GetMyPendingInvitesQue
             Id = i.Id,
             TeamId = i.TeamId,
             TeamName = i.Team.Name,
+            TeamPictureUrl = i.Team.TeamPictureUrl,
             CreatedAt = i.CreatedAt,
             InvitedByUserName = i.InvitedByUser.UserName
         }).ToList();

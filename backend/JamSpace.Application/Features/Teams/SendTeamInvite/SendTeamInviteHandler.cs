@@ -19,7 +19,11 @@ public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand>
         if (!isMember)
             throw new ForbiddenAccessException("You are not a member of this team.");
 
-        await _repo.SendTeamInviteAsync(request.TeamId, request.InvitedUserId, request.InvitingUserId, cancellationToken);
+        var invitedUserId = await _repo.GetUserIdByUsernameAsync(request.InvitedUserName, cancellationToken);
+        if (invitedUserId is null)
+            throw new NotFoundException($"User '{request.InvitedUserName}' not found.");
+
+        await _repo.SendTeamInviteAsync(request.TeamId, invitedUserId.Value, request.InvitingUserId, cancellationToken);
 
         return Unit.Value;
     }

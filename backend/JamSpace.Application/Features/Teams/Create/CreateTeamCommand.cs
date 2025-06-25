@@ -3,4 +3,4 @@ using MediatR;
 
 namespace JamSpace.Application.Features.Teams.Create;
 
-public record CreateTeamCommand(string Name) : IRequest<TeamDto>;
+public record CreateTeamCommand(string Name, string? TeamPictureUrl) : IRequest<TeamDto>;

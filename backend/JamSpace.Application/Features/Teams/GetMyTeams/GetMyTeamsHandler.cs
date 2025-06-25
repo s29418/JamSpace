@@ -19,6 +19,7 @@ public class GetMyTeamsHandler : IRequestHandler<GetMyTeamsQuery, List<TeamDto>>
         var teams = await _repo.GetTeamsByUserIdAsync(request.UserId, cancellationToken);
         return teams
             .Select(TeamMapper.ToDto)
+            .OrderByDescending(t => t.CreatedAt)
             .ToList();
     }
 }

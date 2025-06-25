@@ -22,7 +22,8 @@ public class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, Team
             Id = Guid.NewGuid(),
             Name = request.Command.Name,
             CreatedAt = DateTime.UtcNow,
-            CreatedById = request.CreatorUserId
+            CreatedById = request.CreatorUserId,
+            TeamPictureUrl = request.Command.TeamPictureUrl
         };
 
         var teamId = await _repo.CreateTeamAsync(team, request.CreatorUserId);

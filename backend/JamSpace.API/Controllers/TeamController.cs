@@ -74,9 +74,9 @@ public class TeamController : ControllerBase
         return Ok(result);
     }
     
-    [HttpPost("invite/{userId}")]
+    [HttpPost("invite/{username}")]
     [Authorize]
-    public async Task<IActionResult> SendInvite(Guid userId, [FromBody] Guid teamId)
+    public async Task<IActionResult> SendInvite(string username, [FromBody] Guid teamId)
     {
         var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
                           ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -86,7 +86,7 @@ public class TeamController : ControllerBase
 
         var invitingUserId = Guid.Parse(userIdClaim);
 
-        await _mediator.Send(new SendTeamInviteCommand(userId, teamId, invitingUserId));
+        await _mediator.Send(new SendTeamInviteCommand(username, teamId, invitingUserId));
         return Ok();
     }
     

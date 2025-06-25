@@ -48,8 +48,8 @@ const NavigationBar = () => {
             <NavButton
                 iconSolid={UsersSolid}
                 iconOutline={UsersOutline}
-                path="/team"
-                active={isActive('/team')}
+                path="/teams"
+                active={isActive('/teams')}
                 navigate={navigate}
             />
 
@@ -99,9 +99,11 @@ const NavButton = ({
 }) => {
     const Icon = active ? Solid : Outline;
     return (
+
         <button onClick={() => navigate(path)} className={styles.navIcon}>
             <Icon className={styles.navIcon} />
         </button>
+
     );
 };
 

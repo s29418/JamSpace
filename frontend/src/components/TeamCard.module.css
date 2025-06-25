@@ -45,7 +45,7 @@
     font-weight: bold;
 }
 
-.settingsButton span {
+.settingsButton span, .acceptButton span, .rejectButton span {
     font-size: 16px;
     color: #26cdd4;
 }
@@ -53,7 +53,7 @@
 .inviteActions {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
     margin-left: auto;
 }
 
@@ -61,11 +61,16 @@
     background: none;
     border: 1px solid #26cdd4;
     border-radius: 8px;
-    padding: 6px;
+    padding: 6px 12px;
     cursor: pointer;
+    font-weight: bold;
+    color: #26cdd4;
+    align-items: center;
+    display: inline-flex;
+    gap: 8px;
 }
 
-.acceptButton:hover {
+.acceptButton:hover, .settingsButton:hover {
     background-color: rgba(38, 205, 212, 0.1);
 }
 

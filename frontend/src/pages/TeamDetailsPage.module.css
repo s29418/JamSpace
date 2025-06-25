@@ -1,0 +1,66 @@
+.wrapper {
+    padding: 48px 128px;
+}
+
+.title {
+    font-size: 32px;
+    margin-bottom: 16px;
+    color: white;
+}
+
+.avatar  {
+    width: 96px;
+    height: 96px;
+    border-radius: 100%;
+    border: 2px solid #26cdd4;
+}
+
+.subtitle {
+    font-size: 24px;
+    margin: 24px 0 12px;
+    color: white;
+}
+
+.memberList {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 32px;
+}
+
+.member {
+    color: white;
+    margin-bottom: 8px;
+}
+
+.inviteButton {
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.inviteButton:hover {
+    background-color: #26cdd41f;
+}
+
+.inviteForm {
+    display: flex;
+
+    /*flex-direction: column;*/
+    gap: 16px;
+    margin: 32px 0;
+    /*padding: 32px;*/
+}
+
+.inviteInput {
+    /*flex: 1;*/
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: #1a1a1a;
+    color: white;
+    font-size: 24px;
+}

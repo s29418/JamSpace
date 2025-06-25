@@ -51,3 +51,24 @@ export const rejectTeamInvite = async (inviteId: string) => {
     });
     return response.data;
 };
+
+export const getTeamById = async (id: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${API_URL}/${id}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
+
+export const inviteUserToTeam = async (username: string, teamId: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(`${API_URL}/invite/${username}`, `"${teamId}"`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    return response.data;
+};

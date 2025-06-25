@@ -52,3 +52,16 @@
     background-color: #707070;
     margin: 32px 0;
 }
+
+.successMessage {
+    font-size: 24px;
+    color: #26cdd4;
+    margin-bottom: 16px;
+    font-weight: bold;
+}
+
+.errorMessage {
+    color: #ff6666;
+    margin-bottom: 16px;
+    font-weight: bold;
+}

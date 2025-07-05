@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './TeamCard.module.css';
 import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
-import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
 interface TeamInviteCardProps {
     id: string;

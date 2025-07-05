@@ -150,8 +150,10 @@ const TeamsPage = () => {
             )}
 
             {invites.length > 0 && (
+
                 <div className={styles.inviteSection}>
                     {invites.map(invite => (
+
                         <TeamInviteCard
                             key={invite.id}
                             id={invite.id}
@@ -161,10 +163,11 @@ const TeamsPage = () => {
                             onReject={handleReject}
                         />
                     ))}
+
+                    <hr className={styles.lineBreak}/>
                 </div>
             )}
 
-            <hr className={styles.lineBreak} />
 
             {teams.map(team => (
                 <div onClick={() => navigate(`/teams/${team.id}`)} key={team.id}>

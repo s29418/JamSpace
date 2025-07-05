@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import LoginForm from '../components/LoginForm';
 import RegisterForm from '../components/RegisterForm';
+import styles from './ProfilePage.module.css';
 
 interface JwtPayload {
     username: string;
@@ -38,41 +39,53 @@ const ProfilePage = () => {
 
     if (username) {
         return (
-            <div>
-                <h2>Welcome, {username}!</h2>
-                <button onClick={handleLogout}>Log out</button>
+            <div className={styles.wrapper}>
+                <div className={styles.header}>
+                    <h2>Welcome, {username}!</h2>
+                    <button className={styles.logoutButton} onClick={handleLogout}>Log out</button>
+                </div>
             </div>
         );
     }
 
     return (
-        <div>
-            {isLoginView ? (
-                <>
-                    <LoginForm onLogin={checkLogin} />
-                    <p>
-                        Don’t have an account?{' '}
-                        <span
-                            onClick={() => setIsLoginView(false)}
-                        >
+        <div className={styles.wrapper}>
+                {isLoginView ? (
+                    <>
+
+                        <LoginForm onLogin={checkLogin}/>
+                        <p>
+                            Don’t have an account?{' '}
+
+                            <span
+                                onClick={() => setIsLoginView(false)}
+                            >
               Sign up!
             </span>
-                    </p>
-                </>
-            ) : (
-                <>
+
+                        </p>
+                    </>
+
+                    ) : (
+
+                    <>
                     <RegisterForm />
                     <p>
-                        Already have an account?{' '}
-                        <span
-                            onClick={() => setIsLoginView(true)}
-                        >
+                    Already have an account?{' '}
+                <span
+                    onClick={() => setIsLoginView(true)}
+                >
               Log in!
             </span>
-                    </p>
-                </>
-            )}
-        </div>
+            </p>
+        </>
+
+    )
+
+}
+
+    </div>
+
     );
 };
 

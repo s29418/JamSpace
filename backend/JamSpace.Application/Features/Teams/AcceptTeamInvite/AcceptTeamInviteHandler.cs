@@ -3,7 +3,7 @@ using MediatR;
 
 namespace JamSpace.Application.Features.Teams.AcceptTeamInvite;
 
-public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand>
+public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, Unit>
 {
     private readonly ITeamRepository _repo;
 

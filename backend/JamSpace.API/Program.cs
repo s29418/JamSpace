@@ -8,8 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using DefaultNamespace;
+using FluentValidation;
 using JamSpace.API.Middleware;
 using JamSpace.Application.Authentication;
+using JamSpace.Application.Features.Teams.Create;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,32 +28,24 @@ builder.Services.AddCors(options =>
     });
 });
 
-// =====================================
-// 1. DB CONTEXT (Entity Framework Core)
-// =====================================
+
 builder.Services.AddDbContext<JamSpaceDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// =====================================
-// 2. SERWISY APLIKACYJNE (DI)
-// =====================================
-// builder.Services.AddScoped<TeamService>(); // zostaje Twój TeamService
 
-// =====================================
-// 3. REPOZYTORIA (interfejs + implementacja)
-// =====================================
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
-// =====================================
-// 5. MEDIATR – obsługa Commandów i Handlerów
-// =====================================
-builder.Services.AddMediatR(typeof(RegisterUserHandler).Assembly);
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblyContaining<CreateTeamCommand>(); 
+});
 
-// =====================================
-// 6. JWT Authentication
-// =====================================
+builder.Services.AddValidatorsFromAssemblyContaining<CreateTeamCommandValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -69,57 +64,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// =====================================
-// 7. KONTROLERY + SWAGGER
-// =====================================
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Wprowadź token JWT jak: Bearer {your token}"
-    });
-
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 
-// =====================================
-// 8. ŚRODOWISKO (SWAGGER DEV ONLY)
-// =====================================
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// =====================================
-// 9. MIDDLEWARE
-// =====================================
+
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseAuthentication(); // <- JWT auth
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();

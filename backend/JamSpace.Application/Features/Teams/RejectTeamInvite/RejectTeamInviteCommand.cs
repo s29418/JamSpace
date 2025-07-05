@@ -2,4 +2,4 @@
 
 namespace JamSpace.Application.Features.Teams.RejectTeamInvite;
 
-public record RejectTeamInviteCommand(Guid InviteId, Guid UserId) : IRequest;
+public record RejectTeamInviteCommand(Guid InviteId, Guid UserId) : IRequest<Unit>;

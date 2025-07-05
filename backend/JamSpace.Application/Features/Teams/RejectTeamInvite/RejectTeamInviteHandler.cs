@@ -3,7 +3,7 @@ using MediatR;
 
 namespace JamSpace.Application.Features.Teams.RejectTeamInvite;
 
-public class RejectTeamInviteHandler : IRequestHandler<RejectTeamInviteCommand>
+public class RejectTeamInviteHandler : IRequestHandler<RejectTeamInviteCommand, Unit>
 {
     private readonly ITeamRepository _repo;
 

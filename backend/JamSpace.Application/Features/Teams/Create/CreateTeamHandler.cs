@@ -1,4 +1,5 @@
-﻿using DefaultNamespace;
+﻿using System.ComponentModel.DataAnnotations;
+using DefaultNamespace;
 using JamSpace.Application.Features.Teams.Dtos;
 using JamSpace.Application.Features.Teams.Mappers;
 using JamSpace.Application.Interfaces;
@@ -17,6 +18,9 @@ public class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, Team
 
     public async Task<TeamDto> Handle(CreateTeamWithUserCommand request, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(request.Command.Name) || request.Command.Name.Length < 4)
+            throw new ValidationException("Name of the team must be at least 4 characters long.");
+        
         var team = new Team
         {
             Id = Guid.NewGuid(),

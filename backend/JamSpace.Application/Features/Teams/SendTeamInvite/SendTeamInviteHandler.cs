@@ -4,7 +4,7 @@ using MediatR;
 
 namespace JamSpace.Application.Features.Teams.SendTeamInvite;
 
-public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand>
+public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Unit>
 {
     private readonly ITeamRepository _repo;
 

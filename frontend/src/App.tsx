@@ -4,6 +4,7 @@ import NavigationBar from './components/NavigationBar';
 import ProfilePage from "./pages/ProfilePage";
 import TeamsPage from "./pages/TeamsPage";
 import HomePage from "./pages/HomePage";
+import TeamDetailsPage from "./pages/TeamDetailsPage";
 
 function App() {
     return (
@@ -12,7 +13,8 @@ function App() {
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/team" element={<TeamsPage />} />
+                <Route path="/teams" element={<TeamsPage />} />
+                    <Route path="/teams/:id" element={<TeamDetailsPage />} />
                 {/*<Route path="/chat" element={< />} />*/}
                 {/*<Route path="/search" element={< />} />*/}
                 {/*<Route path="/notifications" element={< />} />*/}

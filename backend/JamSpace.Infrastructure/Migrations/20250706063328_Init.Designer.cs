@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JamSpace.Infrastructure.Migrations
 {
     [DbContext(typeof(JamSpaceDbContext))]
-    [Migration("20250623134752_Init")]
+    [Migration("20250706063328_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -157,6 +157,9 @@ namespace JamSpace.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
 
                     b.ToTable("User", (string)null);
                 });

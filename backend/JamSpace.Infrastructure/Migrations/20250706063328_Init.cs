@@ -141,6 +141,12 @@ namespace JamSpace.Infrastructure.Migrations
                 name: "IX_TeamMember_UserId",
                 table: "TeamMember",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_UserName",
+                table: "User",
+                column: "UserName",
+                unique: true);
         }
 
         /// <inheritdoc />

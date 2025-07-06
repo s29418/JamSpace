@@ -15,18 +15,18 @@
     margin-bottom: 24px;
 }
 
-.createButton, .form button {
+.createButton, .form button, .customFileUpload button {
     color: #26cdd4;
     background-color: rgba(38, 205, 212, 0.07);
     border: 1px solid #26cdd4;
-    padding: 6px 12px;
+    padding: 6px 32px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
     font-size: 24px;
 }
 
-.createButton:hover, .form button:hover {
+.createButton:hover, .form button:hover, .customFileUpload button:hover {
     background-color: rgba(38, 205, 212, 0.2);
 }
 
@@ -36,7 +36,7 @@
     margin-bottom: 32px;
 }
 
-.form input {
+.teamsName {
     flex: 1;
     padding: 6px 12px;
     border-radius: 16px;
@@ -64,4 +64,23 @@
     color: #ff6666;
     margin-bottom: 16px;
     font-weight: bold;
+}
+
+.hiddenInput {
+    display: none;
+}
+
+.fileUploadRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.fileLabel {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.customFileUpload button {
+    margin-top: 8px;
 }

@@ -12,6 +12,25 @@ export const getMyTeams = async () => {
     return response.data;
 };
 
+export const uploadTeamPicture = async (file: File): Promise<string> => {
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axios.post(
+        'http://localhost:5072/api/uploads/team-picture',
+        formData,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        }
+    );
+
+    return response.data.url;
+};
+
 export const createTeam = async (teamData: { name: string; teamPictureUrl?: string | null}) => {
     const token = localStorage.getItem('token');
     const response = await axios.post(API_URL, teamData, {

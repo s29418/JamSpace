@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { register } from '../services/authService';
+import {useNavigate} from "react-router-dom";
 
 const RegisterForm = () => {
     const [email, setEmail] = useState('');
@@ -17,6 +18,7 @@ const RegisterForm = () => {
         try {
             await register(email, username, password);
             alert('Registration successful. You can now log in.');
+            window.location.reload();
         } catch (error) {
             alert('Registration failed.');
         }

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     getMyTeams,
+    uploadTeamPicture,
     createTeam,
     getTeamInvites,
     acceptTeamInvite,
@@ -40,6 +41,9 @@ const TeamsPage = () => {
     const [showForm, setShowForm] = useState(false);
     const [teamName, setTeamName] = useState('');
     const [teamPictureUrl, setTeamPictureUrl] = useState('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [fileLabel, setFileLabel] = useState('No file chosen');
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -62,6 +66,12 @@ const TeamsPage = () => {
         fetchAll();
     }, []);
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setSelectedFile(file);
+        setFileLabel(file?.name || 'No file chosen');
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -70,11 +80,20 @@ const TeamsPage = () => {
                 return;
             }
 
+            let uploadedUrl = teamPictureUrl.trim();
+
+            if (!selectedFile) {
+            } else {
+                uploadedUrl = await uploadTeamPicture(selectedFile);
+            }
+
             await createTeam({
                 name: teamName,
-                teamPictureUrl: teamPictureUrl.trim() || null
+                teamPictureUrl: uploadedUrl || null,
             });
+
             setTeamName('');
+            setSelectedFile(null);
             setShowForm(false);
             setErrorMessage('');
 
@@ -85,8 +104,10 @@ const TeamsPage = () => {
             setTeams(updated);
         } catch (err) {
             console.error('Failed to create team:', err);
+            setErrorMessage('Failed to create team. Please try again.');
         }
     };
+
 
     const handleAccept = async (inviteId: string) => {
         try {
@@ -134,14 +155,26 @@ const TeamsPage = () => {
                         onChange={(e) => setTeamName(e.target.value)}
                         placeholder="Team name"
                         required
+                        className={styles.teamsName}
                     />
 
-                    <input
-                        type="text"
-                        value={teamPictureUrl}
-                        onChange={(e) => setTeamPictureUrl(e.target.value)}
-                        placeholder="Team picture URL (optional)"
-                    />
+                    <div className={styles.customFileUpload}>
+                        <label>Team picture (optional)</label>
+                        <div className={styles.fileUploadRow}>
+                            <button type="button" onClick={() => fileInputRef.current?.click()}>
+                                Upload Image
+                            </button>
+                            <span className={styles.fileLabel}>{fileLabel}</span>
+                        </div>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept="image/*"
+                            className={styles.hiddenInput}
+                        />
+                    </div>
+
 
                     <button type="submit">Create</button>
                     <button type="button" onClick={() => setShowForm(false)}>Cancel</button>

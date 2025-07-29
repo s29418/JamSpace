@@ -17,8 +17,8 @@ public class TeamRepository : ITeamRepository
     
     public async Task<Guid> CreateTeamAsync(Team team, Guid creatorUserId)
     {
-        _db.Teams.Add(team);
-        _db.TeamMembers.Add(new TeamMember
+        await _db.Teams.AddAsync(team);
+        await _db.TeamMembers.AddAsync(new TeamMember
         {
             Team = team,
             UserId = creatorUserId,

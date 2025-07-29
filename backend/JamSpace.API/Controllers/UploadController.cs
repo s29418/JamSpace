@@ -20,8 +20,8 @@ public class UploadController : ControllerBase
     [Authorize]
     public async Task<IActionResult> UploadTeamPicture([FromForm] UploadTeamPictureRequest request)
     {
-        if (request.File == null || request.File.Length == 0)
-            return BadRequest("Brak pliku");
+        if (request.File.Length == 0)
+            return BadRequest("No file provided.");
 
         var url = await _mediator.Send(new UploadTeamPictureCommand(request.File));
         return Ok(new { url });

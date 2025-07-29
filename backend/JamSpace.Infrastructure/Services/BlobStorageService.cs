@@ -1,4 +1,5 @@
-﻿using JamSpace.Application.Interfaces;
+﻿using DefaultNamespace;
+using JamSpace.Application.Interfaces;
 
 namespace JamSpace.Infrastructure.Services;
 
@@ -24,7 +25,7 @@ public class BlobStorageService : IBlobStorageService
 
         var blobClient = _containerClient.GetBlobClient(fileName);
         await blobClient.UploadAsync(fileStream, overwrite: true);
-
-        return blobClient.Uri.ToString(); // <-- publiczny URL
+        
+        return blobClient.Uri.ToString(); 
     }
 }

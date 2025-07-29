@@ -7,6 +7,9 @@ import {
 import styles from './TeamDetailsPage.module.css';
 import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
 import TeamSettingsModal from "../components/modals/TeamSettingsModal";
+import {
+    CogIcon as SettingsIcon,
+} from '@heroicons/react/24/outline';
 
 interface Member {
     userId: string;
@@ -62,6 +65,10 @@ const TeamDetailsPage = () => {
         }
     };
 
+    const handleSettingsClick = () => {
+        setShowModal(true);
+    };
+
     if (loading) return <p>Loading...</p>;
     if (!team) return <p>Team not found</p>;
 
@@ -70,40 +77,24 @@ const TeamDetailsPage = () => {
 
             <div className={styles.teamInfo}>
                 <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar}/>
-                <h1 className={styles.title}>{team.name}</h1>
+                <div>
+                    <h1 className={styles.title}>{team.name}</h1>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowModal(true);
+                        }}
+                        className={styles.editButton}>
+                        <SettingsIcon className={styles.icon} onClick={handleSettingsClick}/> Settings
+                    </button>
+                </div>
+
             </div>
 
+            {showModal && (
+                <TeamSettingsModal teamId={team.id} onClose={() => setShowModal(false)} />
+            )}
 
-            <h2 className={styles.subtitle}>Members</h2>
-
-            <ul className={styles.memberList}>
-                {team.members.map(member => (
-                    <li key={member.userId} className={styles.member}>
-                        <img
-                            src={member.userPictureUrl || defaultTeamIcon}
-                            alt={member.username}
-                            className={styles.userAvatar}
-                        />
-                        <span className={styles.username}>
-                            {member.username} ({member.role})
-                        </span>
-                    </li>
-                ))}
-            </ul>
-
-
-            <form className={styles.inviteForm} onSubmit={handleInvite}>
-                <input
-                    className={styles.inviteInput}
-                    type="text"
-                    placeholder="Enter username"
-                    value={inviteUsername}
-                    onChange={(e) => setInviteUsername(e.target.value)}
-                    required
-                />
-                <button className={styles.inviteButton} type="submit">Invite</button>
-            </form>
-            {message && <p>{message}</p>}
         </div>
     );
 };

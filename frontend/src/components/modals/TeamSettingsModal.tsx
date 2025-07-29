@@ -4,6 +4,10 @@ import { getTeamById, inviteUserToTeam } from '../../services/teamService';
 import modalStyles from './TeamSettingsModal.module.css';
 import styles from '../../pages/TeamDetailsPage.module.css';
 import defaultTeamIcon from '../../assets/defaultTeamIcon.jpg';
+import {
+    TrashIcon as DeleteIcon,
+    PencilSquareIcon as EditIcon,
+} from '@heroicons/react/24/outline';
 
 interface Props {
     teamId: string;
@@ -54,14 +58,25 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose }) => {
 
                 <div className={styles.teamInfo}>
                     <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar} />
-                    <h1 className={styles.title}>{team.name}</h1>
+                    <div>
+                        <h1 className={styles.title}>{team.name}</h1>
+                        <div>
+                            <button className={styles.editButton}><EditIcon className={styles.icon}/> Change name
+                            </button>
+                            <button className={styles.deleteButton}><DeleteIcon className={styles.icon}/> Delete team
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
 
                 <h2 className={styles.subtitle}>Members</h2>
                 <ul className={styles.memberList}>
                     {team.members.map(member => (
                         <li key={member.userId} className={styles.member}>
-                            <img src={member.userPictureUrl || defaultTeamIcon} alt={member.username} className={styles.userAvatar} />
+                            <img src={member.userPictureUrl || defaultTeamIcon}
+                                 alt={member.username}
+                                 className={styles.userAvatar} />
                             <span className={styles.username}>
                 {member.username} ({member.role})
               </span>
@@ -88,7 +103,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose }) => {
                     />
                     <button className={styles.inviteButton} type="submit">Invite</button>
                 </form>
-                {message && <p>{message}</p>}
+                {message && <p className={styles.message}>{message}</p>}
             </div>
         </div>,
         document.getElementById('modal-root') as HTMLElement

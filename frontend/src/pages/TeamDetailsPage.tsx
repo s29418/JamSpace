@@ -6,11 +6,13 @@ import {
 } from '../services/teamService';
 import styles from './TeamDetailsPage.module.css';
 import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
+import TeamSettingsModal from "../components/modals/TeamSettingsModal";
 
 interface Member {
     userId: string;
     username: string;
     role: string;
+    userPictureUrl?: string;
 }
 
 interface Team {
@@ -26,6 +28,7 @@ const TeamDetailsPage = () => {
     const [loading, setLoading] = useState(true);
     const [inviteUsername, setInviteUsername] = useState('');
     const [message, setMessage] = useState('');
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         const fetchTeam = async () => {
@@ -64,19 +67,29 @@ const TeamDetailsPage = () => {
 
     return (
         <div className={styles.wrapper}>
-            <h1 className={styles.title}>{team.name}</h1>
 
-            <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar} />
+            <div className={styles.teamInfo}>
+                <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar}/>
+                <h1 className={styles.title}>{team.name}</h1>
+            </div>
+
 
             <h2 className={styles.subtitle}>Members</h2>
+
             <ul className={styles.memberList}>
                 {team.members.map(member => (
                     <li key={member.userId} className={styles.member}>
-                        <span>{member.username} ({member.role})</span>
+                        <img
+                            src={member.userPictureUrl || defaultTeamIcon}
+                            alt={member.username}
+                            className={styles.userAvatar}
+                        />
+                        <span className={styles.username}>
+                            {member.username} ({member.role})
+                        </span>
                     </li>
                 ))}
             </ul>
-
 
 
             <form className={styles.inviteForm} onSubmit={handleInvite}>

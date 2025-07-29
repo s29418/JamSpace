@@ -205,9 +205,11 @@ const TeamsPage = () => {
             {teams.map(team => (
                 <div onClick={() => navigate(`/teams/${team.id}`)} key={team.id}>
                     <TeamCard
+                        id={team.id}
                         name={team.name}
                         teamPictureUrl={team.teamPictureUrl}
                         members={team.members}
+                        onClick={() => navigate(`/teams/${team.id}`)}
                     />
                 </div>
             ))}

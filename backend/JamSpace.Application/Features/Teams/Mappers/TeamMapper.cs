@@ -13,13 +13,15 @@ public static class TeamMapper
             Name = team.Name,
             TeamPictureUrl = team.TeamPictureUrl,
             CreatedAt = team.CreatedAt,
-            CreatedByUserName = team.CreatedBy?.UserName ?? "Unknown",
+            CreatedByUserName = team.CreatedBy.UserName,
             Members = team.Members
                 .Select(m => new TeamMemberDto
             {
                 UserId = m.User.Id,
                 Username = m.User.UserName,
-                Role = m.Role.ToString()
+                Role = m.Role.ToString(),
+                MusicalRole = m.MusicalRole?.ToString(),
+                UserPictureUrl = m.User.ProfilePictureUrl
             }).ToList()
         };
     }

@@ -1,7 +1,7 @@
 ﻿using JamSpace.Application.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.RejectTeamInvite;
+namespace JamSpace.Application.Features.Teams.Commands.RejectTeamInvite;
 
 public class RejectTeamInviteHandler : IRequestHandler<RejectTeamInviteCommand, Unit>
 {

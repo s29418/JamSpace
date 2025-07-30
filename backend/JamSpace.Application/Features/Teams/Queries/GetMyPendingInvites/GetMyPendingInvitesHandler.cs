@@ -2,7 +2,7 @@
 using JamSpace.Application.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.GetMyPendingInvites;
+namespace JamSpace.Application.Features.Teams.Queries.GetMyPendingInvites;
 
 public class GetMyPendingInvitesHandler : IRequestHandler<GetMyPendingInvitesQuery, List<TeamInviteDto>>
 {

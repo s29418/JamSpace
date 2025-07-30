@@ -4,7 +4,7 @@ using JamSpace.Application.Features.Teams.Mappers;
 using JamSpace.Application.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.GetDetails;
+namespace JamSpace.Application.Features.Teams.Queries.GetDetails;
 
 public class GetTeamByIdHandler : IRequestHandler<GetTeamByIdQuery, TeamDto>
 {

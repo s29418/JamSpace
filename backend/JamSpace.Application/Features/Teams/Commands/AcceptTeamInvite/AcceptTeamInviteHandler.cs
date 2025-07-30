@@ -1,7 +1,7 @@
 ﻿using JamSpace.Application.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.AcceptTeamInvite;
+namespace JamSpace.Application.Features.Teams.Commands.AcceptTeamInvite;
 
 public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, Unit>
 {

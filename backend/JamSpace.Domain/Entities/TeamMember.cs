@@ -1,4 +1,6 @@
-﻿namespace DefaultNamespace;
+﻿using JamSpace.Domain.Enums;
+
+namespace DefaultNamespace;
 
 public class TeamMember
 {
@@ -10,5 +12,6 @@ public class TeamMember
     public Guid UserId { get; set; }
     public User User { get; set; } = null!;
     
-    public string Role { get; set; } = "Member";
+    public FunctionalRole Role { get; set; } = FunctionalRole.Member;
+    public string? MusicalRole { get; set; }
 }

@@ -13,6 +13,7 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
 
         builder.Property(tm => tm.Role)
             .IsRequired()
+            .HasConversion<string>()
             .HasMaxLength(50);
 
         builder.HasOne(tm => tm.User)

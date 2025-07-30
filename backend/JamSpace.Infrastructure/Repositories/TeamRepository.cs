@@ -22,7 +22,7 @@ public class TeamRepository : ITeamRepository
         {
             Team = team,
             UserId = creatorUserId,
-            Role = "Owner"
+            Role = FunctionalRole.Leader
         });
 
         await _db.SaveChangesAsync();
@@ -137,5 +137,41 @@ public class TeamRepository : ITeamRepository
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task<bool> IsUserALeaderAsync(Guid teamId, Guid userId)
+    {
+        return await _db.TeamMembers.AnyAsync(m =>
+            m.TeamId == teamId && m.UserId == userId && m.Role == FunctionalRole.Leader);
+    }
 
+    public async Task<bool> IsUserAnAdminAsync(Guid teamId, Guid userId)
+    {
+        return await _db.TeamMembers
+            .AnyAsync(m => m.TeamId == teamId && m.UserId == userId && m.Role == FunctionalRole.Admin);
+    }
+
+    public async Task ChangeTeamMemberFunctionalRoleAsync(Guid teamId, Guid requestingUserId, Guid userId, 
+        FunctionalRole newRole, CancellationToken ct)
+    {
+        if (!await IsUserALeaderAsync(teamId, requestingUserId))
+            throw new ForbiddenAccessException("Only team leader can change team member functional role.");
+
+        var teamMember = await _db.TeamMembers
+            .FirstOrDefaultAsync(m => m.TeamId == teamId && m.UserId == userId, ct);
+
+        if (teamMember is null)
+            throw new NotFoundException("Team member not found.");
+
+        if (requestingUserId == userId)
+        {
+            var leaders = await _db.TeamMembers
+                .Where(m => m.TeamId == teamId && m.Role == FunctionalRole.Leader)
+                .ToListAsync();
+            
+            if (leaders.Count == 1)
+                throw new ConflictException("Cannot remove last team leader.");
+        }
+        
+        teamMember.Role = newRole;
+        await _db.SaveChangesAsync(ct);
+    }
 }

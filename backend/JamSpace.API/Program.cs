@@ -11,9 +11,11 @@ using DefaultNamespace;
 using FluentValidation;
 using JamSpace.API.Middleware;
 using JamSpace.Application.Authentication;
-using JamSpace.Application.Features.Teams.Create;
 using FluentValidation.AspNetCore;
+using JamSpace.Application.Features.Teams.Commands.Create;
+using JamSpace.Application.Features.Teams.Validators;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,7 +76,39 @@ builder.Services.Configure<FormOptions>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "JamSpace API",
+        Version = "v1"
+    });
+    
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Wklej JWT w formacie: **Bearer &lt;twój_token&gt;**"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+});
 
 var app = builder.Build();
 

@@ -2,7 +2,7 @@
 using JamSpace.Application.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.SendTeamInvite;
+namespace JamSpace.Application.Features.Teams.Commands.SendTeamInvite;
 
 public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Unit>
 {

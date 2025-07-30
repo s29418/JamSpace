@@ -1,13 +1,14 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using JamSpace.Application.Features.Teams.AcceptTeamInvite;
-using JamSpace.Application.Features.Teams.Create;
+﻿using JamSpace.API.Extensions;
+using JamSpace.Application.Features.Teams.Commands.AcceptTeamInvite;
+using JamSpace.Application.Features.Teams.Commands.ChangeTeamMemberFunctionalRole;
+using JamSpace.Application.Features.Teams.Commands.Create;
+using JamSpace.Application.Features.Teams.Commands.RejectTeamInvite;
+using JamSpace.Application.Features.Teams.Commands.SendTeamInvite;
 using JamSpace.Application.Features.Teams.Dtos;
-using JamSpace.Application.Features.Teams.GetDetails;
-using JamSpace.Application.Features.Teams.GetMyPendingInvites;
-using JamSpace.Application.Features.Teams.GetMyTeams;
-using JamSpace.Application.Features.Teams.RejectTeamInvite;
-using JamSpace.Application.Features.Teams.SendTeamInvite;
+using JamSpace.Application.Features.Teams.Queries.GetDetails;
+using JamSpace.Application.Features.Teams.Queries.GetMyPendingInvites;
+using JamSpace.Application.Features.Teams.Queries.GetMyTeams;
+using JamSpace.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,14 +31,7 @@ public class TeamController : ControllerBase
     [Authorize]
     public async Task<ActionResult<TeamDto>> CreateTeam([FromBody] CreateTeamCommand cmd)
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userIdClaim is null)
-            return Unauthorized();
-        
-        var userId = Guid.Parse(userIdClaim);
-
+        var userId = User.GetUserId();
         var result = await _mediator.Send(new CreateTeamWithUserCommand(cmd, userId));
         return Ok(result);
     }
@@ -46,14 +40,7 @@ public class TeamController : ControllerBase
     [Authorize]
     public async Task<ActionResult<TeamDto>> GetTeamById(Guid id)
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userIdClaim is null)
-            return Unauthorized();
-
-        var userId = Guid.Parse(userIdClaim);
-
+        var userId = User.GetUserId();
         var result = await _mediator.Send(new GetTeamByIdQuery(id, userId));
         return Ok(result);
     }
@@ -62,15 +49,8 @@ public class TeamController : ControllerBase
     [Authorize]
     public async Task<ActionResult<List<TeamDto>>> GetMyTeams()
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userIdClaim is null)
-            return Unauthorized();
-
-        var userId = Guid.Parse(userIdClaim);
+        var userId = User.GetUserId();
         var result = await _mediator.Send(new GetMyTeamsQuery(userId));
-
         return Ok(result);
     }
     
@@ -78,14 +58,7 @@ public class TeamController : ControllerBase
     [Authorize]
     public async Task<IActionResult> SendInvite(string username, [FromBody] Guid teamId)
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userIdClaim is null)
-            return Unauthorized();
-
-        var invitingUserId = Guid.Parse(userIdClaim);
-
+        var invitingUserId = User.GetUserId();
         await _mediator.Send(new SendTeamInviteCommand(username, teamId, invitingUserId));
         return Ok();
     }
@@ -94,14 +67,7 @@ public class TeamController : ControllerBase
     [Authorize]
     public async Task<ActionResult<List<TeamInviteDto>>> GetMyInvites()
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userIdClaim is null)
-            return Unauthorized();
-
-        var userId = Guid.Parse(userIdClaim);
-
+        var userId = User.GetUserId();
         var invites = await _mediator.Send(new GetMyPendingInvitesQuery(userId));
         return Ok(invites);
     }
@@ -110,13 +76,7 @@ public class TeamController : ControllerBase
     [Authorize]
     public async Task<IActionResult> AcceptInvite(Guid id)
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userIdClaim is null)
-            return Unauthorized();
-
-        var userId = Guid.Parse(userIdClaim);
+        var userId = User.GetUserId();
         await _mediator.Send(new AcceptTeamInviteCommand(id, userId));
         return Ok();
     }
@@ -125,16 +85,18 @@ public class TeamController : ControllerBase
     [Authorize]
     public async Task<IActionResult> RejectInvite(Guid id)
     {
-        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
-                          ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (userIdClaim is null)
-            return Unauthorized();
-
-        var userId = Guid.Parse(userIdClaim);
+        var userId = User.GetUserId();
         await _mediator.Send(new RejectTeamInviteCommand(id, userId));
         return Ok();
     }
 
+    [HttpPatch("{teamId}/members/{userId}/role")]
+    [Authorize]
+    public async Task<IActionResult> ChangeTeamMemberRole(Guid teamId, Guid userId, [FromQuery] FunctionalRole newRole)
+    {
+        var requestingUserId = User.GetUserId();
+        await _mediator.Send(new ChangeTeamMemberFunctionalRoleCommand(teamId, requestingUserId, userId, newRole));
+        return NoContent();
+    }
     
 }

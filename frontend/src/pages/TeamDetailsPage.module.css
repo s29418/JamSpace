@@ -2,6 +2,13 @@
     padding: 48px 128px;
 }
 
+.teamInfo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+}
+
 .title {
     font-size: 32px;
     margin-bottom: 16px;
@@ -9,15 +16,23 @@
 }
 
 .avatar  {
-    width: 96px;
-    height: 96px;
+    width: 128px;
+    height: 128px;
     border-radius: 100%;
     border: 2px solid #26cdd4;
 }
 
+.userAvatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 100%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    /*margin-bottom: 8px;*/
+}
+
 .subtitle {
     font-size: 24px;
-    margin: 24px 0 12px;
+    margin: 16px 0;
     color: white;
 }
 
@@ -28,9 +43,18 @@
 }
 
 .member {
+    display: flex;
+    align-items: center;
+    gap: 16px;
     color: white;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
 }
+
+.username {
+    font-size: 16px;
+    line-height: 1.2;
+}
+
 
 .inviteButton {
     background-color: transparent;
@@ -48,11 +72,7 @@
 
 .inviteForm {
     display: flex;
-
-    /*flex-direction: column;*/
     gap: 16px;
-    margin: 32px 0;
-    /*padding: 32px;*/
 }
 
 .inviteInput {
@@ -63,4 +83,46 @@
     background-color: #1a1a1a;
     color: white;
     font-size: 24px;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    color: #26cdd4;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    justify-self: center;
+    transition: transform 0.3s;
+}
+
+.message {
+    color: #ff6666;
+    margin-top: 16px;
+    font-weight: bold;
+}
+
+.editButton, .deleteButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 4px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-right: 16px;
+}
+
+.editButton:hover {
+    background-color: #26cdd41f;
+}
+
+.deleteButton:hover {
+    background-color: rgba(255, 102, 102, 0.12);
 }

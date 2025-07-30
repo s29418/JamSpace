@@ -6,11 +6,16 @@ import {
 } from '../services/teamService';
 import styles from './TeamDetailsPage.module.css';
 import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
+import TeamSettingsModal from "../components/modals/TeamSettingsModal";
+import {
+    CogIcon as SettingsIcon,
+} from '@heroicons/react/24/outline';
 
 interface Member {
     userId: string;
     username: string;
     role: string;
+    userPictureUrl?: string;
 }
 
 interface Team {
@@ -26,6 +31,7 @@ const TeamDetailsPage = () => {
     const [loading, setLoading] = useState(true);
     const [inviteUsername, setInviteUsername] = useState('');
     const [message, setMessage] = useState('');
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         const fetchTeam = async () => {
@@ -59,38 +65,36 @@ const TeamDetailsPage = () => {
         }
     };
 
+    const handleSettingsClick = () => {
+        setShowModal(true);
+    };
+
     if (loading) return <p>Loading...</p>;
     if (!team) return <p>Team not found</p>;
 
     return (
         <div className={styles.wrapper}>
-            <h1 className={styles.title}>{team.name}</h1>
 
-            <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar} />
+            <div className={styles.teamInfo}>
+                <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar}/>
+                <div>
+                    <h1 className={styles.title}>{team.name}</h1>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setShowModal(true);
+                        }}
+                        className={styles.editButton}>
+                        <SettingsIcon className={styles.icon} onClick={handleSettingsClick}/> Settings
+                    </button>
+                </div>
 
-            <h2 className={styles.subtitle}>Members</h2>
-            <ul className={styles.memberList}>
-                {team.members.map(member => (
-                    <li key={member.userId} className={styles.member}>
-                        <span>{member.username} ({member.role})</span>
-                    </li>
-                ))}
-            </ul>
+            </div>
 
+            {showModal && (
+                <TeamSettingsModal teamId={team.id} onClose={() => setShowModal(false)} />
+            )}
 
-
-            <form className={styles.inviteForm} onSubmit={handleInvite}>
-                <input
-                    className={styles.inviteInput}
-                    type="text"
-                    placeholder="Enter username"
-                    value={inviteUsername}
-                    onChange={(e) => setInviteUsername(e.target.value)}
-                    required
-                />
-                <button className={styles.inviteButton} type="submit">Invite</button>
-            </form>
-            {message && <p>{message}</p>}
         </div>
     );
 };

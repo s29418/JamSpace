@@ -1,5 +1,5 @@
 ﻿using DefaultNamespace;
-using JamSpace.Application.Authentication;
+using JamSpace.Application.Common.Authentication;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,7 +1,7 @@
-﻿using JamSpace.Application.Features.Teams.Dtos;
-using DefaultNamespace;
+﻿using DefaultNamespace;
+using JamSpace.Application.Common.Features.Teams.Dtos;
 
-namespace JamSpace.Application.Features.Teams.Mappers;
+namespace JamSpace.Application.Common.Features.Teams.Mappers;
 
 public static class TeamMapper
 {

@@ -1,6 +1,6 @@
 ﻿using DefaultNamespace;
-using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Interfaces;
+using JamSpace.Application.Common.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
 using JamSpace.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,19 +30,18 @@ public class TeamRepository : ITeamRepository
         return team.Id;
     }
 
-
     public async Task<Team?> GetTeamByIdAsync(Guid id)
     {
-        return await _db.Teams
+        var team = await _db.Teams
             .Include(t => t.CreatedBy)
             .Include(t => t.Members)
                 .ThenInclude(m => m.User)
             .FirstOrDefaultAsync(t => t.Id == id);
-    }
-    
-    public async Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId)
-    {
-        return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == userId);
+        
+        if (team is null)
+            throw new NotFoundException("Team not found.");
+
+        return team;
     }
     
     public async Task<List<Team>> GetTeamsByUserIdAsync(Guid userId, CancellationToken ct)
@@ -54,7 +53,22 @@ public class TeamRepository : ITeamRepository
             .ThenInclude(m => m.User)
             .ToListAsync(ct);
     }
-    
+
+    public async Task<Team> ChangeTeamNameAsync(Guid teamId, string name, CancellationToken ct)
+    {
+        var team = await GetTeamByIdAsync(teamId);
+        team!.Name = name;
+        await _db.SaveChangesAsync(ct);
+        return team;
+    }
+
+    public async Task DeleteTeamAsync(Guid teamId, CancellationToken ct)
+    {
+        var team = await GetTeamByIdAsync(teamId);
+        _db.Teams.Remove(team!);
+        await _db.SaveChangesAsync(ct);
+    }
+
     public async Task<Guid?> GetUserIdByUsernameAsync(string username, CancellationToken ct)
     {
         var user = await _db.Users
@@ -135,6 +149,11 @@ public class TeamRepository : ITeamRepository
 
         invite.Status = InviteStatus.Rejected;
         await _db.SaveChangesAsync(ct);
+    }
+    
+    public async Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId)
+    {
+        return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == userId);
     }
 
     public async Task<bool> IsUserALeaderAsync(Guid teamId, Guid userId)

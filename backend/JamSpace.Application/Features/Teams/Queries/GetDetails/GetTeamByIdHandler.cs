@@ -1,10 +1,11 @@
-﻿using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Features.Teams.Dtos;
-using JamSpace.Application.Features.Teams.Mappers;
-using JamSpace.Application.Interfaces;
+﻿using JamSpace.Application.Common.Common.Exceptions;
+using JamSpace.Application.Common.Features.Teams.Dtos;
+using JamSpace.Application.Common.Features.Teams.Mappers;
+using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.Queries.GetDetails;
+namespace JamSpace.Application.Common.Features.Teams.Queries.GetDetails;
 
 public class GetTeamByIdHandler : IRequestHandler<GetTeamByIdQuery, TeamDto>
 {
@@ -22,9 +23,7 @@ public class GetTeamByIdHandler : IRequestHandler<GetTeamByIdQuery, TeamDto>
             throw new ForbiddenAccessException("You are not a member of this team.");
 
         var team = await _repo.GetTeamByIdAsync(request.TeamId);
-        if (team is null)
-            throw new NotFoundException("Team not found.");
 
-        return TeamMapper.ToDto(team);
+        return TeamMapper.ToDto(team!);
     }
 }

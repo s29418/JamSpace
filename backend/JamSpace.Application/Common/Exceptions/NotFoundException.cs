@@ -1,4 +1,4 @@
-﻿namespace JamSpace.Application.Common.Exceptions;
+﻿namespace JamSpace.Application.Common.Common.Exceptions;
 
 public class NotFoundException : Exception
 {

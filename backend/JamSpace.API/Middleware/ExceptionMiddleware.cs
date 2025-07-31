@@ -1,4 +1,4 @@
-﻿using JamSpace.Application.Common.Exceptions;
+﻿using JamSpace.Application.Common.Common.Exceptions;
 
 namespace JamSpace.API.Middleware;
 

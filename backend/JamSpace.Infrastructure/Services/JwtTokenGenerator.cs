@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using DefaultNamespace;
-using JamSpace.Application.Interfaces;
+using JamSpace.Application.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 

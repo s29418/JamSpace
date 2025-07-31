@@ -1,7 +1,9 @@
-﻿namespace JamSpace.Application.Authentication;
+﻿using JamSpace.Application.Common.Interfaces;
+
+namespace JamSpace.Application.Common.Authentication;
 
 using MediatR;
-using JamSpace.Application.Interfaces;
+using Application.Common.Interfaces;
 using DefaultNamespace;
 
 public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResultDto>

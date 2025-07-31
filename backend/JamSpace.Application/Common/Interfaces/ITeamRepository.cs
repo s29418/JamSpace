@@ -1,7 +1,7 @@
 ﻿using DefaultNamespace;
 using JamSpace.Domain.Enums;
 
-namespace JamSpace.Application.Interfaces;
+namespace JamSpace.Application.Common.Interfaces;
 
 public interface ITeamRepository
 {
@@ -28,8 +28,8 @@ public interface ITeamRepository
         Guid teamId, Guid userId, FunctionalRole newRole, CancellationToken ct);
 
 
-    // Task ChangeTeamNameAsync(Guid teamId, string name, CancellationToken ct);
-    // Task DeleteTeamAsync(Guid teamId, CancellationToken ct);
+    Task<Team> ChangeTeamNameAsync(Guid teamId, string name, CancellationToken ct);
+    Task DeleteTeamAsync(Guid teamId, CancellationToken ct);
     // Task UpdateTeamPictureAsync(Guid teamId, string pictureUrl, CancellationToken ct);
     Task KickTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct);
     Task<TeamMember> EditTeamMemberMusicalRole(Guid teamId, Guid userId, string musicalRole, CancellationToken ct);

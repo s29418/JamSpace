@@ -1,8 +1,8 @@
-﻿using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Interfaces;
+﻿using JamSpace.Application.Common.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.Commands.SendTeamInvite;
+namespace JamSpace.Application.Common.Features.Teams.Commands.SendTeamInvite;
 
 public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Unit>
 {

@@ -1,7 +1,7 @@
 ﻿using DefaultNamespace;
 using MediatR;
 
-namespace JamSpace.Application.Authentication;
+namespace JamSpace.Application.Common.Authentication;
 
 public record LoginUserQuery(
     string Email,

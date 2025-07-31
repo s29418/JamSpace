@@ -1,5 +1,5 @@
 ﻿using DefaultNamespace;
-using JamSpace.Application.Interfaces;
+using JamSpace.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace JamSpace.Infrastructure.Repositories;

@@ -1,4 +1,4 @@
-using JamSpace.Application.Interfaces;
+using JamSpace.Application.Common.Interfaces;
 // using JamSpace.Application.Services;
 using JamSpace.Infrastructure.Repositories;
 using JamSpace.Infrastructure.Services;
@@ -10,10 +10,10 @@ using System.Text;
 using DefaultNamespace;
 using FluentValidation;
 using JamSpace.API.Middleware;
-using JamSpace.Application.Authentication;
+using JamSpace.Application.Common.Authentication;
 using FluentValidation.AspNetCore;
-using JamSpace.Application.Features.Teams.Commands.Create;
-using JamSpace.Application.Features.Teams.Validators;
+using JamSpace.Application.Common.Features.Teams.Commands.Create;
+using JamSpace.Application.Common.Features.Teams.Validators;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Models;
 

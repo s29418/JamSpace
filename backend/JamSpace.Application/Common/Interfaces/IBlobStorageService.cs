@@ -1,4 +1,4 @@
-﻿namespace JamSpace.Application.Interfaces;
+﻿namespace JamSpace.Application.Common.Interfaces;
 
 public interface IBlobStorageService
 {

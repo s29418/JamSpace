@@ -1,4 +1,4 @@
-﻿using JamSpace.Application.Features.Uploads.UploadTeamPicture;
+﻿using JamSpace.Application.Common.Features.Uploads.UploadTeamPicture;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

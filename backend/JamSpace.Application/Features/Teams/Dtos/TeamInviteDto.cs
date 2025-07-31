@@ -1,4 +1,4 @@
-﻿namespace JamSpace.Application.Features.Teams.Dtos;
+﻿namespace JamSpace.Application.Common.Features.Teams.Dtos;
 
 public class TeamInviteDto
 {

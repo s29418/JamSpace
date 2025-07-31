@@ -1,8 +1,8 @@
-﻿using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Interfaces;
+﻿using JamSpace.Application.Common.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.Commands.KickTeamMember;
+namespace JamSpace.Application.Common.Features.Teams.Commands.KickTeamMember;
 
 public class KickTeamMemberHandler : IRequestHandler<KickTeamMemberCommand, Unit>
 {

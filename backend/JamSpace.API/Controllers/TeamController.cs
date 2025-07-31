@@ -1,15 +1,17 @@
 ﻿using JamSpace.API.Extensions;
-using JamSpace.Application.Features.Teams.Commands.AcceptTeamInvite;
-using JamSpace.Application.Features.Teams.Commands.ChangeTeamMemberFunctionalRole;
-using JamSpace.Application.Features.Teams.Commands.Create;
-using JamSpace.Application.Features.Teams.Commands.EditTeamMemberMusicalRole;
-using JamSpace.Application.Features.Teams.Commands.KickTeamMember;
-using JamSpace.Application.Features.Teams.Commands.RejectTeamInvite;
-using JamSpace.Application.Features.Teams.Commands.SendTeamInvite;
-using JamSpace.Application.Features.Teams.Dtos;
-using JamSpace.Application.Features.Teams.Queries.GetDetails;
-using JamSpace.Application.Features.Teams.Queries.GetMyPendingInvites;
-using JamSpace.Application.Features.Teams.Queries.GetMyTeams;
+using JamSpace.Application.Common.Features.Teams.Commands.AcceptTeamInvite;
+using JamSpace.Application.Common.Features.Teams.Commands.ChangeTeamMemberFunctionalRole;
+using JamSpace.Application.Common.Features.Teams.Commands.Create;
+using JamSpace.Application.Common.Features.Teams.Commands.EditTeamMemberMusicalRole;
+using JamSpace.Application.Common.Features.Teams.Commands.KickTeamMember;
+using JamSpace.Application.Common.Features.Teams.Commands.RejectTeamInvite;
+using JamSpace.Application.Common.Features.Teams.Commands.SendTeamInvite;
+using JamSpace.Application.Common.Features.Teams.Dtos;
+using JamSpace.Application.Common.Features.Teams.Queries.GetDetails;
+using JamSpace.Application.Common.Features.Teams.Queries.GetMyPendingInvites;
+using JamSpace.Application.Common.Features.Teams.Queries.GetMyTeams;
+using JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
+using JamSpace.Application.Features.Teams.Commands.DeleteTeam;
 using JamSpace.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -119,5 +121,24 @@ public class TeamController : ControllerBase
             _mediator.Send(new EditTeamMemberMusicalRoleCommand(teamId, requestingUserId, userId, musicalRole));
         return Ok(updated);
     }
+
+    [HttpPatch("{teamId}/name")]
+    [Authorize]
+    public async Task<ActionResult<TeamDto>> ChangeTeamName(Guid teamId, [FromQuery] string teamName)
+    {
+        var requestingUserId = User.GetUserId();
+        var updated = await _mediator.Send(new ChangeTeamNameCommand(teamId, requestingUserId, teamName));
+        return Ok(updated);
+    }
+
+    [HttpDelete("{teamId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteTeam(Guid teamId)
+    {
+        var requestingUserId = User.GetUserId();
+        await _mediator.Send(new DeleteTeamCommand(teamId, requestingUserId));
+        return NoContent();
+    }
+    
     
 }

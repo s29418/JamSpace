@@ -1,9 +1,9 @@
-﻿using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Features.Teams.Dtos;
-using JamSpace.Application.Interfaces;
+﻿using JamSpace.Application.Common.Common.Exceptions;
+using JamSpace.Application.Common.Features.Teams.Dtos;
+using JamSpace.Application.Common.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.Commands.ChangeTeamMemberFunctionalRole;
+namespace JamSpace.Application.Common.Features.Teams.Commands.ChangeTeamMemberFunctionalRole;
 
 public class ChangeTeamMemberFunctionalRoleHandler : IRequestHandler<ChangeTeamMemberFunctionalRoleCommand, TeamMemberDto>
 {

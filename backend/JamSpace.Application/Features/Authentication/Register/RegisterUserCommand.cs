@@ -1,6 +1,6 @@
 ﻿using DefaultNamespace;
 
-namespace JamSpace.Application.Authentication;
+namespace JamSpace.Application.Common.Authentication;
 
 using MediatR;
 

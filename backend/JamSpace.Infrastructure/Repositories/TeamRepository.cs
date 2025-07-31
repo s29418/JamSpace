@@ -149,29 +149,50 @@ public class TeamRepository : ITeamRepository
             .AnyAsync(m => m.TeamId == teamId && m.UserId == userId && m.Role == FunctionalRole.Admin);
     }
 
-    public async Task ChangeTeamMemberFunctionalRoleAsync(Guid teamId, Guid requestingUserId, Guid userId, 
-        FunctionalRole newRole, CancellationToken ct)
+    public async Task<TeamMember> GetTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct)
     {
-        if (!await IsUserALeaderAsync(teamId, requestingUserId))
-            throw new ForbiddenAccessException("Only team leader can change team member functional role.");
-
-        var teamMember = await _db.TeamMembers
+        var member = await _db.TeamMembers
+            .Include(m => m.User)
             .FirstOrDefaultAsync(m => m.TeamId == teamId && m.UserId == userId, ct);
 
-        if (teamMember is null)
+        if (member is null)
             throw new NotFoundException("Team member not found.");
 
-        if (requestingUserId == userId)
-        {
-            var leaders = await _db.TeamMembers
-                .Where(m => m.TeamId == teamId && m.Role == FunctionalRole.Leader)
-                .ToListAsync();
-            
-            if (leaders.Count == 1)
-                throw new ConflictException("Cannot remove last team leader.");
-        }
-        
+        return member;
+    }
+
+    public async Task<List<TeamMember>> GetLeadersAsync(Guid teamId, CancellationToken ct)
+    {
+        return await _db.TeamMembers
+            .Where(m => m.TeamId == teamId && m.Role == FunctionalRole.Leader)
+            .ToListAsync(ct);
+    }
+    
+    public async Task<TeamMember> ChangeTeamMemberFunctionalRoleAsync(
+        Guid teamId, Guid userId, FunctionalRole newRole, CancellationToken ct)
+    {
+        var teamMember = await GetTeamMemberAsync(teamId, userId, ct);
+
         teamMember.Role = newRole;
+
         await _db.SaveChangesAsync(ct);
+        return teamMember;
+    }
+
+    public async Task KickTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct)
+    {
+        var teamMember = await GetTeamMemberAsync(teamId, userId, ct);
+        
+        _db.TeamMembers.Remove(teamMember);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<TeamMember> EditTeamMemberMusicalRole(Guid teamId, Guid userId, string musicalRole, CancellationToken ct)
+    {
+        var teamMember = await GetTeamMemberAsync(teamId, userId, ct);
+        
+        teamMember.MusicalRole = musicalRole;
+        await _db.SaveChangesAsync(ct);
+        return teamMember;
     }
 }

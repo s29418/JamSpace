@@ -2,6 +2,8 @@
 using JamSpace.Application.Features.Teams.Commands.AcceptTeamInvite;
 using JamSpace.Application.Features.Teams.Commands.ChangeTeamMemberFunctionalRole;
 using JamSpace.Application.Features.Teams.Commands.Create;
+using JamSpace.Application.Features.Teams.Commands.EditTeamMemberMusicalRole;
+using JamSpace.Application.Features.Teams.Commands.KickTeamMember;
 using JamSpace.Application.Features.Teams.Commands.RejectTeamInvite;
 using JamSpace.Application.Features.Teams.Commands.SendTeamInvite;
 using JamSpace.Application.Features.Teams.Dtos;
@@ -12,7 +14,6 @@ using JamSpace.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace JamSpace.API.Controllers;
 
@@ -92,11 +93,31 @@ public class TeamController : ControllerBase
 
     [HttpPatch("{teamId}/members/{userId}/role")]
     [Authorize]
-    public async Task<IActionResult> ChangeTeamMemberRole(Guid teamId, Guid userId, [FromQuery] FunctionalRole newRole)
+    public async Task<ActionResult<TeamMemberDto>> ChangeTeamMemberRole(Guid teamId, Guid userId, [FromQuery] FunctionalRole newRole)
     {
         var requestingUserId = User.GetUserId();
-        await _mediator.Send(new ChangeTeamMemberFunctionalRoleCommand(teamId, requestingUserId, userId, newRole));
+        var updated = await _mediator.Send(new ChangeTeamMemberFunctionalRoleCommand(teamId, requestingUserId, userId, newRole));
+        return Ok(updated);
+    }
+
+    [HttpDelete("{teamId}/members/{userId}")]
+    [Authorize]
+    public async Task<IActionResult> KickTeamMember(Guid teamId, Guid userId)
+    {
+        var requestingUserId = User.GetUserId();
+        await _mediator.Send(new KickTeamMemberCommand(teamId, requestingUserId, userId));
         return NoContent();
+    }
+
+    [HttpPatch("{teamId}/members/{userId}/musical-role")]
+    [Authorize]
+    public async Task<ActionResult<TeamMemberDto>> EditTeamMemberMusicalRole(Guid teamId, Guid userId,
+        [FromQuery] string musicalRole)
+    {
+        var requestingUserId = User.GetUserId();
+        var updated = await 
+            _mediator.Send(new EditTeamMemberMusicalRoleCommand(teamId, requestingUserId, userId, musicalRole));
+        return Ok(updated);
     }
     
 }

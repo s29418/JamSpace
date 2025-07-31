@@ -1,10 +1,11 @@
-﻿using JamSpace.Application.Features.Teams.Dtos;
+﻿using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Features.Teams.Dtos;
 using JamSpace.Application.Interfaces;
 using MediatR;
 
 namespace JamSpace.Application.Features.Teams.Commands.ChangeTeamMemberFunctionalRole;
 
-public class ChangeTeamMemberFunctionalRoleHandler : IRequestHandler<ChangeTeamMemberFunctionalRoleCommand, Unit>
+public class ChangeTeamMemberFunctionalRoleHandler : IRequestHandler<ChangeTeamMemberFunctionalRoleCommand, TeamMemberDto>
 {
     private readonly ITeamRepository _repo;
     
@@ -13,9 +14,28 @@ public class ChangeTeamMemberFunctionalRoleHandler : IRequestHandler<ChangeTeamM
         _repo = repo;
     }
 
-    public async Task<Unit> Handle(ChangeTeamMemberFunctionalRoleCommand request, CancellationToken cancellationToken)
+    public async Task<TeamMemberDto> Handle(ChangeTeamMemberFunctionalRoleCommand request, CancellationToken ct)
     {
-        await _repo.ChangeTeamMemberFunctionalRoleAsync(request.TeamId, request.RequestingUserId, request.UserId, request.NewRole, cancellationToken);
-        return Unit.Value;
+        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId))
+            throw new ForbiddenAccessException("Only team leader can change roles.");
+
+        if (request.RequestingUserId == request.UserId)
+        {
+            var leaders = await _repo.GetLeadersAsync(request.TeamId, ct);
+            if (leaders.Count == 1)
+                throw new ConflictException("Cannot remove the last team leader.");
+        }
+
+        var updated = await _repo.ChangeTeamMemberFunctionalRoleAsync(
+            request.TeamId, request.UserId, request.NewRole, ct);
+
+        return new TeamMemberDto
+        {
+            UserId = updated.UserId,
+            Username = updated.User.UserName,
+            Role = updated.Role.ToString(),
+            MusicalRole = updated.MusicalRole,
+            UserPictureUrl = updated.User.ProfilePictureUrl
+        };
     }
 }

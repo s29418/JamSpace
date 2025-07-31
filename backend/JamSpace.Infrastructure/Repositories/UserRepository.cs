@@ -13,8 +13,8 @@ public class UserRepository : IUserRepository
         _db = db;
     }
 
-    public Task<User?> GetByEmailAsync(string email) =>
-        _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+    public async Task<User?> GetByEmailAsync(string email) =>
+        await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
 
     public async Task AddAsync(User user)
     {

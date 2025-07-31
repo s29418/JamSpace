@@ -1,7 +1,8 @@
-﻿using DefaultNamespace;
-using JamSpace.Application.Common.Authentication;
-using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Features.Authentication.Dtos;
 using MediatR;
+
+namespace JamSpace.Application.Features.Authentication.Login;
 
 public class LoginUserHandler : IRequestHandler<LoginUserQuery, AuthResultDto>
 {

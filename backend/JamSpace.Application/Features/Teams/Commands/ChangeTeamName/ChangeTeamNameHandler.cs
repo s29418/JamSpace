@@ -1,7 +1,7 @@
-﻿using JamSpace.Application.Common.Common.Exceptions;
-using JamSpace.Application.Common.Features.Teams.Dtos;
-using JamSpace.Application.Common.Features.Teams.Mappers;
+﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.Mappers;
 using MediatR;
 
 namespace JamSpace.Application.Features.Teams.Commands.ChangeTeamName;

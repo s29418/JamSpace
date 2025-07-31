@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace JamSpace.Application.Common.Features.Uploads.UploadTeamPicture;
+namespace JamSpace.Application.Features.Uploads.UploadTeamPicture;
 
 public class UploadTeamPictureRequest
 {

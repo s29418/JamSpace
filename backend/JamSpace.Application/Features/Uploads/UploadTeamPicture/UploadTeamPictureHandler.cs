@@ -1,7 +1,7 @@
 ﻿using JamSpace.Application.Common.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Common.Features.Uploads.UploadTeamPicture;
+namespace JamSpace.Application.Features.Uploads.UploadTeamPicture;
 
 public class UploadTeamPictureHandler : IRequestHandler<UploadTeamPictureCommand, string>
 {

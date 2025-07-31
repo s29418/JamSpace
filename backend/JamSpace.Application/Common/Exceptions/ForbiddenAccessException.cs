@@ -1,4 +1,4 @@
-﻿namespace JamSpace.Application.Common.Common.Exceptions;
+﻿namespace JamSpace.Application.Common.Exceptions;
 
 public class ForbiddenAccessException : Exception
 {

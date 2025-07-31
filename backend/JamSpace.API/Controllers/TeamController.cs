@@ -1,17 +1,19 @@
 ﻿using JamSpace.API.Extensions;
-using JamSpace.Application.Common.Features.Teams.Commands.AcceptTeamInvite;
-using JamSpace.Application.Common.Features.Teams.Commands.ChangeTeamMemberFunctionalRole;
-using JamSpace.Application.Common.Features.Teams.Commands.Create;
-using JamSpace.Application.Common.Features.Teams.Commands.EditTeamMemberMusicalRole;
-using JamSpace.Application.Common.Features.Teams.Commands.KickTeamMember;
-using JamSpace.Application.Common.Features.Teams.Commands.RejectTeamInvite;
-using JamSpace.Application.Common.Features.Teams.Commands.SendTeamInvite;
-using JamSpace.Application.Common.Features.Teams.Dtos;
-using JamSpace.Application.Common.Features.Teams.Queries.GetDetails;
-using JamSpace.Application.Common.Features.Teams.Queries.GetMyPendingInvites;
-using JamSpace.Application.Common.Features.Teams.Queries.GetMyTeams;
+using JamSpace.Application.Features.Teams.Commands.AcceptTeamInvite;
+using JamSpace.Application.Features.Teams.Commands.CancelTeamInvite;
+using JamSpace.Application.Features.Teams.Commands.ChangeTeamMemberFunctionalRole;
 using JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
+using JamSpace.Application.Features.Teams.Commands.CreateTeam;
 using JamSpace.Application.Features.Teams.Commands.DeleteTeam;
+using JamSpace.Application.Features.Teams.Commands.EditTeamMemberMusicalRole;
+using JamSpace.Application.Features.Teams.Commands.KickTeamMember;
+using JamSpace.Application.Features.Teams.Commands.RejectTeamInvite;
+using JamSpace.Application.Features.Teams.Commands.SendTeamInvite;
+using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.Queries.GetDetails;
+using JamSpace.Application.Features.Teams.Queries.GetMyPendingInvites;
+using JamSpace.Application.Features.Teams.Queries.GetMyTeams;
+using JamSpace.Application.Features.Teams.Queries.GetTeamInvites;
 using JamSpace.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -57,7 +59,7 @@ public class TeamController : ControllerBase
         return Ok(result);
     }
     
-    [HttpPost("invite/{username}")]
+    [HttpPost("invites/{username}")]
     [Authorize]
     public async Task<IActionResult> SendInvite(string username, [FromBody] Guid teamId)
     {
@@ -66,7 +68,7 @@ public class TeamController : ControllerBase
         return Ok();
     }
     
-    [HttpGet("invite")]
+    [HttpGet("invites")]
     [Authorize]
     public async Task<ActionResult<List<TeamInviteDto>>> GetMyInvites()
     {
@@ -75,7 +77,7 @@ public class TeamController : ControllerBase
         return Ok(invites);
     }
     
-    [HttpPost("invite/{id}/accept")]
+    [HttpPost("invites/{inviteId}/accept")]
     [Authorize]
     public async Task<IActionResult> AcceptInvite(Guid id)
     {
@@ -84,7 +86,7 @@ public class TeamController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("invite/{id}/reject")]
+    [HttpPost("invites/{inviteId}/reject")]
     [Authorize]
     public async Task<IActionResult> RejectInvite(Guid id)
     {
@@ -139,6 +141,23 @@ public class TeamController : ControllerBase
         await _mediator.Send(new DeleteTeamCommand(teamId, requestingUserId));
         return NoContent();
     }
-    
+
+    [HttpGet("{teamId}/invites")]
+    [Authorize]
+    public async Task<ActionResult<TeamInviteDto>> GetTeamInvites(Guid teamId)
+    {
+        var requestingUserId = User.GetUserId();
+        var invites =await _mediator.Send(new GetTeamInvitesQuery(teamId, requestingUserId));
+        return Ok(invites);
+    }
+
+    [HttpPatch("/invites/{inviteId}/cancel")]
+    [Authorize]
+    public async Task<IActionResult> CancelInvite(Guid teamInviteId)
+    {
+        var requestingUserId = User.GetUserId();
+        await _mediator.Send(new CancelTeamInviteCommand(teamInviteId, requestingUserId));
+        return NoContent();
+    }
     
 }

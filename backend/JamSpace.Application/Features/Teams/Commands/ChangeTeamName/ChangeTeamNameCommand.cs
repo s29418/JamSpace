@@ -1,4 +1,4 @@
-﻿using JamSpace.Application.Common.Features.Teams.Dtos;
+﻿using JamSpace.Application.Features.Teams.Dtos;
 using MediatR;
 
 namespace JamSpace.Application.Features.Teams.Commands.ChangeTeamName;

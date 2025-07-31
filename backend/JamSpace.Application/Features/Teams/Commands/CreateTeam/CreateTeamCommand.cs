@@ -1,6 +1,6 @@
-﻿using JamSpace.Application.Common.Features.Teams.Dtos;
+﻿using JamSpace.Application.Features.Teams.Dtos;
 using MediatR;
 
-namespace JamSpace.Application.Common.Features.Teams.Commands.Create;
+namespace JamSpace.Application.Features.Teams.Commands.CreateTeam;
 
 public record CreateTeamCommand(string Name, string? TeamPictureUrl) : IRequest<TeamDto>;

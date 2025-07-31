@@ -1,9 +1,9 @@
-﻿using JamSpace.Application.Common.Features.Teams.Dtos;
-using JamSpace.Application.Common.Features.Teams.Mappers;
-using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.Mappers;
 using MediatR;
 
-namespace JamSpace.Application.Common.Features.Teams.Queries.GetMyTeams;
+namespace JamSpace.Application.Features.Teams.Queries.GetMyTeams;
 
 public class GetMyTeamsHandler : IRequestHandler<GetMyTeamsQuery, List<TeamDto>>
 {

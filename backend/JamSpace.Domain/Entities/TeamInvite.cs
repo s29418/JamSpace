@@ -1,6 +1,6 @@
 ﻿using JamSpace.Domain.Enums;
 
-namespace DefaultNamespace;
+namespace JamSpace.Domain.Entities;
 
 public class TeamInvite
 {

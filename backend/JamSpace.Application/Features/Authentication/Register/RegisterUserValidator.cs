@@ -1,4 +1,4 @@
-﻿namespace JamSpace.Application.Common.Authentication;
+﻿namespace JamSpace.Application.Features.Authentication.Register;
 
 public class RegisterUserValidator
 {

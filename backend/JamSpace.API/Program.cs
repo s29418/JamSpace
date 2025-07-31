@@ -7,13 +7,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using DefaultNamespace;
 using FluentValidation;
 using JamSpace.API.Middleware;
-using JamSpace.Application.Common.Authentication;
 using FluentValidation.AspNetCore;
-using JamSpace.Application.Common.Features.Teams.Commands.Create;
-using JamSpace.Application.Common.Features.Teams.Validators;
+using JamSpace.Application.Features.Teams.Commands.CreateTeam;
+using JamSpace.Infrastructure.Data;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Models;
 

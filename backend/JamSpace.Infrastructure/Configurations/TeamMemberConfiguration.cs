@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using JamSpace.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DefaultNamespace;
+namespace JamSpace.Infrastructure.Configurations;
 
 public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
 {

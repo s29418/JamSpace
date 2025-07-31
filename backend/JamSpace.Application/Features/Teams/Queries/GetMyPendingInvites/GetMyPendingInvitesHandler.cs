@@ -1,8 +1,9 @@
-﻿using JamSpace.Application.Common.Features.Teams.Dtos;
-using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.Mappers;
 using MediatR;
 
-namespace JamSpace.Application.Common.Features.Teams.Queries.GetMyPendingInvites;
+namespace JamSpace.Application.Features.Teams.Queries.GetMyPendingInvites;
 
 public class GetMyPendingInvitesHandler : IRequestHandler<GetMyPendingInvitesQuery, List<TeamInviteDto>>
 {
@@ -17,14 +18,8 @@ public class GetMyPendingInvitesHandler : IRequestHandler<GetMyPendingInvitesQue
     {
         var invites = await _repo.GetMyPendingInvitesAsync(request.UserId, cancellationToken);
 
-        return invites.Select(i => new TeamInviteDto
-        {
-            Id = i.Id,
-            TeamId = i.TeamId,
-            TeamName = i.Team.Name,
-            TeamPictureUrl = i.Team.TeamPictureUrl,
-            CreatedAt = i.CreatedAt,
-            InvitedByUserName = i.InvitedByUser.UserName
-        }).ToList();
+        return invites
+            .Select(TeamInviteMapper.ToDto)
+            .ToList();
     }
 }

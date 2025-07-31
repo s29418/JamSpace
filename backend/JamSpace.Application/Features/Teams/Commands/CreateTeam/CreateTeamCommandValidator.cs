@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
-using JamSpace.Application.Common.Features.Teams.Commands.Create;
 
-namespace JamSpace.Application.Common.Features.Teams.Validators;
+namespace JamSpace.Application.Features.Teams.Commands.CreateTeam;
 
 public class CreateTeamCommandValidator : AbstractValidator<CreateTeamCommand>
 {

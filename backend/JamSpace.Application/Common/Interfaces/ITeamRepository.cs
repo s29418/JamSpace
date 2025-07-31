@@ -1,4 +1,4 @@
-﻿using DefaultNamespace;
+﻿using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
 
 namespace JamSpace.Application.Common.Interfaces;
@@ -11,7 +11,6 @@ public interface ITeamRepository
     Task<Guid> CreateTeamAsync(Team team, Guid creatorUserId);
 
     Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId);
-    Task<Guid?> GetUserIdByUsernameAsync(string username, CancellationToken ct);
     
     //Team invites
     Task<List<TeamInvite>> GetMyPendingInvitesAsync(Guid userId, CancellationToken ct);
@@ -34,8 +33,9 @@ public interface ITeamRepository
     Task KickTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct);
     Task<TeamMember> EditTeamMemberMusicalRole(Guid teamId, Guid userId, string musicalRole, CancellationToken ct);
 
-    // Task<List<TeamInvite>> GetTeamInvitesAsync(Guid teamId, Guid requestingUserId, CancellationToken ct);
-    // Task CancelInviteAsync(Guid inviteId, Guid requestingUserId, CancellationToken ct);
-    // Task<bool> WasInviteSentByUserAsync(Guid inviteId, Guid userId, CancellationToken ct);
+    Task<TeamInvite> GetTeamInviteByIdAsync(Guid teamInviteId, CancellationToken ct);
+    Task<List<TeamInvite>> GetTeamInvitesAsync(Guid teamId, Guid requestingUserId, CancellationToken ct);
+    Task CancelTeamInviteAsync(Guid inviteId, Guid requestingUserId, CancellationToken ct);
+    Task<bool> WasInviteSentByUserAsync(Guid inviteId, Guid userId, CancellationToken ct);
 
 }

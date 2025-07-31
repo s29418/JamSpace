@@ -1,11 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using DefaultNamespace;
-using JamSpace.Application.Common.Features.Teams.Dtos;
-using JamSpace.Application.Common.Features.Teams.Mappers;
-using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.Mappers;
+using JamSpace.Domain.Entities;
 using MediatR;
 
-namespace JamSpace.Application.Common.Features.Teams.Commands.Create;
+namespace JamSpace.Application.Features.Teams.Commands.CreateTeam;
 
 public class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, TeamDto>
 {

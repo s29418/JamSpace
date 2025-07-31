@@ -1,16 +1,18 @@
-﻿using JamSpace.Application.Common.Common.Exceptions;
+﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Common.Features.Teams.Commands.SendTeamInvite;
+namespace JamSpace.Application.Features.Teams.Commands.SendTeamInvite;
 
 public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Unit>
 {
     private readonly ITeamRepository _repo;
+    private readonly IUserRepository _userRepo;
 
-    public SendTeamInviteHandler(ITeamRepository repo)
+    public SendTeamInviteHandler(ITeamRepository repo, IUserRepository userRepo)
     {
         _repo = repo;
+        _userRepo = userRepo;
     }
 
     public async Task<Unit> Handle(SendTeamInviteCommand request, CancellationToken cancellationToken)
@@ -19,7 +21,7 @@ public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Unit
         if (!isMember)
             throw new ForbiddenAccessException("You are not a member of this team.");
 
-        var invitedUserId = await _repo.GetUserIdByUsernameAsync(request.InvitedUserName, cancellationToken);
+        var invitedUserId = await _userRepo.GetUserIdByUsernameAsync(request.InvitedUserName, cancellationToken);
         if (invitedUserId is null)
             throw new NotFoundException($"User '{request.InvitedUserName}' not found.");
 

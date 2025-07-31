@@ -1,7 +1,8 @@
-﻿using DefaultNamespace;
-using JamSpace.Application.Common.Common.Exceptions;
+﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
+using JamSpace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace JamSpace.Infrastructure.Repositories;
@@ -69,16 +70,6 @@ public class TeamRepository : ITeamRepository
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task<Guid?> GetUserIdByUsernameAsync(string username, CancellationToken ct)
-    {
-        var user = await _db.Users
-            .Where(u => u.UserName == username)
-            .Select(u => new { u.Id })
-            .FirstOrDefaultAsync(ct);
-
-        return user?.Id;
-    }
-
     public async Task SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct)
     {
         var alreadyExists = await _db.TeamInvites.AnyAsync(
@@ -87,8 +78,8 @@ public class TeamRepository : ITeamRepository
                  && i.Status == InviteStatus.Pending,
             ct);
 
-        if (alreadyExists)
-            return;
+        if (alreadyExists || await IsUserInTeamAsync(teamId, invitedUserId))
+            throw new ConflictException("Invite already exists or user is in the team.");
 
         var invite = new TeamInvite
         {
@@ -135,7 +126,7 @@ public class TeamRepository : ITeamRepository
 
         await _db.SaveChangesAsync(ct);
     }
-
+    
     public async Task RejectInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
     {
         var invite = await _db.TeamInvites
@@ -150,6 +141,59 @@ public class TeamRepository : ITeamRepository
         invite.Status = InviteStatus.Rejected;
         await _db.SaveChangesAsync(ct);
     }
+
+    public async Task<TeamInvite> GetTeamInviteByIdAsync(Guid teamInviteId, CancellationToken ct)
+    {
+        return await _db.TeamInvites
+            .Include(i => i.Team)
+            .Include(i => i.InvitedByUser)
+            .FirstOrDefaultAsync(i => i.Id == teamInviteId, ct);
+    }
+
+    public async Task<bool> WasInviteSentByUserAsync(Guid inviteId, Guid userId, CancellationToken ct)
+    {
+        return await _db.TeamInvites
+            .AnyAsync(i => i.Id == inviteId && i.InvitedByUserId == userId, ct);   
+    }
+
+    public async Task<List<TeamInvite>> GetTeamInvitesAsync(Guid teamId, Guid requestingUserId, CancellationToken ct)
+    {
+        var query = _db.TeamInvites
+            .Where(i => i.TeamId == teamId)
+            .Include(i => i.Team)
+            .Include(i => i.InvitedByUser);
+
+        if (await IsUserALeaderAsync(teamId, requestingUserId) || await IsUserAnAdminAsync(teamId, requestingUserId))
+        {
+            return await query.ToListAsync(ct); 
+        }
+
+        return await query
+            .Where(i => i.InvitedByUserId == requestingUserId)
+            .ToListAsync(ct); 
+    }
+
+    public async Task CancelTeamInviteAsync(Guid inviteId, Guid requestingUserId, CancellationToken ct)
+    {
+        var invite = await GetTeamInviteByIdAsync(inviteId, ct);
+
+        if (invite is null)
+            throw new NotFoundException("Invite not found.");
+
+        var teamId = invite.TeamId;
+
+        var hasPermission =
+            await IsUserALeaderAsync(teamId, requestingUserId) ||
+            await IsUserAnAdminAsync(teamId, requestingUserId) ||
+            await WasInviteSentByUserAsync(inviteId, requestingUserId, ct);
+
+        if (!hasPermission)
+            throw new UnauthorizedAccessException("Only team leader, admin or user who sent the invite can cancel it.");
+
+        invite.Status = InviteStatus.Cancelled;
+        await _db.SaveChangesAsync(ct);
+    }
+
     
     public async Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId)
     {

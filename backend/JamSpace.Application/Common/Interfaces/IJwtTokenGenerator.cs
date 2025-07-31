@@ -1,4 +1,4 @@
-﻿using DefaultNamespace;
+﻿using JamSpace.Domain.Entities;
 
 namespace JamSpace.Application.Common.Interfaces;
 

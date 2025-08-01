@@ -101,6 +101,7 @@ public class TeamRepository : ITeamRepository
             .Where(i => i.InvitedUserId == userId && i.Status == InviteStatus.Pending)
             .Include(i => i.Team)
             .Include(i => i.InvitedByUser)
+            .Include(i => i.InvitedUser)
             .ToListAsync(ct);
     }
 
@@ -147,6 +148,7 @@ public class TeamRepository : ITeamRepository
         return await _db.TeamInvites
             .Include(i => i.Team)
             .Include(i => i.InvitedByUser)
+            .Include(i => i.InvitedUser)
             .FirstOrDefaultAsync(i => i.Id == teamInviteId, ct);
     }
 
@@ -161,7 +163,8 @@ public class TeamRepository : ITeamRepository
         var query = _db.TeamInvites
             .Where(i => i.TeamId == teamId && i.Status == InviteStatus.Pending)
             .Include(i => i.Team)
-            .Include(i => i.InvitedByUser);
+            .Include(i => i.InvitedByUser)
+            .Include(i => i.InvitedUser);
 
         if (await IsUserALeaderAsync(teamId, requestingUserId) || await IsUserAnAdminAsync(teamId, requestingUserId))
         {

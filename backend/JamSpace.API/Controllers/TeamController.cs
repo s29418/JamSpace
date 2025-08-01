@@ -125,7 +125,7 @@ public class TeamController : ControllerBase
         return Ok(updated);
     }
 
-    [HttpPatch("{teamId}/name")]
+    [HttpPatch("{teamId}/teamName")]
     [Authorize]
     public async Task<ActionResult<TeamDto>> ChangeTeamName(Guid teamId, [FromQuery] string teamName)
     {
@@ -152,7 +152,7 @@ public class TeamController : ControllerBase
         return Ok(invites);
     }
 
-    [HttpPatch("/invites/{inviteId}/cancel")]
+    [HttpPatch("invites/{inviteId}/cancel")]
     [Authorize]
     public async Task<IActionResult> CancelInvite(Guid inviteId)
     {

@@ -167,7 +167,7 @@ export const getTeamInvitesByTeamId = async (teamId: string) => {
 
 export const cancelTeamInvite = async (inviteId: string) => {
     const token = localStorage.getItem('token');
-    const response = await axios.delete(`${API_URL}/invites/${inviteId}/cancel}`, {
+    const response = await axios.patch(`${API_URL}/invites/${inviteId}/cancel`, null, {
         headers: {
             Authorization: `Bearer ${token}`,
         },

@@ -10,8 +10,11 @@ import {
 } from '@heroicons/react/24/outline';
 import {
     changeTeamName,
-    deleteTeam
+    deleteTeam,
+    getTeamInvitesByTeamId,
+    cancelTeamInvite
 } from '../../services/teamService';
+import {useNavigate} from "react-router-dom";
 
 interface Props {
     teamId: string;
@@ -33,6 +36,12 @@ interface Team {
     members: Member[];
 }
 
+interface Invite {
+    id: string;
+    invitedUserName: string;
+    invitedUserPictureUrl?: string;
+}
+
 const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate }) => {
     const [team, setTeam] = useState<Team | null>(null);
     const [loading, setLoading] = useState(true);
@@ -40,6 +49,8 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
     const [message, setMessage] = useState('');
     const [isEditingName, setIsEditingName] = useState(false);
     const [newTeamName, setNewTeamName] = useState('');
+    const [invites, setInvites] = useState<Invite[]>([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTeam = async () => {
@@ -54,6 +65,19 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
         };
 
         fetchTeam();
+    }, [teamId]);
+
+    useEffect(() => {
+        const fetchInvites = async () => {
+            try {
+                const data = await getTeamInvitesByTeamId(teamId);
+                setInvites(data);
+            } catch (error) {
+                console.error('Failed to fetch team invites:', error);
+            }
+        };
+
+        fetchInvites();
     }, [teamId]);
 
     const handleChangeTeamName = async (newName: string) => {
@@ -80,10 +104,22 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
             await deleteTeam(teamId);
             setMessage('Team deleted successfully.');
             onClose();
+            navigate('/teams');
             window.location.reload();
         } catch (error) {
             console.error('Failed to delete team:', error);
             setMessage('Failed to delete team.');
+        }
+    };
+
+    const cancelInvite = async (inviteId: string) => {
+        try {
+            await cancelTeamInvite(inviteId);
+            setMessage('Invite cancelled successfully.');
+            setInvites(prev => prev.filter(i => i.id !== inviteId));
+        } catch (error) {
+            console.error('Failed to cancel invite:', error);
+            setMessage('Failed to cancel invite.');
         }
     };
 
@@ -138,18 +174,48 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
                 </div>
 
                 <h2 className={styles.subtitle}>Members</h2>
+
                 <ul className={styles.memberList}>
                     {team.members.map(member => (
+
                         <li key={member.userId} className={styles.member}>
+
                             <img src={member.userPictureUrl || defaultTeamIcon}
                                  alt={member.username}
                                  className={styles.userAvatar}/>
+
                             <span className={styles.username}>
-                {member.username} ({member.role})
-              </span>
+                                {member.username} ({member.role})
+                            </span>
                         </li>
                     ))}
                 </ul>
+
+                { invites.length > 0 && (
+                    <div className={styles.memberSection}>
+
+                        <h2 className={styles.subtitle}>Invites</h2>
+
+                        <ul className={styles.memberList}>
+                            {invites.map((invite: Invite) => (
+
+                                <li key={invite.id} className={styles.member}>
+                                    <img src={invite.invitedUserPictureUrl || defaultTeamIcon}
+                                         alt={invite.invitedUserName}
+                                         className={styles.userAvatar}/>
+                                    <span className={styles.username}>{invite.invitedUserName}</span>
+
+                                    <button className={styles.inviteButton} onClick={() =>
+                                        cancelInvite(invite.id)}>
+                                        Cancel Invite
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                <h2 className={styles.subtitle}>Invite User</h2>
 
                 <form className={styles.inviteForm} onSubmit={(e) => {
                     e.preventDefault();

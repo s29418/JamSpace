@@ -159,7 +159,7 @@ public class TeamRepository : ITeamRepository
     public async Task<List<TeamInvite>> GetTeamInvitesAsync(Guid teamId, Guid requestingUserId, CancellationToken ct)
     {
         var query = _db.TeamInvites
-            .Where(i => i.TeamId == teamId)
+            .Where(i => i.TeamId == teamId && i.Status == InviteStatus.Pending)
             .Include(i => i.Team)
             .Include(i => i.InvitedByUser);
 
@@ -188,7 +188,7 @@ public class TeamRepository : ITeamRepository
             await WasInviteSentByUserAsync(inviteId, requestingUserId, ct);
 
         if (!hasPermission)
-            throw new UnauthorizedAccessException("Only team leader, admin or user who sent the invite can cancel it.");
+            throw new ForbiddenAccessException("Only team leader, admin or user who sent the invite can cancel it.");
 
         invite.Status = InviteStatus.Cancelled;
         await _db.SaveChangesAsync(ct);
@@ -258,4 +258,17 @@ public class TeamRepository : ITeamRepository
         await _db.SaveChangesAsync(ct);
         return teamMember;
     }
+
+    public async Task UpdateTeamPictureAsync(Guid teamId, Guid requestingUserId, string pictureUrl,
+        CancellationToken ct)
+    {
+        var team = await GetTeamByIdAsync(teamId);
+        
+        if (!await IsUserALeaderAsync(teamId, requestingUserId) && !await IsUserAnAdminAsync(teamId, requestingUserId))
+            throw new ForbiddenAccessException("Only team leader or admin can update team picture.");
+
+        team.TeamPictureUrl = pictureUrl;
+        await _db.SaveChangesAsync(ct);
+    }
+
 }

@@ -41,7 +41,7 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 
 builder.Services.AddMediatR(cfg =>
 {
-    cfg.RegisterServicesFromAssemblyContaining<CreateTeamCommand>(); 
+    cfg.RegisterServicesFromAssemblyContaining<CreateTeamCommand>();
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateTeamCommandValidator>();

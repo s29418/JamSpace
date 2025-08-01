@@ -14,6 +14,7 @@ using JamSpace.Application.Features.Teams.Queries.GetDetails;
 using JamSpace.Application.Features.Teams.Queries.GetMyPendingInvites;
 using JamSpace.Application.Features.Teams.Queries.GetMyTeams;
 using JamSpace.Application.Features.Teams.Queries.GetTeamInvites;
+using JamSpace.Application.Features.Uploads.UpdateTeamPicture;
 using JamSpace.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -79,19 +80,19 @@ public class TeamController : ControllerBase
     
     [HttpPost("invites/{inviteId}/accept")]
     [Authorize]
-    public async Task<IActionResult> AcceptInvite(Guid id)
+    public async Task<IActionResult> AcceptInvite(Guid inviteId)
     {
         var userId = User.GetUserId();
-        await _mediator.Send(new AcceptTeamInviteCommand(id, userId));
+        await _mediator.Send(new AcceptTeamInviteCommand(inviteId, userId));
         return Ok();
     }
 
     [HttpPost("invites/{inviteId}/reject")]
     [Authorize]
-    public async Task<IActionResult> RejectInvite(Guid id)
+    public async Task<IActionResult> RejectInvite(Guid inviteId)
     {
         var userId = User.GetUserId();
-        await _mediator.Send(new RejectTeamInviteCommand(id, userId));
+        await _mediator.Send(new RejectTeamInviteCommand(inviteId, userId));
         return Ok();
     }
 
@@ -153,11 +154,30 @@ public class TeamController : ControllerBase
 
     [HttpPatch("/invites/{inviteId}/cancel")]
     [Authorize]
-    public async Task<IActionResult> CancelInvite(Guid teamInviteId)
+    public async Task<IActionResult> CancelInvite(Guid inviteId)
     {
         var requestingUserId = User.GetUserId();
-        await _mediator.Send(new CancelTeamInviteCommand(teamInviteId, requestingUserId));
+        await _mediator.Send(new CancelTeamInviteCommand(inviteId, requestingUserId));
         return NoContent();
     }
-    
+
+    [HttpPatch("{teamId}/team-picture")]
+    [Authorize]
+    public async Task<ActionResult<string>> UpdateTeamPicture(Guid teamId, [FromForm] UpdateTeamPictureRequest request)
+    {
+        if (request.File.Length == 0)
+            return BadRequest("No file provided.");
+
+        var requestingUserId = User.GetUserId();
+        
+        var command = new UpdateTeamPictureCommand
+        {
+            TeamId = teamId,
+            RequestingUserId = requestingUserId,
+            File = request.File
+        };
+
+        var url = await _mediator.Send(command);
+        return Ok(new { url });
+    }
 }

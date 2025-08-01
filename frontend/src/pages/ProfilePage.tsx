@@ -58,9 +58,8 @@ const ProfilePage = () => {
                             Don’t have an account?{' '}
                             <span
                                 onClick={() => setIsLoginView(false)}
-                            >
-              Sign up!
-            </span>
+                            >Sign up!
+                            </span>
                         </p>
                     </>
                 ) : (
@@ -70,9 +69,8 @@ const ProfilePage = () => {
                             Already have an account?{' '}
                             <span
                                 onClick={() => setIsLoginView(true)}
-                            >
-              Log in!
-            </span>
+                            >Log in!
+                            </span>
                         </p>
                     </>
                 )}

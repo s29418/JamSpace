@@ -43,7 +43,7 @@ export const createTeam = async (teamData: { name: string; teamPictureUrl?: stri
 
 export const getTeamInvites = async () => {
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${API_URL}/invite`, {
+    const response = await axios.get(`${API_URL}/invites`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -53,7 +53,7 @@ export const getTeamInvites = async () => {
 
 export const acceptTeamInvite = async (inviteId: string) => {
     const token = localStorage.getItem('token');
-    const response = await axios.post(`${API_URL}/invite/${inviteId}/accept`, {}, {
+    const response = await axios.post(`${API_URL}/invites/${inviteId}/accept`, {}, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -63,7 +63,7 @@ export const acceptTeamInvite = async (inviteId: string) => {
 
 export const rejectTeamInvite = async (inviteId: string) => {
     const token = localStorage.getItem('token');
-    const response = await axios.post(`${API_URL}/invite/${inviteId}/reject`, {}, {
+    const response = await axios.post(`${API_URL}/invites/${inviteId}/reject`, {}, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -83,7 +83,7 @@ export const getTeamById = async (id: string) => {
 
 export const inviteUserToTeam = async (username: string, teamId: string) => {
     const token = localStorage.getItem('token');
-    const response = await axios.post(`${API_URL}/invite/${username}`, `"${teamId}"`, {
+    const response = await axios.post(`${API_URL}/invites/${username}`, `"${teamId}"`, {
         headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -91,3 +91,86 @@ export const inviteUserToTeam = async (username: string, teamId: string) => {
     });
     return response.data;
 };
+
+export const deleteTeam = async (teamId: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.delete(`${API_URL}/${teamId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
+
+export const changeTeamName = async (teamId: string, newName: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.patch(`${API_URL}/${teamId}/teamName?teamName=${newName}`,{ },  {
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+    });
+    return response.data;
+}
+
+export const changeTeamPicture = async (teamId: string, pictureUrl: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.patch(`${API_URL}/${teamId}/team-picture`, { teamPictureUrl: pictureUrl }, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    return response.data;
+};
+
+export const changeTeamMemberRole = async (teamId: string, userId: string, newRole: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.patch(`${API_URL}/${teamId}/members/${userId}/role`, { role: newRole }, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    return response.data;
+}
+
+export const kickTeamMember = async (teamId: string, userId: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.delete(`${API_URL}/${teamId}/members/${userId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
+
+export const changeTeamMemberMusicalRole = async (teamId: string, userId: string, newMusicalRole: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.patch(`${API_URL}/${teamId}/members/${userId}/musical-role`, { musicalRole: newMusicalRole }, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    return response.data;
+}
+
+export const getTeamInvitesByTeamId = async (teamId: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${API_URL}/${teamId}/invites`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+}
+
+export const cancelTeamInvite = async (inviteId: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.patch(`${API_URL}/invites/${inviteId}/cancel`, null, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+}

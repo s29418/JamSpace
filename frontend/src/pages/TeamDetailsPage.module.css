@@ -75,7 +75,7 @@
     gap: 16px;
 }
 
-.inviteInput {
+.inviteInput, .teamNameInput {
     /*flex: 1;*/
     padding: 6px 12px;
     border-radius: 16px;
@@ -83,6 +83,11 @@
     background-color: #1a1a1a;
     color: white;
     font-size: 24px;
+}
+
+.teamNameInput:focus {
+    outline: none;
+    border-color: #ffffff;
 }
 
 .icon {
@@ -116,7 +121,7 @@
     border-radius: 12px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-right: 16px;
+    margin-right: 8px;
 }
 
 .editButton:hover {
@@ -125,4 +130,10 @@
 
 .deleteButton:hover {
     background-color: rgba(255, 102, 102, 0.12);
+}
+
+.changeNameOptions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
 }

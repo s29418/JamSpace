@@ -20,8 +20,32 @@ interface TeamCardProps {
     onClick: () => void;
 }
 
+interface Team {
+    id: string;
+    name: string;
+    teamPictureUrl?: string;
+    members: {
+        userId: string;
+        username: string;
+        role: string;
+        userPictureUrl?: string;
+    }[];
+}
+
 const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps) => {
     const [showModal, setShowModal] = useState(false);
+
+    const [team, setTeam] = useState<{
+        id: string;
+        name: string;
+        teamPictureUrl?: string;
+        members: Member[];
+    }>({
+        id,
+        name,
+        teamPictureUrl,
+        members,
+    });
 
     const handleCardClick = (e: React.MouseEvent) => {
         if ((e.target as HTMLElement).closest('button')) return;
@@ -29,15 +53,19 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps)
         onClick();
     };
 
+    const handleTeamUpdate = (updatedTeam: Team) => {
+        setTeam(updatedTeam);
+    };
+
     return (
         <div className={styles.card} onClick={handleCardClick}>
             <div className={styles.avatar}>
-                <img src={teamPictureUrl || defaultTeamIcon} alt={name} />
+                <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} />
             </div>
 
             <div className={styles.info}>
-                <h3>{name}</h3>
-                <span>{members.length} members</span>
+                <h3>{team.name}</h3>
+                <span>{team.members.length} members</span>
             </div>
 
             <div className={styles.actions}>
@@ -53,7 +81,11 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps)
             </div>
 
             {showModal && (
-                <TeamSettingsModal teamId={id} onClose={() => setShowModal(false)} />
+                <TeamSettingsModal
+                    teamId={team.id}
+                    onClose={() => setShowModal(false)}
+                    onTeamNameUpdate={handleTeamUpdate}
+                />
             )}
         </div>
     );

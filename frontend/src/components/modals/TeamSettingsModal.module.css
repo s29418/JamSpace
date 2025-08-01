@@ -33,3 +33,18 @@
     color: white;
     cursor: pointer;
 }
+
+.expandable {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.75s ease;
+    align-items: center;
+    margin: 16px 0;
+    /*padding: 0.5px 2px;*/
+}
+
+.expanded {
+    max-height: 90px;
+    opacity: 1;
+}
+

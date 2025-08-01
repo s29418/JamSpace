@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-    getTeamById,
-    inviteUserToTeam
+    getTeamById
 } from '../services/teamService';
 import styles from './TeamDetailsPage.module.css';
 import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
@@ -29,8 +28,6 @@ const TeamDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
     const [team, setTeam] = useState<Team | null>(null);
     const [loading, setLoading] = useState(true);
-    const [inviteUsername, setInviteUsername] = useState('');
-    const [message, setMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
@@ -49,24 +46,12 @@ const TeamDetailsPage = () => {
         fetchTeam();
     }, [id]);
 
-    const handleInvite = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!team || !id) return;
-
-        try {
-            await inviteUserToTeam(inviteUsername, id);
-
-            setMessage(`User "${inviteUsername}" has been invited.`);
-            setInviteUsername('');
-
-        } catch (err) {
-            console.error('Invite failed:', err);
-            setMessage('Failed to send invite.');
-        }
-    };
-
     const handleSettingsClick = () => {
         setShowModal(true);
+    };
+
+    const handleTeamNameUpdate = (updatedTeam: Team) => {
+        setTeam(updatedTeam);
     };
 
     if (loading) return <p>Loading...</p>;
@@ -85,14 +70,21 @@ const TeamDetailsPage = () => {
                             setShowModal(true);
                         }}
                         className={styles.editButton}>
-                        <SettingsIcon className={styles.icon} onClick={handleSettingsClick}/> Settings
+                        <SettingsIcon
+                            className={styles.icon}
+                            onClick={handleSettingsClick}
+                        /> Settings
                     </button>
                 </div>
 
             </div>
 
             {showModal && (
-                <TeamSettingsModal teamId={team.id} onClose={() => setShowModal(false)} />
+                <TeamSettingsModal
+                    teamId={team.id}
+                    onClose={() => setShowModal(false)}
+                    onTeamNameUpdate={handleTeamNameUpdate}
+                />
             )}
 
         </div>

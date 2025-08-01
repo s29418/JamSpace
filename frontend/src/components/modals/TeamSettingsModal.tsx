@@ -8,10 +8,18 @@ import {
     TrashIcon as DeleteIcon,
     PencilSquareIcon as EditIcon,
 } from '@heroicons/react/24/outline';
+import {
+    changeTeamName,
+    deleteTeam,
+    getTeamInvitesByTeamId,
+    cancelTeamInvite
+} from '../../services/teamService';
+import {useNavigate} from "react-router-dom";
 
 interface Props {
     teamId: string;
     onClose: () => void;
+    onTeamNameUpdate?: (team: Team) => void;
 }
 
 interface Member {
@@ -28,11 +36,21 @@ interface Team {
     members: Member[];
 }
 
-const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose }) => {
+interface Invite {
+    id: string;
+    invitedUserName: string;
+    invitedUserPictureUrl?: string;
+}
+
+const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate }) => {
     const [team, setTeam] = useState<Team | null>(null);
     const [loading, setLoading] = useState(true);
     const [inviteUsername, setInviteUsername] = useState('');
     const [message, setMessage] = useState('');
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [newTeamName, setNewTeamName] = useState('');
+    const [invites, setInvites] = useState<Invite[]>([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTeam = async () => {
@@ -49,6 +67,62 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose }) => {
         fetchTeam();
     }, [teamId]);
 
+    useEffect(() => {
+        const fetchInvites = async () => {
+            try {
+                const data = await getTeamInvitesByTeamId(teamId);
+                setInvites(data);
+            } catch (error) {
+                console.error('Failed to fetch team invites:', error);
+            }
+        };
+
+        fetchInvites();
+    }, [teamId]);
+
+    const handleChangeTeamName = async (newName: string) => {
+        if (!newName.trim()) return;
+
+        try {
+            const updated = await changeTeamName(teamId, newName);
+            setTeam(updated);
+            setMessage('Team name updated.');
+
+            onTeamNameUpdate?.(updated);
+            setIsEditingName(false);
+        } catch (err) {
+            console.error('Failed to change name:', err);
+            setMessage('Failed to change team name.');
+        }
+    }
+
+    const handleDeleteTeam = async () => {
+        try {
+            const confirmed = window.confirm('Are you sure you want to delete this team?');
+            if (!confirmed) return;
+
+            await deleteTeam(teamId);
+            setMessage('Team deleted successfully.');
+            onClose();
+            navigate('/teams');
+            window.location.reload();
+        } catch (error) {
+            console.error('Failed to delete team:', error);
+            setMessage('Failed to delete team.');
+        }
+    };
+
+    const cancelInvite = async (inviteId: string) => {
+        try {
+            await cancelTeamInvite(inviteId);
+            setMessage('Invite cancelled successfully.');
+            setInvites(prev => prev.filter(i => i.id !== inviteId));
+        } catch (error) {
+            console.error('Failed to cancel invite:', error);
+            setMessage('Failed to cancel invite.');
+        }
+    };
+
     if (loading || !team) return null;
 
     return ReactDOM.createPortal(
@@ -61,28 +135,87 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose }) => {
                     <div>
                         <h1 className={styles.title}>{team.name}</h1>
                         <div>
-                            <button className={styles.editButton}><EditIcon className={styles.icon}/> Change name
+
+                            <button className={styles.editButton} onClick={() => {
+                                setNewTeamName(team.name);
+                                setIsEditingName(true);
+                            }}>
+                                <EditIcon className={styles.icon}/> Change name
                             </button>
-                            <button className={styles.deleteButton}><DeleteIcon className={styles.icon}/> Delete team
+
+                            <button className={styles.deleteButton} onClick={handleDeleteTeam}>
+                                <DeleteIcon className={styles.icon}/> Delete team
                             </button>
+
+                            <div
+                                className={modalStyles.expandable + (isEditingName ? ' ' + modalStyles.expanded : '')}>
+
+                                <input
+                                    className={styles.teamNameInput}
+                                    value={newTeamName}
+                                    onChange={(e) => setNewTeamName(e.target.value)}
+                                />
+
+                                <div className={styles.changeNameOptions}>
+                                    <button className={styles.inviteButton}
+                                            onClick={() => handleChangeTeamName(newTeamName)}>
+                                        Save
+                                    </button>
+
+                                    <button className={styles.inviteButton}
+                                            onClick={() => setIsEditingName(false)}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                 </div>
 
                 <h2 className={styles.subtitle}>Members</h2>
+
                 <ul className={styles.memberList}>
                     {team.members.map(member => (
+
                         <li key={member.userId} className={styles.member}>
+
                             <img src={member.userPictureUrl || defaultTeamIcon}
                                  alt={member.username}
-                                 className={styles.userAvatar} />
+                                 className={styles.userAvatar}/>
+
                             <span className={styles.username}>
-                {member.username} ({member.role})
-              </span>
+                                {member.username} ({member.role})
+                            </span>
                         </li>
                     ))}
                 </ul>
+
+                { invites.length > 0 && (
+                    <div className={styles.memberSection}>
+
+                        <h2 className={styles.subtitle}>Invites</h2>
+
+                        <ul className={styles.memberList}>
+                            {invites.map((invite: Invite) => (
+
+                                <li key={invite.id} className={styles.member}>
+                                    <img src={invite.invitedUserPictureUrl || defaultTeamIcon}
+                                         alt={invite.invitedUserName}
+                                         className={styles.userAvatar}/>
+                                    <span className={styles.username}>{invite.invitedUserName}</span>
+
+                                    <button className={styles.inviteButton} onClick={() =>
+                                        cancelInvite(invite.id)}>
+                                        Cancel Invite
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                <h2 className={styles.subtitle}>Invite User</h2>
 
                 <form className={styles.inviteForm} onSubmit={(e) => {
                     e.preventDefault();

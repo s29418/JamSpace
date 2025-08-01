@@ -129,8 +129,31 @@ const TeamsPage = () => {
         }
     };
 
-    return (
+        return (
         <div className={styles.wrapper}>
+
+            {invites.length > 0 && (
+
+
+                <div className={styles.inviteSection}>
+                    <h1 className={styles.title}>Team Invites</h1>
+
+                    {invites.map(invite => (
+
+                        <TeamInviteCard
+                            key={invite.id}
+                            id={invite.id}
+                            name={invite.teamName}
+                            teamPictureUrl={invite.teamPictureUrl}
+                            onAccept={handleAccept}
+                            onReject={handleReject}
+                        />
+                    ))}
+
+                    <hr className={styles.lineBreak}/>
+                </div>
+            )}
+
             <div className={styles.header}>
                 <h1 className={styles.title}>Teams</h1>
 
@@ -182,28 +205,8 @@ const TeamsPage = () => {
                 </form>
             )}
 
-            {invites.length > 0 && (
-
-                <div className={styles.inviteSection}>
-                    {invites.map(invite => (
-
-                        <TeamInviteCard
-                            key={invite.id}
-                            id={invite.id}
-                            name={invite.teamName}
-                            teamPictureUrl={invite.teamPictureUrl}
-                            onAccept={handleAccept}
-                            onReject={handleReject}
-                        />
-                    ))}
-
-                    <hr className={styles.lineBreak}/>
-                </div>
-            )}
-
-
             {teams.map(team => (
-                <div >
+                <div>
                     <TeamCard
                         id={team.id}
                         name={team.name}
@@ -214,7 +217,7 @@ const TeamsPage = () => {
                 </div>
             ))}
         </div>
-    );
-};
+        );
+        };
 
-export default TeamsPage;
+        export default TeamsPage;

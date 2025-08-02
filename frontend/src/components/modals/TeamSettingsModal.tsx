@@ -14,7 +14,8 @@ import {
     getTeamInvitesByTeamId,
     cancelTeamInvite,
     changeTeamMemberRole,
-    changeTeamMemberMusicalRole
+    changeTeamMemberMusicalRole,
+    kickTeamMember
 } from '../../services/teamService';
 import {useNavigate} from "react-router-dom";
 
@@ -43,6 +44,7 @@ interface Invite {
     id: string;
     invitedUserName: string;
     invitedUserPictureUrl?: string;
+    invitedByUserName: string;
 }
 
 const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate }) => {
@@ -154,6 +156,21 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
         } catch (err) {
             console.error('Failed to change member musical role:', err);
             setMessage('Failed to change member musical role.');
+        }
+    }
+
+    const handleKickMember = async (userId: string) => {
+        try {
+            const confirmed = window.confirm('Are you sure you want to kick this member from the team?');
+            if (!confirmed) return;
+
+            await kickTeamMember(teamId, userId);
+            const updated = await getTeamById(teamId);
+            setTeam(updated);
+            setMessage('Member kicked successfully.');
+        } catch (error) {
+            console.error('Failed to kick member:', error);
+            setMessage('Failed to kick member.');
         }
     }
 
@@ -306,6 +323,10 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
                                         </div>
                                     </div>
                                 )}
+                                <button className={styles.userActionButton} style={{marginTop: "4px"}} onClick={() =>
+                                    handleKickMember(member.userId)} >
+                                    ✖ Kick from team
+                                </button>
                             </div>
                         </li>
                     ))}
@@ -328,11 +349,16 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
                                          className={styles.userAvatar}/>
 
                                     <div className={styles.invitedUserDetails}>
-                                        <span className={styles.username}>{invite.invitedUserName}</span>
+                                        <div>
+                                            <p className={styles.username}>{invite.invitedUserName}</p>
+                                            <p className={styles.role}>
+                                                Invited by: {invite.invitedByUserName} </p>
+                                        </div>
+
 
                                         <button className={styles.userActionButton} onClick={() =>
                                             cancelInvite(invite.id)}>
-                                            ✖ Cancel Invite
+                                        ✖ Cancel Invite
                                         </button>
                                     </div>
                                 </li>

@@ -125,7 +125,7 @@ export const changeTeamPicture = async (teamId: string, pictureUrl: string) => {
 
 export const changeTeamMemberRole = async (teamId: string, userId: string, newRole: string) => {
     const token = localStorage.getItem('token');
-    const response = await axios.patch(`${API_URL}/${teamId}/members/${userId}/role`, { role: newRole }, {
+    const response = await axios.patch(`${API_URL}/${teamId}/members/${userId}/role?newRole=${newRole}`, { }, {
         headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ export const kickTeamMember = async (teamId: string, userId: string) => {
 
 export const changeTeamMemberMusicalRole = async (teamId: string, userId: string, newMusicalRole: string) => {
     const token = localStorage.getItem('token');
-    const response = await axios.patch(`${API_URL}/${teamId}/members/${userId}/musical-role`, { musicalRole: newMusicalRole }, {
+    const response = await axios.patch(`${API_URL}/${teamId}/members/${userId}/musical-role?musicalRole=${newMusicalRole}`, { }, {
         headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

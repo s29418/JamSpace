@@ -6,13 +6,15 @@ import styles from '../../pages/TeamDetailsPage.module.css';
 import defaultTeamIcon from '../../assets/defaultTeamIcon.jpg';
 import {
     TrashIcon as DeleteIcon,
-    PencilSquareIcon as EditIcon,
+    PencilSquareIcon as EditIcon
 } from '@heroicons/react/24/outline';
 import {
     changeTeamName,
     deleteTeam,
     getTeamInvitesByTeamId,
-    cancelTeamInvite
+    cancelTeamInvite,
+    changeTeamMemberRole,
+    changeTeamMemberMusicalRole
 } from '../../services/teamService';
 import {useNavigate} from "react-router-dom";
 
@@ -26,6 +28,7 @@ interface Member {
     userId: string;
     username: string;
     role: string;
+    musicalRole?: string;
     userPictureUrl?: string;
 }
 
@@ -50,6 +53,9 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
     const [isEditingName, setIsEditingName] = useState(false);
     const [newTeamName, setNewTeamName] = useState('');
     const [invites, setInvites] = useState<Invite[]>([]);
+    const [editingRoleUserId, setEditingRoleUserId] = useState<string | null>(null);
+    const [editingMusicalUserId, setEditingMusicalUserId] = useState<string | null>(null);
+    const [newMusicalRole, setNewMusicalRole] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -123,7 +129,53 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
         }
     };
 
-    if (loading || !team) return null;
+    const handleChangeMemberRole = async (userId: string, newRole: string) => {
+        if (!newRole.trim()) return;
+
+        try {
+            await changeTeamMemberRole(teamId, userId, newRole);
+            const updated = await getTeamById(teamId);
+            setTeam(updated);
+            setMessage('Member role updated.');
+        } catch (err) {
+            console.error('Failed to change member role:', err);
+            setMessage('Failed to change member role.');
+        }
+    }
+
+    const handleChangeMemberMusicalRole = async (userId: string, newMusicalRole: string) => {
+        if (!newMusicalRole.trim()) return;
+
+        try {
+            await changeTeamMemberMusicalRole(teamId, userId, newMusicalRole);
+            const updated = await getTeamById(teamId);
+            setTeam(updated);
+            setMessage('Member musical role updated.');
+        } catch (err) {
+            console.error('Failed to change member musical role:', err);
+            setMessage('Failed to change member musical role.');
+        }
+    }
+
+    const handleInviteUserToTeam = async (username: string, teamId: string) => {
+        if (!username.trim()) {
+            setMessage('Username cannot be empty.');
+            return;
+        }
+
+        try {
+            await inviteUserToTeam(username, teamId);
+            const updatedInvites = await getTeamInvitesByTeamId(teamId);
+            setInvites(updatedInvites);
+            setMessage(`User "${username}" has been invited.`);
+            setInviteUsername('');
+        } catch (error) {
+            console.error('Failed to invite user:', error);
+            setMessage('Failed to send invite. User may not exist or is already a member.');
+        }
+    }
+
+    if (loading || !team) return <div/>
 
     return ReactDOM.createPortal(
         <div className={modalStyles.backdrop} onClick={onClose}>
@@ -131,7 +183,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
                 <button className={modalStyles.close} onClick={onClose}>✖</button>
 
                 <div className={styles.teamInfo}>
-                    <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar} />
+                    <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar}/>
                     <div>
                         <h1 className={styles.title}>{team.name}</h1>
                         <div>
@@ -173,25 +225,96 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
 
                 </div>
 
+                <hr className={styles.lineBreak}/>
+
                 <h2 className={styles.subtitle}>Members</h2>
 
                 <ul className={styles.memberList}>
-                    {team.members.map(member => (
+                    {team && team.members && team.members.map(member => (
 
                         <li key={member.userId} className={styles.member}>
-
                             <img src={member.userPictureUrl || defaultTeamIcon}
                                  alt={member.username}
                                  className={styles.userAvatar}/>
+                            <div>
+                                <p className={styles.username}>{member.username}</p>
 
-                            <span className={styles.username}>
-                                {member.username} ({member.role})
-                            </span>
+                                <p className={styles.role}>
+                                    Team role: {member.role}
+                                    <EditIcon
+                                        className={styles.editRoleIcon}
+                                        onClick={() =>
+                                            setEditingRoleUserId(editingRoleUserId === member.userId ? null : member.userId)
+                                        }
+                                    />
+                                </p>
+
+                                {editingRoleUserId === member.userId && (
+                                    <div className={`${styles.expandable} ${styles.expanded}`}>
+                                        <select
+                                            className={styles.roleSelect}
+                                            value={""}
+                                            onChange={(e) => {
+                                                handleChangeMemberRole(member.userId, e.target.value);
+                                                setEditingRoleUserId(null);
+                                            }}
+                                        >
+                                            <option value="" disabled>Select role</option>
+                                            <option value="2">Member</option>
+                                            <option value="1">Admin</option>
+                                            <option value="0">Leader</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                <p className={styles.musicalRole}>
+                                    Musical role: {member.musicalRole}
+                                    <EditIcon
+                                        className={styles.editMusicalRoleIcon}
+                                        onClick={() => {
+                                            setEditingMusicalUserId(editingMusicalUserId === member.userId ? null : member.userId);
+                                            setNewMusicalRole(member.musicalRole || '');
+                                        }}
+                                    />
+                                </p>
+
+                                {editingMusicalUserId === member.userId && (
+                                    <div className={`${styles.expandable} ${styles.expanded}`}>
+                                        <input
+                                            type="text"
+                                            value={newMusicalRole}
+                                            onChange={(e) => setNewMusicalRole(e.target.value)}
+                                            className={styles.musicalRoleInput}
+                                            placeholder="Enter new musical role"
+                                        />
+                                        <div className={styles.editButtonsRow}>
+                                            <button
+                                                className={styles.userActionButton}
+                                                onClick={() => {
+                                                    handleChangeMemberMusicalRole(member.userId, newMusicalRole);
+                                                    setEditingMusicalUserId(null);
+                                                }}
+                                            >
+                                                Save
+                                            </button>
+                                            <button
+                                                className={styles.userActionButton}
+                                                onClick={() => setEditingMusicalUserId(null)}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </li>
                     ))}
                 </ul>
 
-                { invites.length > 0 && (
+                <hr className={styles.lineBreak}/>
+
+                {invites.length > 0 && (
+
                     <div className={styles.memberSection}>
 
                         <h2 className={styles.subtitle}>Invites</h2>
@@ -203,12 +326,15 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
                                     <img src={invite.invitedUserPictureUrl || defaultTeamIcon}
                                          alt={invite.invitedUserName}
                                          className={styles.userAvatar}/>
-                                    <span className={styles.username}>{invite.invitedUserName}</span>
 
-                                    <button className={styles.inviteButton} onClick={() =>
-                                        cancelInvite(invite.id)}>
-                                        Cancel Invite
-                                    </button>
+                                    <div className={styles.invitedUserDetails}>
+                                        <span className={styles.username}>{invite.invitedUserName}</span>
+
+                                        <button className={styles.userActionButton} onClick={() =>
+                                            cancelInvite(invite.id)}>
+                                            ✖ Cancel Invite
+                                        </button>
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -217,15 +343,13 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
 
                 <h2 className={styles.subtitle}>Invite User</h2>
 
-                <form className={styles.inviteForm} onSubmit={(e) => {
-                    e.preventDefault();
-                    inviteUserToTeam(inviteUsername, team.id)
-                        .then(() => {
-                            setMessage(`User "${inviteUsername}" has been invited.`);
-                            setInviteUsername('');
-                        })
-                        .catch(() => setMessage('Failed to send invite.'));
-                }}>
+                <form className={styles.inviteForm}
+                      onSubmit={(e) => {
+                          e.preventDefault();
+                          handleInviteUserToTeam(inviteUsername, teamId);
+                          setInviteUsername('');
+                      }}
+                >
                     <input
                         className={styles.inviteInput}
                         type="text"

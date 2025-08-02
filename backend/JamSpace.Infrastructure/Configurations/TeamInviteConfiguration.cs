@@ -22,7 +22,7 @@ public class TeamInviteConfiguration : IEntityTypeConfiguration<TeamInvite>
         builder.HasOne(ti => ti.Team)
             .WithMany()
             .HasForeignKey(ti => ti.TeamId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(ti => ti.InvitedUser)
             .WithMany()

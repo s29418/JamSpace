@@ -83,7 +83,7 @@ const TeamDetailsPage = () => {
                 <TeamSettingsModal
                     teamId={team.id}
                     onClose={() => setShowModal(false)}
-                    onTeamNameUpdate={handleTeamNameUpdate}
+                    onTeamUpdate={handleTeamNameUpdate}
                 />
             )}
 

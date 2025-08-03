@@ -1,12 +1,13 @@
 import ReactDOM from 'react-dom';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { getTeamById, inviteUserToTeam } from '../../services/teamService';
 import modalStyles from './TeamSettingsModal.module.css';
 import styles from '../../pages/TeamDetailsPage.module.css';
 import defaultTeamIcon from '../../assets/defaultTeamIcon.jpg';
 import {
     TrashIcon as DeleteIcon,
-    PencilSquareIcon as EditIcon
+    PencilSquareIcon as EditIcon,
+    CameraIcon as ChangePictureIcon
 } from '@heroicons/react/24/outline';
 import {
     changeTeamName,
@@ -15,14 +16,15 @@ import {
     cancelTeamInvite,
     changeTeamMemberRole,
     changeTeamMemberMusicalRole,
-    kickTeamMember
+    kickTeamMember,
+    changeTeamPicture
 } from '../../services/teamService';
 import {useNavigate} from "react-router-dom";
 
 interface Props {
     teamId: string;
     onClose: () => void;
-    onTeamNameUpdate?: (team: Team) => void;
+    onTeamUpdate?: (team: Team) => void;
 }
 
 interface Member {
@@ -47,7 +49,7 @@ interface Invite {
     invitedByUserName: string;
 }
 
-const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate }) => {
+const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) => {
     const [team, setTeam] = useState<Team | null>(null);
     const [loading, setLoading] = useState(true);
     const [inviteUsername, setInviteUsername] = useState('');
@@ -59,6 +61,8 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
     const [editingMusicalUserId, setEditingMusicalUserId] = useState<string | null>(null);
     const [newMusicalRole, setNewMusicalRole] = useState('');
     const navigate = useNavigate();
+    const [showUpload, setShowUpload] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const fetchTeam = async () => {
@@ -88,6 +92,29 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
         fetchInvites();
     }, [teamId]);
 
+    const handleAvatarClick = () => {
+        setShowUpload((prev) => !prev);
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            if (!team) return;
+            await changeTeamPicture(team.id, file);
+            const updated = await getTeamById(team.id);
+
+            setTeam(updated);
+            setShowUpload(false);
+            setMessage('Team picture updated.');
+            onTeamUpdate?.(updated);
+        } catch (err) {
+            console.error("Upload failed", err);
+            setMessage('Failed to update team picture.');
+        }
+    };
+
     const handleChangeTeamName = async (newName: string) => {
         if (!newName.trim()) return;
 
@@ -96,7 +123,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
             setTeam(updated);
             setMessage('Team name updated.');
 
-            onTeamNameUpdate?.(updated);
+            onTeamUpdate?.(updated);
             setIsEditingName(false);
         } catch (err) {
             console.error('Failed to change name:', err);
@@ -200,7 +227,16 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
                 <button className={modalStyles.close} onClick={onClose}>✖</button>
 
                 <div className={styles.teamInfo}>
-                    <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar}/>
+
+                    <div className={styles.avatarWrapper} onClick={handleAvatarClick}>
+                        <img
+                            src={team.teamPictureUrl || defaultTeamIcon}
+                            alt={team.name}
+                            className={styles.avatarModal}
+                        />
+                        <ChangePictureIcon className={styles.cameraIcon}/>
+                    </div>
+
                     <div>
                         <h1 className={styles.title}>{team.name}</h1>
                         <div>
@@ -239,7 +275,20 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
                             </div>
                         </div>
                     </div>
+                </div>
 
+                <div className={`${modalStyles.uploadPanel} ${showUpload ? modalStyles.visible : ''}`}>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        className={modalStyles.hiddenInput}
+                        onChange={handleFileChange}
+                    />
+                    <button className={styles.uploadButton}
+                        onClick={() => fileInputRef.current?.click()}>
+                        Choose file
+                    </button>
                 </div>
 
                 <hr className={styles.lineBreak}/>
@@ -324,7 +373,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
                                     </div>
                                 )}
                                 <button className={styles.userActionButton} style={{marginTop: "4px"}} onClick={() =>
-                                    handleKickMember(member.userId)} >
+                                    handleKickMember(member.userId)}>
                                     ✖ Kick from team
                                 </button>
                             </div>
@@ -358,7 +407,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamNameUpdate 
 
                                         <button className={styles.userActionButton} onClick={() =>
                                             cancelInvite(invite.id)}>
-                                        ✖ Cancel Invite
+                                            ✖ Cancel Invite
                                         </button>
                                     </div>
                                 </li>

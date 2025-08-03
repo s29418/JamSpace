@@ -84,7 +84,7 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps)
                 <TeamSettingsModal
                     teamId={team.id}
                     onClose={() => setShowModal(false)}
-                    onTeamNameUpdate={handleTeamUpdate}
+                    onTeamUpdate={handleTeamUpdate}
                 />
             )}
         </div>

@@ -112,15 +112,23 @@ export const changeTeamName = async (teamId: string, newName: string) => {
     return response.data;
 }
 
-export const changeTeamPicture = async (teamId: string, pictureUrl: string) => {
+export const changeTeamPicture = async (teamId: string, file: File): Promise<string> => {
     const token = localStorage.getItem('token');
-    const response = await axios.patch(`${API_URL}/${teamId}/team-picture`, { teamPictureUrl: pictureUrl }, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-    return response.data;
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await axios.patch(
+        `http://localhost:5072/api/teams/${teamId}/team-picture`,
+        formData,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        }
+    );
+
+    return response.data.url;
 };
 
 export const changeTeamMemberRole = async (teamId: string, userId: string, newRole: string) => {

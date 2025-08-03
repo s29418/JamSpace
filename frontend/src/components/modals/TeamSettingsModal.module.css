@@ -48,3 +48,18 @@
     opacity: 1;
 }
 
+.uploadPanel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.75s ease;
+}
+
+.uploadPanel.visible {
+    max-height: 80px;
+    margin-top: 10px;
+}
+
+.hiddenInput {
+    display: none;
+    background-color: #26cdd4;
+}

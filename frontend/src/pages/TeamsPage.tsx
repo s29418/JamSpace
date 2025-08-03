@@ -217,6 +217,6 @@ const TeamsPage = () => {
             ))}
         </div>
         );
-        };
+};
 
-        export default TeamsPage;
+export default TeamsPage;

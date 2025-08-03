@@ -4,7 +4,9 @@ import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
 import TeamSettingsModal from "../components/modals/TeamSettingsModal";
 import {
     CogIcon as SettingsIcon,
+    ArrowRightStartOnRectangleIcon as LeaveIcon
 } from '@heroicons/react/24/outline';
+import { leaveTeam } from '../services/teamService';
 
 interface Member {
     userId: string;
@@ -18,6 +20,7 @@ interface TeamCardProps {
     teamPictureUrl?: string;
     members: Member[];
     onClick: () => void;
+    onLeave?: (teamId: string) => void;
 }
 
 interface Team {
@@ -32,7 +35,7 @@ interface Team {
     }[];
 }
 
-const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps) => {
+const TeamCard = ({ id, name, teamPictureUrl, members, onClick, onLeave }: TeamCardProps) => {
     const [showModal, setShowModal] = useState(false);
 
     const [team, setTeam] = useState<{
@@ -57,6 +60,19 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps)
         setTeam(updatedTeam);
     };
 
+    const handleLeaveTeam = async () => {
+        try {
+            if(!window.confirm("Are you sure you want to leave the team? This action cannot be undone.")) return;
+
+            await leaveTeam(team.id);
+            if (onLeave) {
+                onLeave(team.id);
+            }
+        } catch (error) {
+            console.error('Failed to leave team:', error);
+        }
+    }
+
     return (
         <div className={styles.card} onClick={handleCardClick}>
             <div className={styles.avatar}>
@@ -69,6 +85,7 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps)
             </div>
 
             <div className={styles.actions}>
+
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
@@ -78,6 +95,17 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps)
                 >
                     <SettingsIcon className={styles.icon}/> Settings
                 </button>
+
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleLeaveTeam();
+                    }}
+                    className={styles.settingsButton}>
+
+                    <LeaveIcon className={styles.icon}/> Leave team
+                </button>
+
             </div>
 
             {showModal && (

@@ -182,3 +182,13 @@ export const cancelTeamInvite = async (inviteId: string) => {
     });
     return response.data;
 }
+
+export const leaveTeam = async (teamId: string) => {
+    const token = localStorage.getItem('token');
+    const response = await axios.delete(`${API_URL}/${teamId}/members/leave`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+}

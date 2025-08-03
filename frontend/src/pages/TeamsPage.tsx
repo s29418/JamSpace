@@ -40,7 +40,7 @@ const TeamsPage = () => {
 
     const [showForm, setShowForm] = useState(false);
     const [teamName, setTeamName] = useState('');
-    const [teamPictureUrl, setTeamPictureUrl] = useState('');
+    const [teamPictureUrl] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileLabel, setFileLabel] = useState('No file chosen');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -129,6 +129,10 @@ const TeamsPage = () => {
         }
     };
 
+    const handleLeaveTeam = (teamId: string) => {
+        setTeams(prev => prev.filter(t => t.id !== teamId));
+    };
+
         return (
         <div className={styles.wrapper}>
 
@@ -213,6 +217,7 @@ const TeamsPage = () => {
                     teamPictureUrl={team.teamPictureUrl}
                     members={team.members}
                     onClick={() => navigate(`/teams/${team.id}`)}
+                    onLeave={handleLeaveTeam}
                 />
             ))}
         </div>

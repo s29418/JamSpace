@@ -180,4 +180,13 @@ public class TeamController : ControllerBase
         var url = await _mediator.Send(command);
         return Ok(new { url });
     }
+
+    [HttpDelete("{teamId}/members/leave")]
+    [Authorize]
+    public async Task<IActionResult> LeaveTeam(Guid teamId)
+    {
+        var requestingUserId = User.GetUserId();
+        await _mediator.Send(new KickTeamMemberCommand(teamId, requestingUserId, requestingUserId));
+        return NoContent();
+    }
 }

@@ -245,7 +245,7 @@ public class TeamRepository : ITeamRepository
         return teamMember;
     }
 
-    public async Task KickTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct)
+    public async Task DeleteTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct)
     {
         var teamMember = await GetTeamMemberAsync(teamId, userId, ct);
         

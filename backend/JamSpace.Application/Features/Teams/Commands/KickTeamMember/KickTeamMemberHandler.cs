@@ -18,10 +18,10 @@ public class KickTeamMemberHandler : IRequestHandler<KickTeamMemberCommand, Unit
         if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId)) 
             throw new ForbiddenAccessException("Only team leader can kick members.");
 
-        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.UserId))
+        if (await _repo.IsUserALeaderAsync(request.TeamId, request.UserId))
             throw new ConflictException("Cannot kick a team leader.");
 
-        await _repo.KickTeamMemberAsync(request.TeamId, request.UserId, ct);
+        await _repo.DeleteTeamMemberAsync(request.TeamId, request.UserId, ct);
         return Unit.Value;
     }
 }

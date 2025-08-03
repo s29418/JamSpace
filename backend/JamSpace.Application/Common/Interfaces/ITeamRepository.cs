@@ -30,7 +30,7 @@ public interface ITeamRepository
     Task<Team> ChangeTeamNameAsync(Guid teamId, string name, CancellationToken ct);
     Task DeleteTeamAsync(Guid teamId, CancellationToken ct);
     Task UpdateTeamPictureAsync(Guid teamId, Guid requestingUserId,string pictureUrl, CancellationToken ct);
-    Task KickTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct);
+    Task DeleteTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct);
     Task<TeamMember> EditTeamMemberMusicalRole(Guid teamId, Guid userId, string musicalRole, CancellationToken ct);
 
     Task<TeamInvite> GetTeamInviteByIdAsync(Guid teamInviteId, CancellationToken ct);

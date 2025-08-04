@@ -7,6 +7,7 @@ using JamSpace.Application.Features.Teams.Commands.CreateTeam;
 using JamSpace.Application.Features.Teams.Commands.DeleteTeam;
 using JamSpace.Application.Features.Teams.Commands.EditTeamMemberMusicalRole;
 using JamSpace.Application.Features.Teams.Commands.KickTeamMember;
+using JamSpace.Application.Features.Teams.Commands.LeaveTeam;
 using JamSpace.Application.Features.Teams.Commands.RejectTeamInvite;
 using JamSpace.Application.Features.Teams.Commands.SendTeamInvite;
 using JamSpace.Application.Features.Teams.Dtos;
@@ -62,11 +63,11 @@ public class TeamController : ControllerBase
     
     [HttpPost("invites/{username}")]
     [Authorize]
-    public async Task<IActionResult> SendInvite(string username, [FromBody] Guid teamId)
+    public async Task<ActionResult<TeamInviteDto>> SendInvite(string username, [FromBody] Guid teamId)
     {
         var invitingUserId = User.GetUserId();
-        await _mediator.Send(new SendTeamInviteCommand(username, teamId, invitingUserId));
-        return Ok();
+        var inviteDto = await _mediator.Send(new SendTeamInviteCommand(username, teamId, invitingUserId));
+        return Ok(inviteDto);
     }
     
     [HttpGet("invites")]
@@ -80,20 +81,20 @@ public class TeamController : ControllerBase
     
     [HttpPost("invites/{inviteId}/accept")]
     [Authorize]
-    public async Task<IActionResult> AcceptInvite(Guid inviteId)
+    public async Task<ActionResult<TeamInviteDto>> AcceptInvite(Guid inviteId)
     {
         var userId = User.GetUserId();
-        await _mediator.Send(new AcceptTeamInviteCommand(inviteId, userId));
-        return Ok();
+        var inviteDto = await _mediator.Send(new AcceptTeamInviteCommand(inviteId, userId));
+        return Ok(inviteDto);
     }
 
     [HttpPost("invites/{inviteId}/reject")]
     [Authorize]
-    public async Task<IActionResult> RejectInvite(Guid inviteId)
+    public async Task<ActionResult<TeamInviteDto>> RejectInvite(Guid inviteId)
     {
         var userId = User.GetUserId();
-        await _mediator.Send(new RejectTeamInviteCommand(inviteId, userId));
-        return Ok();
+        var invite = await _mediator.Send(new RejectTeamInviteCommand(inviteId, userId));
+        return Ok(invite);
     }
 
     [HttpPatch("{teamId}/members/{userId}/role")]
@@ -154,11 +155,11 @@ public class TeamController : ControllerBase
 
     [HttpPatch("invites/{inviteId}/cancel")]
     [Authorize]
-    public async Task<IActionResult> CancelInvite(Guid inviteId)
+    public async Task<ActionResult<TeamInviteDto>> CancelInvite(Guid inviteId)
     {
         var requestingUserId = User.GetUserId();
-        await _mediator.Send(new CancelTeamInviteCommand(inviteId, requestingUserId));
-        return NoContent();
+        var inviteDto = await _mediator.Send(new CancelTeamInviteCommand(inviteId, requestingUserId));
+        return Ok(inviteDto);
     }
 
     [HttpPatch("{teamId}/team-picture")]
@@ -186,7 +187,7 @@ public class TeamController : ControllerBase
     public async Task<IActionResult> LeaveTeam(Guid teamId)
     {
         var requestingUserId = User.GetUserId();
-        await _mediator.Send(new KickTeamMemberCommand(teamId, requestingUserId, requestingUserId));
+        await _mediator.Send(new LeaveTeamCommand(teamId, requestingUserId));
         return NoContent();
     }
 }

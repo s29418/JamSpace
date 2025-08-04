@@ -70,7 +70,7 @@ public class TeamRepository : ITeamRepository
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct)
+    public async Task<TeamInvite> SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct)
     {
         var alreadyExists = await _db.TeamInvites.AnyAsync(
             i => i.TeamId == teamId 
@@ -91,8 +91,9 @@ public class TeamRepository : ITeamRepository
             Status = InviteStatus.Pending
         };
 
-        _db.TeamInvites.Add(invite);
+        await _db.TeamInvites.AddAsync(invite);
         await _db.SaveChangesAsync(ct);
+        return invite;
     }
     
     public async Task<List<TeamInvite>> GetMyPendingInvitesAsync(Guid userId, CancellationToken ct)
@@ -105,7 +106,7 @@ public class TeamRepository : ITeamRepository
             .ToListAsync(ct);
     }
 
-    public async Task AcceptInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
+    public async Task<TeamInvite> AcceptInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
     {
         var invite = await _db.TeamInvites
             .Include(i => i.Team)
@@ -126,9 +127,10 @@ public class TeamRepository : ITeamRepository
         });
 
         await _db.SaveChangesAsync(ct);
+        return invite;
     }
     
-    public async Task RejectInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
+    public async Task<TeamInvite> RejectInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
     {
         var invite = await _db.TeamInvites
             .FirstOrDefaultAsync(i => i.Id == inviteId && i.InvitedUserId == userId, ct);
@@ -141,6 +143,7 @@ public class TeamRepository : ITeamRepository
 
         invite.Status = InviteStatus.Rejected;
         await _db.SaveChangesAsync(ct);
+        return invite;
     }
 
     public async Task<TeamInvite> GetTeamInviteByIdAsync(Guid teamInviteId, CancellationToken ct)
@@ -176,7 +179,7 @@ public class TeamRepository : ITeamRepository
             .ToListAsync(ct); 
     }
 
-    public async Task CancelTeamInviteAsync(Guid inviteId, Guid requestingUserId, CancellationToken ct)
+    public async Task<TeamInvite> CancelTeamInviteAsync(Guid inviteId, Guid requestingUserId, CancellationToken ct)
     {
         var invite = await GetTeamInviteByIdAsync(inviteId, ct);
 
@@ -195,6 +198,7 @@ public class TeamRepository : ITeamRepository
 
         invite.Status = InviteStatus.Cancelled;
         await _db.SaveChangesAsync(ct);
+        return invite;
     }
 
     

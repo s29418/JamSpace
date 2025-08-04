@@ -1,10 +1,12 @@
 ﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.Mappers;
 using MediatR;
 
 namespace JamSpace.Application.Features.Teams.Commands.SendTeamInvite;
 
-public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Unit>
+public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, TeamInviteDto>
 {
     private readonly ITeamRepository _repo;
     private readonly IUserRepository _userRepo;
@@ -15,7 +17,7 @@ public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Unit
         _userRepo = userRepo;
     }
 
-    public async Task<Unit> Handle(SendTeamInviteCommand request, CancellationToken cancellationToken)
+    public async Task<TeamInviteDto> Handle(SendTeamInviteCommand request, CancellationToken cancellationToken)
     {
         var isMember = await _repo.IsUserInTeamAsync(request.TeamId, request.InvitingUserId);
         if (!isMember)
@@ -25,8 +27,10 @@ public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Unit
         if (invitedUserId is null)
             throw new NotFoundException($"User '{request.InvitedUserName}' not found.");
 
-        await _repo.SendTeamInviteAsync(request.TeamId, invitedUserId.Value, request.InvitingUserId, cancellationToken);
-
-        return Unit.Value;
+        var invite = 
+            await _repo.SendTeamInviteAsync(request.TeamId, invitedUserId.Value, 
+                request.InvitingUserId, cancellationToken);
+        
+        return TeamInviteMapper.ToDto(invite);
     }
 }

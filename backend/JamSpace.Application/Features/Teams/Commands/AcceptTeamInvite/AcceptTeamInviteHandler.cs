@@ -1,9 +1,11 @@
 ﻿using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.Mappers;
 using MediatR;
 
 namespace JamSpace.Application.Features.Teams.Commands.AcceptTeamInvite;
 
-public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, Unit>
+public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, TeamInviteDto>
 {
     private readonly ITeamRepository _repo;
 
@@ -12,9 +14,9 @@ public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, 
         _repo = repo;
     }
 
-    public async Task<Unit> Handle(AcceptTeamInviteCommand request, CancellationToken cancellationToken)
+    public async Task<TeamInviteDto> Handle(AcceptTeamInviteCommand request, CancellationToken cancellationToken)
     {
-        await _repo.AcceptInviteAsync(request.InviteId, request.UserId, cancellationToken);
-        return Unit.Value;
+        var invite = await _repo.AcceptInviteAsync(request.InviteId, request.UserId, cancellationToken);
+        return TeamInviteMapper.ToDto(invite);
     }
 }

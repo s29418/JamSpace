@@ -6,19 +6,21 @@ namespace JamSpace.Application.Features.Teams.Commands.DeleteTeam;
 
 public class DeleteTeamHandler : IRequestHandler<DeleteTeamCommand, Unit>
 {
-    private readonly ITeamRepository _repo;
+    private readonly ITeamRepository _teamRepository;
+    private readonly ITeamMemberRepository _teamMemberRepository;
 
-    public DeleteTeamHandler(ITeamRepository repo)
+    public DeleteTeamHandler(ITeamRepository teamRepository, ITeamMemberRepository teamMemberRepository)
     {
-        _repo = repo;
+        _teamRepository = teamRepository;
+        _teamMemberRepository = teamMemberRepository;
     }
 
     public async Task<Unit> Handle(DeleteTeamCommand request, CancellationToken cancellationToken)
     {
-        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId))
+        if (!await _teamMemberRepository.IsUserALeaderAsync(request.TeamId, request.RequestingUserId))
             throw new ForbiddenAccessException("Only team leader can delete teams.");
         
-        await _repo.DeleteTeamAsync(request.TeamId, cancellationToken);
+        await _teamRepository.DeleteTeamAsync(request.TeamId, cancellationToken);
         return Unit.Value;
     }
 }

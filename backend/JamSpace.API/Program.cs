@@ -36,6 +36,8 @@ builder.Services.AddDbContext<JamSpaceDbContext>(options =>
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
+builder.Services.AddScoped<ITeamInviteRepository, TeamInviteRepository>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 

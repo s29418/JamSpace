@@ -1,6 +1,6 @@
 ﻿using JamSpace.Application.Features.TeamMembers.DTOs;
 
-namespace JamSpace.Application.Features.Teams.Dtos;
+namespace JamSpace.Application.Features.Teams.DTOs;
 
 public class TeamDto
 {

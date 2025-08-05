@@ -2,9 +2,9 @@
 using JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
 using JamSpace.Application.Features.Teams.Commands.CreateTeam;
 using JamSpace.Application.Features.Teams.Commands.DeleteTeam;
-using JamSpace.Application.Features.Teams.Dtos;
-using JamSpace.Application.Features.Teams.Queries.GetDetails;
+using JamSpace.Application.Features.Teams.DTOs;
 using JamSpace.Application.Features.Teams.Queries.GetMyTeams;
+using JamSpace.Application.Features.Teams.Queries.GetTeamById;
 using JamSpace.Application.Features.Uploads.UpdateTeamPicture;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

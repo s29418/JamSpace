@@ -46,8 +46,9 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblyContaining<CreateTeamCommand>();
 });
 
-builder.Services.AddValidatorsFromAssemblyContaining<CreateTeamCommandValidator>();
 builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssembly(typeof(CreateTeamCommandValidator).Assembly);
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(JamSpace.Application.Common.Behaviors.ValidationBehavior<,>));
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

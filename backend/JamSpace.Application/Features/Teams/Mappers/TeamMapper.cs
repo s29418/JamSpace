@@ -1,5 +1,5 @@
 ﻿using JamSpace.Application.Features.TeamMembers.DTOs;
-using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.DTOs;
 using JamSpace.Domain.Entities;
 
 namespace JamSpace.Application.Features.Teams.Mappers;

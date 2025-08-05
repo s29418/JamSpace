@@ -1,5 +1,5 @@
 ﻿using JamSpace.Application.Common.Interfaces;
-using JamSpace.Application.Features.Teams.Dtos;
+using JamSpace.Application.Features.Teams.DTOs;
 using JamSpace.Application.Features.Teams.Mappers;
 using JamSpace.Domain.Entities;
 using MediatR;

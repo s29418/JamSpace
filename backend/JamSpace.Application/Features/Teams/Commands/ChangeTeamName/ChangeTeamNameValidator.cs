@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace JamSpace.Application.Features.Teams.Commands.CreateTeam;
+namespace JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
 
-public class CreateTeamCommandValidator : AbstractValidator<CreateTeamCommand>
+public class ChangeTeamNameValidator : AbstractValidator<ChangeTeamNameCommand>
 {
-    public CreateTeamCommandValidator()
+    public ChangeTeamNameValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name of the team cannot be empty.")

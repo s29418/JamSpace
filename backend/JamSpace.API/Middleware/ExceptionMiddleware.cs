@@ -1,14 +1,17 @@
-﻿using JamSpace.Application.Common.Exceptions;
+﻿using FluentValidation;
+using JamSpace.Application.Common.Exceptions;
 
 namespace JamSpace.API.Middleware;
 
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionMiddleware> _logger;
 
     public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -19,23 +22,47 @@ public class ExceptionMiddleware
         }
         catch (ForbiddenAccessException ex)
         {
+            _logger.LogWarning(ex, "Forbidden access.");
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
         }
         catch (NotFoundException ex)
         {
+            _logger.LogWarning(ex, "Resource not found.");
             context.Response.StatusCode = StatusCodes.Status404NotFound;
-            await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
         }
         catch (ConflictException ex)
         {
+            _logger.LogWarning(ex, "Conflict detected.");
             context.Response.StatusCode = StatusCodes.Status409Conflict;
-            await context.Response.WriteAsJsonAsync(new { error = ex.Message });       
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+        }
+        catch (ValidationException ex)
+        {
+            _logger.LogWarning(ex, "Validation failed.");
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            context.Response.ContentType = "application/json";
+
+            var errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage });
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                Title = "Validation failed",
+                Errors = errors
+            });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access.");
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message });       
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Unhandled exception occurred.");
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await context.Response.WriteAsJsonAsync(new { error = "Something went wrong." });
+            await context.Response.WriteAsJsonAsync(new { message = "An unexpected error occurred." });
         }
     }
 }

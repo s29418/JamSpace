@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JamSpace.Infrastructure", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JamSpace.Application", "JamSpace.Application\JamSpace.Application.csproj", "{B0C66957-B376-4AAC-9E9B-45BDBE9074FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JamSpace.Tests", "JamSpace.Tests\JamSpace.Tests.csproj", "{732B6069-2867-4C61-8BBE-A6789B412C3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{B0C66957-B376-4AAC-9E9B-45BDBE9074FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0C66957-B376-4AAC-9E9B-45BDBE9074FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0C66957-B376-4AAC-9E9B-45BDBE9074FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{732B6069-2867-4C61-8BBE-A6789B412C3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{732B6069-2867-4C61-8BBE-A6789B412C3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{732B6069-2867-4C61-8BBE-A6789B412C3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{732B6069-2867-4C61-8BBE-A6789B412C3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

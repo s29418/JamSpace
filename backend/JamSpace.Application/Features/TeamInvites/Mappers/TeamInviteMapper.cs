@@ -16,7 +16,8 @@ public static class TeamInviteMapper
             CreatedAt = teamInvite.CreatedAt,
             InvitedByUserName = teamInvite.InvitedByUser.UserName,
             InvitedUserName = teamInvite.InvitedUser.UserName,
-            InvitedUserPictureUrl = teamInvite.InvitedUser.ProfilePictureUrl
+            InvitedUserPictureUrl = teamInvite.InvitedUser.ProfilePictureUrl,
+            Status = teamInvite.Status.ToString()
         };
     }
 }

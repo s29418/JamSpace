@@ -2,9 +2,9 @@
 
 namespace JamSpace.Application.Features.TeamMembers.Commands.EditTeamMemberMusicalRole;
 
-public class EditTeamMemberMusicalRoleValidator : AbstractValidator<EditTeamMemberMusicalRoleCommand>
+public class EditTeamMemberMusicalRoleCommandValidator : AbstractValidator<EditTeamMemberMusicalRoleCommand>
 {
-    public EditTeamMemberMusicalRoleValidator()
+    public EditTeamMemberMusicalRoleCommandValidator()
     {
         RuleFor(x => x.MusicalRole)
             .NotEmpty().WithMessage("Musical role cannot be empty.")

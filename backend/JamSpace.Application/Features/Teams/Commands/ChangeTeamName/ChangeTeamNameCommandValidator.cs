@@ -2,9 +2,9 @@
 
 namespace JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
 
-public class ChangeTeamNameValidator : AbstractValidator<ChangeTeamNameCommand>
+public class ChangeTeamNameCommandValidator : AbstractValidator<ChangeTeamNameCommand>
 {
-    public ChangeTeamNameValidator()
+    public ChangeTeamNameCommandValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name of the team cannot be empty.")

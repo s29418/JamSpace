@@ -96,7 +96,7 @@ public class TeamInviteRepository : ITeamInviteRepository
             throw new InvalidOperationException("Invite is no longer pending.");
 
         invite.Status = InviteStatus.Accepted;
-        _db.TeamMembers.Add(new TeamMember { TeamId = invite.TeamId, UserId = userId });
+        await _db.TeamMembers.AddAsync(new TeamMember { TeamId = invite.TeamId, UserId = userId });
         await _db.SaveChangesAsync(ct);
         
         return invite;

@@ -22,7 +22,8 @@ public class GetTeamInvitesHandler : IRequestHandler<GetTeamInvitesQuery, List<T
         if (!await _teamMemberRepository.IsUserInTeamAsync(request.TeamId, request.RequestingUserId))
             throw new ForbiddenAccessException("User is not in the team.");
 
-        var invites = await _teamInviteRepository.GetTeamInvitesAsync(request.TeamId, request.RequestingUserId, ct);
+        var invites = await _teamInviteRepository
+            .GetTeamInvitesAsync(request.TeamId, request.RequestingUserId, ct);
 
         return invites
             .Select(TeamInviteMapper.ToDto)

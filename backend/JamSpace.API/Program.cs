@@ -30,8 +30,11 @@ builder.Services.AddCors(options =>
 });
 
 
-builder.Services.AddDbContext<JamSpaceDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+if (builder.Environment.EnvironmentName != "Testing")
+{
+    builder.Services.AddDbContext<JamSpaceDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -129,3 +132,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.Run();
+
+public partial class Program {}

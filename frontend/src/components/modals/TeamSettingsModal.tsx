@@ -1,6 +1,5 @@
 import ReactDOM from 'react-dom';
 import React, {useEffect, useRef, useState} from 'react';
-import { getTeamById, inviteUserToTeam } from '../../services/teamService';
 import modalStyles from './TeamSettingsModal.module.css';
 import styles from '../../pages/TeamDetailsPage.module.css';
 import defaultTeamIcon from '../../assets/defaultTeamIcon.jpg';
@@ -10,6 +9,7 @@ import {
     CameraIcon as ChangePictureIcon
 } from '@heroicons/react/24/outline';
 import {
+    getTeamById,
     changeTeamName,
     deleteTeam,
     getTeamInvitesByTeamId,
@@ -19,6 +19,9 @@ import {
     kickTeamMember,
     changeTeamPicture
 } from '../../services/teamService';
+
+import { inviteUserToTeam } from '../../services/teamInvites.service';
+
 import {useNavigate} from "react-router-dom";
 
 interface Props {
@@ -54,6 +57,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
     const [loading, setLoading] = useState(true);
     const [inviteUsername, setInviteUsername] = useState('');
     const [message, setMessage] = useState('');
+    const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
     const [isEditingName, setIsEditingName] = useState(false);
     const [newTeamName, setNewTeamName] = useState('');
     const [invites, setInvites] = useState<Invite[]>([]);
@@ -63,6 +67,11 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
     const navigate = useNavigate();
     const [showUpload, setShowUpload] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    function showMessage(text: string, type: 'success' | 'error') {
+        setMessage(text);
+        setMessageType(type);
+    }
 
     useEffect(() => {
         const fetchTeam = async () => {
@@ -202,22 +211,19 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
     }
 
     const handleInviteUserToTeam = async (username: string, teamId: string) => {
-        if (!username.trim()) {
-            setMessage('Username cannot be empty.');
-            return;
-        }
 
         try {
             await inviteUserToTeam(username, teamId);
             const updatedInvites = await getTeamInvitesByTeamId(teamId);
             setInvites(updatedInvites);
-            setMessage(`User "${username}" has been invited.`);
+            showMessage(`User "${username}" has been invited.`, 'success');
             setInviteUsername('');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to invite user:', error);
-            setMessage('Failed to send invite. User may not exist or is already a member.');
+            const backendMsg = error?.message ?? 'Failed to send invite.';
+            showMessage(backendMsg, 'error');
         }
-    }
+    };
 
     if (loading || !team) return <div/>
 
@@ -237,8 +243,8 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                         <ChangePictureIcon className={styles.cameraIcon}/>
                     </div>
 
-                    <div>
-                        <h1 className={styles.title}>{team.name}</h1>
+                    <div className={styles.textCol}>
+                        <h1 className={styles.title} title={team.name}>{team.name}</h1>
                         <div>
 
                             <button className={styles.editButton} onClick={() => {

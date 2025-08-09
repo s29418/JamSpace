@@ -89,8 +89,9 @@ export const inviteUserToTeam = async (username: string, teamId: string) => {
             'Content-Type': 'application/json',
         },
     });
+
     return response.data;
-};
+}
 
 export const deleteTeam = async (teamId: string) => {
     const token = localStorage.getItem('token');
@@ -165,7 +166,7 @@ export const changeTeamMemberMusicalRole = async (teamId: string, userId: string
 
 export const getTeamInvitesByTeamId = async (teamId: string) => {
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${API_URL}/${teamId}/invites`, {
+    const response = await axios.get(`${API_URL}/invites/team/${teamId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },

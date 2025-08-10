@@ -13,7 +13,7 @@ import {
     changeTeamName,
     deleteTeam,
     changeTeamPicture
-} from '../../services/teamService';
+} from '../../services/teams.service';
 
 import {
     inviteUserToTeam,
@@ -49,6 +49,7 @@ interface Team {
     name: string;
     teamPictureUrl?: string;
     members: Member[];
+    currentUserRole?: string;
 }
 
 interface Invite {
@@ -254,53 +255,82 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
 
                 <div className={styles.teamInfo}>
 
-                    <div className={styles.avatarWrapper} onClick={handleAvatarClick}>
+                    <div
+                        className={styles.avatarWrapper}
+                        onClick={
+                            (team.currentUserRole === 'Leader' || team.currentUserRole === 'Admin')
+                                ? handleAvatarClick
+                                : undefined
+                        }
+                        style={{
+                            cursor: team.currentUserRole === 'Leader' ? 'pointer' : 'default'
+                        }}
+                    >
                         <img
                             src={team.teamPictureUrl || defaultTeamIcon}
                             alt={team.name}
                             className={styles.avatarModal}
                         />
-                        <ChangePictureIcon className={styles.cameraIcon}/>
+
+                        {(team.currentUserRole === 'Leader' || team.currentUserRole === 'Admin') && (
+                            <ChangePictureIcon className={styles.cameraIcon}/>
+                        )}
                     </div>
 
                     <div className={styles.textCol}>
                         <h1 className={styles.title} title={team.name}>{team.name}</h1>
-                        <div>
 
-                            <button className={styles.editButton} onClick={() => {
-                                setNewTeamName(team.name);
-                                setIsEditingName(true);
-                            }}>
-                                <EditIcon className={styles.icon}/> Change name
-                            </button>
+                        {(team.currentUserRole === 'Leader' || team.currentUserRole === 'Admin') && (
+                            <div>
+                                <button
+                                    className={styles.editButton}
+                                    onClick={() => {
+                                        setNewTeamName(team.name);
+                                        setIsEditingName(true);
+                                    }}
+                                >
+                                    <EditIcon className={styles.icon}/> Change name
+                                </button>
 
-                            <button className={styles.deleteButton} onClick={handleDeleteTeam}>
-                                <DeleteIcon className={styles.icon}/> Delete team
-                            </button>
+                                <button
+                                    className={styles.deleteButton}
+                                    onClick={handleDeleteTeam}
+                                >
+                                    <DeleteIcon className={styles.icon}/> Delete team
+                                </button>
 
-                            <div
-                                className={modalStyles.expandable + (isEditingName ? ' ' + modalStyles.expanded : '')}>
+                                <div
+                                    className={
+                                        modalStyles.expandable +
+                                        (isEditingName ? ' ' + modalStyles.expanded : '')
+                                    }
+                                >
+                                    <input
+                                        className={styles.teamNameInput}
+                                        value={newTeamName}
+                                        onChange={(e) => setNewTeamName(e.target.value)}
+                                    />
 
-                                <input
-                                    className={styles.teamNameInput}
-                                    value={newTeamName}
-                                    onChange={(e) => setNewTeamName(e.target.value)}
-                                />
+                                    <div className={styles.changeNameOptions}>
+                                        <button
+                                            className={styles.inviteButton}
+                                            onClick={() => handleChangeTeamName(newTeamName)}
+                                        >
+                                            Save
+                                        </button>
 
-                                <div className={styles.changeNameOptions}>
-                                    <button className={styles.inviteButton}
-                                            onClick={() => handleChangeTeamName(newTeamName)}>
-                                        Save
-                                    </button>
-
-                                    <button className={styles.inviteButton}
-                                            onClick={() => setIsEditingName(false)}>
-                                        Cancel
-                                    </button>
+                                        <button
+                                            className={styles.inviteButton}
+                                            onClick={() => setIsEditingName(false)}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <ExpandableMessage message={teamMessage} />
+                        )}
+
+                        <ExpandableMessage message={teamMessage}/>
                     </div>
                 </div>
 
@@ -313,8 +343,8 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                         onChange={handleFileChange}
                     />
                     <button className={styles.uploadButton}
-                        onClick={() => fileInputRef.current?.click()}>
-                        Choose file
+                            onClick={() => fileInputRef.current?.click()}>
+                    Choose file
                     </button>
                 </div>
 
@@ -334,12 +364,17 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
 
                                 <p className={styles.role}>
                                     Team role: {member.role}
-                                    <EditIcon
-                                        className={styles.editRoleIcon}
-                                        onClick={() =>
-                                            setEditingRoleUserId(editingRoleUserId === member.userId ? null : member.userId)
-                                        }
-                                    />
+
+                                    {team.currentUserRole === 'Leader' && (
+                                        <EditIcon
+                                            className={styles.editRoleIcon}
+                                            onClick={() =>
+                                                setEditingRoleUserId(
+                                                    editingRoleUserId === member.userId ? null : member.userId)
+                                            }
+                                        />
+                                    )}
+
                                 </p>
 
                                 {editingRoleUserId === member.userId && (
@@ -360,16 +395,27 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                                     </div>
                                 )}
 
-                                <p className={styles.musicalRole}>
-                                    Musical role: {member.musicalRole}
-                                    <EditIcon
-                                        className={styles.editMusicalRoleIcon}
-                                        onClick={() => {
-                                            setEditingMusicalUserId(editingMusicalUserId === member.userId ? null : member.userId);
-                                            setNewMusicalRole(member.musicalRole || '');
-                                        }}
-                                    />
-                                </p>
+                                {(team.currentUserRole === 'Leader' || team.currentUserRole === 'Admin') ? (
+                                    <p className={styles.musicalRole}>
+                                        Musical role: {member.musicalRole || 'None'}
+                                        <EditIcon
+                                            className={styles.editMusicalRoleIcon}
+                                            onClick={() => {
+                                                setEditingMusicalUserId(
+                                                    editingMusicalUserId === member.userId ? null : member.userId
+                                                );
+                                                setNewMusicalRole(member.musicalRole || '');
+                                            }}
+                                        />
+                                    </p>
+                                ) : (
+                                    member.musicalRole && (
+                                        <p className={styles.musicalRole}>
+                                            Musical role: {member.musicalRole}
+                                        </p>
+                                    )
+                                )}
+
 
                                 {editingMusicalUserId === member.userId && (
                                     <div className={`${styles.expandable} ${styles.expanded}`}>
@@ -399,16 +445,21 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                                         </div>
                                     </div>
                                 )}
-                                <button className={styles.userActionButton} style={{marginTop: "4px"}} onClick={() =>
-                                    handleKickMember(member.userId)}>
-                                    ✖ Kick from team
-                                </button>
+
+                                {team.currentUserRole === 'Leader' && (
+                                    <button className={styles.userActionButton} style={{marginTop: "4px"}}
+                                            onClick={() =>
+                                                handleKickMember(member.userId)}>
+                                        ✖ Kick from team
+                                    </button>
+                                )}
+
                             </div>
                         </li>
                     ))}
                 </ul>
 
-                <ExpandableMessage message={teamMemberMessage} />
+                <ExpandableMessage message={teamMemberMessage}/>
 
                 <hr className={styles.lineBreak}/>
 

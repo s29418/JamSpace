@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
     getTeamById
-} from '../services/teamService';
+} from '../services/teams.service';
 import styles from './TeamDetailsPage.module.css';
 import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
 import TeamSettingsModal from "../components/modals/TeamSettingsModal";

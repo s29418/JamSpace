@@ -4,7 +4,7 @@ import {
     getMyTeams,
     uploadTeamPicture,
     createTeam,
-} from '../services/teamService';
+} from '../services/teams.service';
 
 import {
     fetchUserInvites,
@@ -189,7 +189,7 @@ const TeamsPage = () => {
                     />
 
                     <div className={styles.customFileUpload}>
-                        <label>Team picture (optional)</label>
+                        {/*<label>Team picture (optional)</label>*/}
                         <div className={styles.fileUploadRow}>
                             <button type="button" onClick={() => fileInputRef.current?.click()}>
                                 Upload Image

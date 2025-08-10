@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createTeam } from '../services/teamService';
+import { createTeam } from '../services/teams.service';
 
 interface Props {
     onTeamCreated: () => void;

@@ -10,7 +10,7 @@ export async function changeTeamMemberRole(teamId: string, userId: string, newRo
         throw new Error('Role cannot be empty.');
     }
     await apiChangeTeamMemberRole(teamId, userId, newRole);
-    return `Member role updated to "${newRole}".`;
+    return `Member role updated.`;
 }
 
 export async function kickTeamMember(teamId: string, userId: string): Promise<string> {

@@ -4,10 +4,13 @@ import {
     getMyTeams,
     uploadTeamPicture,
     createTeam,
-    getTeamInvites,
-    acceptTeamInvite,
-    rejectTeamInvite
 } from '../services/teamService';
+
+import {
+    fetchUserInvites,
+    acceptInvite,
+    rejectInvite
+} from '../services/teamInvites.service';
 import TeamCard from '../components/TeamCard';
 import TeamInviteCard from '../components/TeamInviteCard';
 import styles from './TeamsPage.module.css';
@@ -53,7 +56,7 @@ const TeamsPage = () => {
         try {
             const [teamData, inviteData] = await Promise.all([
                 getMyTeams(),
-                getTeamInvites()
+                fetchUserInvites()
             ]);
             setTeams(teamData);
             setInvites(inviteData);
@@ -111,7 +114,7 @@ const TeamsPage = () => {
 
     const handleAccept = async (inviteId: string) => {
         try {
-            await acceptTeamInvite(inviteId);
+            await acceptInvite(inviteId);
             setInvites(prev => prev.filter(i => i.id !== inviteId));
             const updated = await getMyTeams();
             setTeams(updated);
@@ -122,7 +125,7 @@ const TeamsPage = () => {
 
     const handleReject = async (inviteId: string) => {
         try {
-            await rejectTeamInvite(inviteId);
+            await rejectInvite(inviteId);
             setInvites(prev => prev.filter(i => i.id !== inviteId));
         } catch (err) {
             console.error('Failed to reject invite:', err);

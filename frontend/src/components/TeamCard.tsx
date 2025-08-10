@@ -6,7 +6,7 @@ import {
     CogIcon as SettingsIcon,
     ArrowRightStartOnRectangleIcon as LeaveIcon
 } from '@heroicons/react/24/outline';
-import { leaveTeam } from '../services/teamService';
+import { leaveTeam } from '../services/teamMembers.service';
 
 interface Member {
     userId: string;

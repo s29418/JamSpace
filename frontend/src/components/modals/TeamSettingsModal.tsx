@@ -12,16 +12,22 @@ import {
     getTeamById,
     changeTeamName,
     deleteTeam,
-    getTeamInvitesByTeamId,
-    cancelTeamInvite,
-    changeTeamMemberRole,
-    changeTeamMemberMusicalRole,
-    kickTeamMember,
     changeTeamPicture
 } from '../../services/teamService';
 
-import { inviteUserToTeam } from '../../services/teamInvites.service';
+import {
+    inviteUserToTeam,
+    cancelInvite,
+    fetchTeamInvitesByTeamId
+} from '../../services/teamInvites.service';
 
+import {
+    changeTeamMemberMusicalRole,
+    changeTeamMemberRole,
+    kickTeamMember,
+} from '../../services/teamMembers.service';
+
+import ExpandableMessage from '../common/ExpandableMessage';
 import {useNavigate} from "react-router-dom";
 
 interface Props {
@@ -56,8 +62,9 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
     const [team, setTeam] = useState<Team | null>(null);
     const [loading, setLoading] = useState(true);
     const [inviteUsername, setInviteUsername] = useState('');
-    const [message, setMessage] = useState('');
-    const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
+    const [inviteMessage, setInviteMessage] = useState<MessageState>(null);
+    const [teamMemberMessage, setTeamMemberMessage] = useState<MessageState>(null);
+    const [teamMessage, setTeamMessage] = useState<MessageState>(null);
     const [isEditingName, setIsEditingName] = useState(false);
     const [newTeamName, setNewTeamName] = useState('');
     const [invites, setInvites] = useState<Invite[]>([]);
@@ -68,9 +75,19 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
     const [showUpload, setShowUpload] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    function showMessage(text: string, type: 'success' | 'error') {
-        setMessage(text);
-        setMessageType(type);
+    type MessageState = { text: string; color: string } | null;
+
+    function showMessage(
+        setMessage: React.Dispatch<React.SetStateAction<MessageState>>,
+        text: string,
+        type: 'success' | 'error'
+    ) {
+        const color = type === 'success' ? '#26cdd4' : '#ef4444';
+        setMessage({ text, color });
+
+        setTimeout(() => {
+            setMessage(null);
+        }, 5000);
     }
 
     useEffect(() => {
@@ -91,7 +108,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
     useEffect(() => {
         const fetchInvites = async () => {
             try {
-                const data = await getTeamInvitesByTeamId(teamId);
+                const data = await fetchTeamInvitesByTeamId(teamId);
                 setInvites(data);
             } catch (error) {
                 console.error('Failed to fetch team invites:', error);
@@ -111,16 +128,17 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
 
         try {
             if (!team) return;
-            await changeTeamPicture(team.id, file);
+            const successMsg = await changeTeamPicture(team.id, file);
             const updated = await getTeamById(team.id);
 
             setTeam(updated);
             setShowUpload(false);
-            setMessage('Team picture updated.');
+            showMessage(setInviteMessage, successMsg, 'success');
             onTeamUpdate?.(updated);
-        } catch (err) {
-            console.error("Upload failed", err);
-            setMessage('Failed to update team picture.');
+        } catch (error: any) {
+            console.error("Upload failed", error);
+            const backendMsg = error?.message ?? 'Failed to upload team picture.';
+            showMessage(setTeamMessage, backendMsg, 'error');
         }
     };
 
@@ -128,15 +146,15 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
         if (!newName.trim()) return;
 
         try {
-            const updated = await changeTeamName(teamId, newName);
-            setTeam(updated);
-            setMessage('Team name updated.');
+            const updatedTeam = await changeTeamName(teamId, newName);
+            setTeam(updatedTeam);
+            showMessage(setInviteMessage, 'Team name updated.', 'success');
 
-            onTeamUpdate?.(updated);
+            onTeamUpdate?.(updatedTeam);
             setIsEditingName(false);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to change name:', err);
-            setMessage('Failed to change team name.');
+            showMessage(setTeamMessage, err?.message ?? 'Failed to change team name.', 'error');
         }
     }
 
@@ -145,39 +163,28 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
             const confirmed = window.confirm('Are you sure you want to delete this team?');
             if (!confirmed) return;
 
-            await deleteTeam(teamId);
-            setMessage('Team deleted successfully.');
+            const successMsg = await deleteTeam(teamId);
+            showMessage(setTeamMessage, successMsg, 'success');
             onClose();
             navigate('/teams');
             window.location.reload();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to delete team:', error);
-            setMessage('Failed to delete team.');
-        }
-    };
-
-    const cancelInvite = async (inviteId: string) => {
-        try {
-            await cancelTeamInvite(inviteId);
-            setMessage('Invite cancelled successfully.');
-            setInvites(prev => prev.filter(i => i.id !== inviteId));
-        } catch (error) {
-            console.error('Failed to cancel invite:', error);
-            setMessage('Failed to cancel invite.');
+            const backendMsg = error?.message ?? 'Failed to delete team.';
+            showMessage(setTeamMessage, backendMsg, 'error');
         }
     };
 
     const handleChangeMemberRole = async (userId: string, newRole: string) => {
-        if (!newRole.trim()) return;
-
         try {
-            await changeTeamMemberRole(teamId, userId, newRole);
+            const successMsg = await changeTeamMemberRole(teamId, userId, newRole);
             const updated = await getTeamById(teamId);
             setTeam(updated);
-            setMessage('Member role updated.');
-        } catch (err) {
-            console.error('Failed to change member role:', err);
-            setMessage('Failed to change member role.');
+            showMessage(setTeamMemberMessage, successMsg, 'success');
+        } catch (error: any) {
+            console.error('Failed to change member role:', error);
+            const backendMsg = error?.message ?? 'Failed to change member role.';
+            showMessage(setTeamMemberMessage, backendMsg, 'error');
         }
     }
 
@@ -185,13 +192,14 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
         if (!newMusicalRole.trim()) return;
 
         try {
-            await changeTeamMemberMusicalRole(teamId, userId, newMusicalRole);
+            const successMsg = await changeTeamMemberMusicalRole(teamId, userId, newMusicalRole);
             const updated = await getTeamById(teamId);
             setTeam(updated);
-            setMessage('Member musical role updated.');
-        } catch (err) {
-            console.error('Failed to change member musical role:', err);
-            setMessage('Failed to change member musical role.');
+            showMessage(setTeamMemberMessage, successMsg, 'success');
+        } catch (error: any) {
+            console.error('Failed to change member musical role:', error);
+            const backendMsg = error?.message ?? 'Failed to change member musical role.';
+            showMessage(setTeamMemberMessage, backendMsg, 'error');
         }
     }
 
@@ -200,28 +208,40 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
             const confirmed = window.confirm('Are you sure you want to kick this member from the team?');
             if (!confirmed) return;
 
-            await kickTeamMember(teamId, userId);
+            const successMsg = await kickTeamMember(teamId, userId);
             const updated = await getTeamById(teamId);
             setTeam(updated);
-            setMessage('Member kicked successfully.');
-        } catch (error) {
+            showMessage(setTeamMemberMessage, successMsg, 'success');
+        } catch (error: any) {
             console.error('Failed to kick member:', error);
-            setMessage('Failed to kick member.');
+            const backendMsg = error?.message ?? 'Failed to kick member.';
+            showMessage(setTeamMemberMessage, backendMsg, 'error');
         }
     }
 
-    const handleInviteUserToTeam = async (username: string, teamId: string) => {
-
+    const handleCancelInvite = async (inviteId: string) => {
         try {
-            await inviteUserToTeam(username, teamId);
-            const updatedInvites = await getTeamInvitesByTeamId(teamId);
+            const successMsg = await cancelInvite(inviteId);
+            showMessage(setInviteMessage, successMsg, 'success');
+            setInvites(prev => prev.filter(i => i.id !== inviteId));
+        } catch (error: any) {
+            console.error('Failed to invite user:', error);
+            const backendMsg = error?.message ?? 'Failed to cancel invite.';
+            showMessage(setInviteMessage, backendMsg, 'error');
+        }
+    };
+
+    const handleInviteUserToTeam = async (username: string, teamId: string) => {
+        try {
+            const successMsg = await inviteUserToTeam(username, teamId);
+            const updatedInvites = await fetchTeamInvitesByTeamId(teamId);
             setInvites(updatedInvites);
-            showMessage(`User "${username}" has been invited.`, 'success');
+            showMessage(setInviteMessage, successMsg, 'success');
             setInviteUsername('');
         } catch (error: any) {
             console.error('Failed to invite user:', error);
             const backendMsg = error?.message ?? 'Failed to send invite.';
-            showMessage(backendMsg, 'error');
+            showMessage(setInviteMessage, backendMsg, 'error');
         }
     };
 
@@ -280,6 +300,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                                 </div>
                             </div>
                         </div>
+                        <ExpandableMessage message={teamMessage} />
                     </div>
                 </div>
 
@@ -387,6 +408,8 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                     ))}
                 </ul>
 
+                <ExpandableMessage message={teamMemberMessage} />
+
                 <hr className={styles.lineBreak}/>
 
                 {invites.length > 0 && (
@@ -412,7 +435,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
 
 
                                         <button className={styles.userActionButton} onClick={() =>
-                                            cancelInvite(invite.id)}>
+                                            handleCancelInvite(invite.id)}>
                                             ✖ Cancel Invite
                                         </button>
                                     </div>
@@ -441,7 +464,9 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                     />
                     <button className={styles.inviteButton} type="submit">Invite</button>
                 </form>
-                {message && <p className={styles.message}>{message}</p>}
+
+                <ExpandableMessage message={inviteMessage} />
+
             </div>
         </div>,
         document.getElementById('modal-root') as HTMLElement

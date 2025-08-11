@@ -16,7 +16,8 @@ public class TeamMemberRepository : ITeamMemberRepository
     public async Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId)
     {
         Console.WriteLine($"TEAM EXISTS: {_db.Teams.Any(t => t.Id == teamId)}");
-        Console.WriteLine($"IS USER IN TEAM: {await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == userId)}");
+        Console.WriteLine($"IS USER IN TEAM: {await _db.TeamMembers.AnyAsync(
+            m => m.TeamId == teamId && m.UserId == userId)}");
         return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == userId);
     }
 

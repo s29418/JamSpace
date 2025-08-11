@@ -1,20 +1,20 @@
+using System.Text;
+using Azure.Storage.Blobs;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using JamSpace.API.Middleware;
 using JamSpace.Application.Common.Interfaces;
-// using JamSpace.Application.Services;
+using JamSpace.Application.Features.Teams.Commands.CreateTeam;
+using JamSpace.Infrastructure.Data;
 using JamSpace.Infrastructure.Repositories;
 using JamSpace.Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Azure.Storage.Blobs;
-using FluentValidation;
-using JamSpace.API.Middleware;
-using FluentValidation.AspNetCore;
-using JamSpace.Application.Features.Teams.Commands.CreateTeam;
-using JamSpace.Infrastructure.Data;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.OpenApi.Models;
+// using JamSpace.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -141,4 +141,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.Run();
 
-public partial class Program {}
+namespace JamSpace.API
+{
+    public partial class Program {}
+}

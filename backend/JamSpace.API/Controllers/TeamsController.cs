@@ -6,7 +6,7 @@ using JamSpace.Application.Features.Teams.Commands.DeleteTeam;
 using JamSpace.Application.Features.Teams.DTOs;
 using JamSpace.Application.Features.Teams.Queries.GetMyTeams;
 using JamSpace.Application.Features.Teams.Queries.GetTeamById;
-using JamSpace.Application.Features.Uploads.UploadTeamPicture;
+using JamSpace.Application.Features.Uploads.UploadPicture;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -55,16 +55,7 @@ public class TeamsController : ControllerBase
         var updated = await _mediator.Send(new ChangeTeamNameCommand(teamId, requestingUserId, teamName));
         return Ok(updated);
     }
-
-    [HttpDelete("{teamId}")]
-    [Authorize]
-    public async Task<IActionResult> DeleteTeam(Guid teamId)
-    {
-        var requestingUserId = User.GetUserId();
-        await _mediator.Send(new DeleteTeamCommand(teamId, requestingUserId));
-        return NoContent();
-    }
-
+    
     [HttpPatch("{teamId}/team-picture")]
     [Authorize]
     public async Task<ActionResult<string>> UpdateTeamPicture(
@@ -82,4 +73,12 @@ public class TeamsController : ControllerBase
         return Ok(new { url });
     }
 
+    [HttpDelete("{teamId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteTeam(Guid teamId)
+    {
+        var requestingUserId = User.GetUserId();
+        await _mediator.Send(new DeleteTeamCommand(teamId, requestingUserId));
+        return NoContent();
+    }
 }

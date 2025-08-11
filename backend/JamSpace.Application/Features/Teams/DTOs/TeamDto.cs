@@ -11,4 +11,5 @@ public class TeamDto
 
     public string CreatedByUserName { get; set; } = default!;
     public List<TeamMemberDto> Members { get; set; } = new();
+    public string? CurrentUserRole { get; set; }
 }

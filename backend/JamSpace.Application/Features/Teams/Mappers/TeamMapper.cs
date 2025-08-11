@@ -6,7 +6,7 @@ namespace JamSpace.Application.Features.Teams.Mappers;
 
 public static class TeamMapper
 {
-    public static TeamDto ToDto(Team team)
+    public static TeamDto ToDto(Team team, Guid currentUserId)
     {
         return new TeamDto
         {
@@ -23,7 +23,9 @@ public static class TeamMapper
                 Role = m.Role.ToString(),
                 MusicalRole = m.MusicalRole?.ToString(),
                 UserPictureUrl = m.User.ProfilePictureUrl
-            }).ToList()
+            }).ToList(),
+            CurrentUserRole = team.Members
+                .FirstOrDefault(m => m.User.Id == currentUserId)?.Role.ToString()
         };
     }
 }

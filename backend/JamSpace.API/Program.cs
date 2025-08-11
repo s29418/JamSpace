@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Azure.Storage.Blobs;
 using FluentValidation;
 using JamSpace.API.Middleware;
 using FluentValidation.AspNetCore;
@@ -36,13 +37,20 @@ if (builder.Environment.EnvironmentName != "Testing")
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
 
+builder.Services.AddSingleton<IFileStorageService>(sp =>
+{
+    var connectionString = builder.Configuration["AzureBlobStorage:ConnectionString"];
+    var containerName = builder.Configuration["AzureBlobStorage:ContainerName"];
+
+    var blobServiceClient = new BlobServiceClient(connectionString);
+    return new AzureBlobStorageService(blobServiceClient, containerName);
+});
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
 builder.Services.AddScoped<ITeamInviteRepository, TeamInviteRepository>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 
 builder.Services.AddMediatR(cfg =>
 {

@@ -25,6 +25,6 @@ public class ChangeTeamNameHandler : IRequestHandler<ChangeTeamNameCommand, Team
         
         var team = await _teamRepository.ChangeTeamNameAsync(request.TeamId,request.Name, cancellationToken);
 
-        return TeamMapper.ToDto(team);
+        return TeamMapper.ToDto(team, request.RequestingUserId);
     }
 }

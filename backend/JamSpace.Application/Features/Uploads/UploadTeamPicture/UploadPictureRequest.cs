@@ -2,7 +2,7 @@
 
 namespace JamSpace.Application.Features.Uploads.UploadTeamPicture;
 
-public class UploadTeamPictureRequest
+public class UploadPictureRequest
 {
     public IFormFile File { get; set; } = null!;
 }

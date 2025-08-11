@@ -5,7 +5,8 @@ using JamSpace.Infrastructure.Repositories;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
-using Moq;
+using System.Collections.Concurrent;
+using JamSpace.Application.Common.Exceptions;
 
 namespace JamSpace.Tests.Integration.TeamInvites;
 
@@ -18,252 +19,329 @@ public class TeamInviteRepositoryTests
             .Options;
         return new JamSpaceDbContext(options);
     }
+    
+    private class TestTeamMemberRepository : ITeamMemberRepository
+    {
+        private readonly JamSpaceDbContext _db;
+
+        private readonly ConcurrentDictionary<(Guid teamId, Guid userId), bool> _leaders = new();
+
+        public TestTeamMemberRepository(JamSpaceDbContext db)
+        {
+            _db = db;
+        }
+
+        public void MarkLeader(Guid teamId, Guid userId) => _leaders[(teamId, userId)] = true;
+
+        public Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId)
+            => Task.FromResult(_db.TeamMembers.Any(tm => tm.TeamId == teamId && tm.UserId == userId));
+
+        public Task<bool> IsUserALeaderAsync(Guid teamId, Guid userId)
+            => Task.FromResult(_leaders.ContainsKey((teamId, userId)));
+
+        public Task<bool> IsUserAnAdminAsync(Guid teamId, Guid userId)
+        {
+            var isAdmin = _db.TeamMembers
+                .Any(m => m.TeamId == teamId 
+                          && m.UserId == userId 
+                          && (m.Role == FunctionalRole.Leader || m.Role == FunctionalRole.Admin));
+            return Task.FromResult(isAdmin);
+        }
+
+        public Task<TeamMember> GetTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<TeamMember>> GetLeadersAsync(Guid teamId, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<TeamMember> ChangeTeamMemberFunctionalRoleAsync(Guid teamId, Guid userId, FunctionalRole newRole, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<TeamMember> EditTeamMemberMusicalRole(Guid teamId, Guid userId, string musicalRole, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct)
+        {
+            throw new NotImplementedException();
+        }
+        
+    }
+
+    private static (User invited, User inviter, Team team) SeedUsersAndTeam(
+        JamSpaceDbContext db, Guid? teamId = null, Guid? invitedId = null, Guid? inviterId = null)
+    {
+        var team = new Team
+        {
+            Id = teamId ?? Guid.NewGuid(), 
+            Name = "Test Team"
+        };
+        var invitedUser = new User
+        {
+            Id = invitedId ?? Guid.NewGuid(), 
+            UserName = "invited", 
+            Email = "invited@test", 
+            PasswordHash = "x"
+        };
+        var invitedByUser = new User
+        {
+            Id = inviterId ?? Guid.NewGuid(), 
+            UserName = "inviter", 
+            Email = "inviter@test", 
+            PasswordHash = "y"
+        };
+
+        db.Teams.Add(team);
+        db.Users.AddRange(invitedUser, invitedByUser);
+        db.SaveChanges();
+        return (invitedUser, invitedByUser, team);
+    }
 
     [Fact]
     public async Task Should_Add_Invite()
     {
-        // Arrange
         await using var db = CreateDbContext();
-        var memberRepo = new Mock<ITeamMemberRepository>();
-        memberRepo.Setup(r => r.IsUserInTeamAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(false);
+        var memberRepo = new TestTeamMemberRepository(db);
+        var repo = new TeamInviteRepository(db, memberRepo);
 
-        var repo = new TeamInviteRepository(db, memberRepo.Object);
+        var (invited, inviter, team) = SeedUsersAndTeam(db);
 
-        // Act
-        var invite = await repo.SendTeamInviteAsync(
-            Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), CancellationToken.None);
+        var invite = await repo.SendTeamInviteAsync(team.Id, invited.Id, inviter.Id, CancellationToken.None);
 
-        // Assert
         invite.Status.Should().Be(InviteStatus.Pending);
         (await db.TeamInvites.CountAsync()).Should().Be(1);
+        invite.Team.Should().NotBeNull();
+        invite.InvitedUser.Should().NotBeNull();
+        invite.InvitedByUser.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Should_Not_Add_Invite_When_Pending_Exists_Or_User_In_Team()
+    {
+        await using var db = CreateDbContext();
+        var memberRepo = new TestTeamMemberRepository(db);
+        var repo = new TeamInviteRepository(db, memberRepo);
+
+        var (invited, inviter, team) = SeedUsersAndTeam(db);
+        
+        db.TeamInvites.Add(new TeamInvite
+        {
+            Id = Guid.NewGuid(),
+            TeamId = team.Id,
+            InvitedUserId = invited.Id,
+            InvitedByUserId = inviter.Id,
+            CreatedAt = DateTime.UtcNow,
+            Status = InviteStatus.Pending
+        });
+        await db.SaveChangesAsync();
+
+        Func<Task> duplicate = () => repo.SendTeamInviteAsync(team.Id, invited.Id, inviter.Id, CancellationToken.None);
+        await duplicate.Should().ThrowAsync<ConflictException>();
+        
+        db.TeamInvites.RemoveRange(db.TeamInvites); 
+        await db.TeamMembers.AddAsync(new TeamMember { TeamId = team.Id, UserId = invited.Id });
+        await db.SaveChangesAsync();
+
+        Func<Task> alreadyInTeam = () => repo.SendTeamInviteAsync(team.Id, invited.Id, inviter.Id, CancellationToken.None);
+        await alreadyInTeam.Should().ThrowAsync<ConflictException>();
     }
 
     [Fact]
     public async Task Should_Accept_Invite()
     {
-        // Arrange
         await using var db = CreateDbContext();
-        
+        var memberRepo = new TestTeamMemberRepository(db);
+        var repo = new TeamInviteRepository(db, memberRepo);
+
+        var (invited, inviter, team) = SeedUsersAndTeam(db);
+
         var invite = new TeamInvite
         {
             Id = Guid.NewGuid(),
-            TeamId = Guid.NewGuid(),
-            InvitedUserId = Guid.NewGuid(),
-            InvitedByUserId = Guid.NewGuid(),
+            TeamId = team.Id,
+            InvitedUserId = invited.Id,
+            InvitedByUserId = inviter.Id,
             CreatedAt = DateTime.UtcNow,
             Status = InviteStatus.Pending
         };
-
-        var team = new Team { Id = invite.TeamId, Name = "Test Team" };
-        var invitedUser = new User { Id = invite.InvitedUserId, UserName = "invited", Email = "<EMAIL>", PasswordHash = "<PASSWORD>"};
-        var invitedByUser = new User { Id = invite.InvitedByUserId, UserName = "inviter", Email = "<EMAIL2>", PasswordHash = "<PASSWORD2>" };
-
-        db.Teams.Add(team);
-        db.Users.AddRange(invitedUser, invitedByUser);
         db.TeamInvites.Add(invite);
         await db.SaveChangesAsync();
 
-        var memberRepo = new Mock<ITeamMemberRepository>();
-        var repo = new TeamInviteRepository(db, memberRepo.Object);
+        var result = await repo.AcceptInviteAsync(invite.Id, invited.Id, CancellationToken.None);
 
-        // Act
-        var result = await repo.AcceptInviteAsync(invite.Id, invite.InvitedUserId, CancellationToken.None);
-
-        // Assert
         result.Status.Should().Be(InviteStatus.Accepted);
         (await db.TeamMembers.CountAsync()).Should().Be(1);
+        db.TeamMembers.Single().UserId.Should().Be(invited.Id);
+        db.TeamMembers.Single().TeamId.Should().Be(team.Id);
     }
 
     [Fact]
     public async Task Should_Reject_Invite()
     {
-        // Arrange
         await using var db = CreateDbContext();
-        var repo = new TeamInviteRepository(db, Mock.Of<ITeamMemberRepository>());
-    
+        var memberRepo = new TestTeamMemberRepository(db);
+        var repo = new TeamInviteRepository(db, memberRepo);
+
+        var (invited, inviter, team) = SeedUsersAndTeam(db);
+
         var invite = new TeamInvite
         {
             Id = Guid.NewGuid(),
-            TeamId = Guid.NewGuid(),
-            InvitedUserId = Guid.NewGuid(),
-            InvitedByUserId = Guid.NewGuid(),
+            TeamId = team.Id,
+            InvitedUserId = invited.Id,
+            InvitedByUserId = inviter.Id,
             CreatedAt = DateTime.UtcNow,
             Status = InviteStatus.Pending
         };
-    
-        var team = new Team { Id = invite.TeamId, Name = "Test Team" };
-        var invitedUser = new User { Id = invite.InvitedUserId, UserName = "invited", Email = "<EMAIL>", PasswordHash = "<PASSWORD>"};
-        var invitedByUser = new User { Id = invite.InvitedByUserId, UserName = "inviter", Email = "<EMAIL2>", PasswordHash = "<PASSWORD2>" };
-
-        db.Teams.Add(team);
-        db.Users.AddRange(invitedUser, invitedByUser);
         db.TeamInvites.Add(invite);
         await db.SaveChangesAsync();
-    
-        // Act
-        var result = await repo.RejectInviteAsync(invite.Id, invite.InvitedUserId, CancellationToken.None);
-    
-        // Assert
+
+        var result = await repo.RejectInviteAsync(invite.Id, invited.Id, CancellationToken.None);
+
         result.Status.Should().Be(InviteStatus.Rejected);
+        (await db.TeamMembers.CountAsync()).Should().Be(0);
     }
-    
+
     [Fact]
     public async Task Should_Cancel_Invite()
     {
-        // Arrange
         await using var db = CreateDbContext();
-        var repo = new TeamInviteRepository(db, Mock.Of<ITeamMemberRepository>());
-    
+        var memberRepo = new TestTeamMemberRepository(db);
+        var repo = new TeamInviteRepository(db, memberRepo);
+
+        var (invited, inviter, team) = SeedUsersAndTeam(db);
+
         var invite = new TeamInvite
         {
             Id = Guid.NewGuid(),
-            TeamId = Guid.NewGuid(),
-            InvitedUserId = Guid.NewGuid(),
-            InvitedByUserId = Guid.NewGuid(),
+            TeamId = team.Id,
+            InvitedUserId = invited.Id,
+            InvitedByUserId = inviter.Id,
             CreatedAt = DateTime.UtcNow,
             Status = InviteStatus.Pending
         };
-        
-        var team = new Team { Id = invite.TeamId, Name = "Test Team" };
-        var invitedUser = new User { Id = invite.InvitedUserId, UserName = "invited", Email = "<EMAIL>", PasswordHash = "<PASSWORD>"};
-        var invitedByUser = new User { Id = invite.InvitedByUserId, UserName = "inviter", Email = "<EMAIL2>", PasswordHash = "<PASSWORD2>" };
-
-        db.Teams.Add(team);
-        db.Users.AddRange(invitedUser, invitedByUser);
         db.TeamInvites.Add(invite);
         await db.SaveChangesAsync();
-    
-        // Act
-        var result = await repo.CancelTeamInviteAsync(invite.Id, invite.InvitedByUserId, CancellationToken.None);
-    
-        // Assert
+
+        var result = await repo.CancelTeamInviteAsync(invite.Id, inviter.Id, CancellationToken.None);
+
         result.Status.Should().Be(InviteStatus.Cancelled);
     }
-    
+
     [Fact]
     public async Task Should_Get_My_Pending_Invites()
     {
-        // Arrange
         await using var db = CreateDbContext();
-        var repo = new TeamInviteRepository(db, Mock.Of<ITeamMemberRepository>());
-    
-        var userId = Guid.NewGuid();
-    
-        
-        var invite = new TeamInvite
-        {
-            Id = Guid.NewGuid(),
-            TeamId = Guid.NewGuid(),
-            InvitedUserId = userId,
-            InvitedByUserId = Guid.NewGuid(),
-            CreatedAt = DateTime.UtcNow,
-            Status = InviteStatus.Pending
-        };
-        
-        var invite2 = new TeamInvite
-        {
-            Id = Guid.NewGuid(),
-            TeamId = Guid.NewGuid(),
-            InvitedUserId = userId,
-            InvitedByUserId = Guid.NewGuid(),
-            CreatedAt = DateTime.UtcNow,
-            Status = InviteStatus.Accepted
-        };
-    
-        var team = new Team { Id = invite.TeamId, Name = "Test Team" };
-        var invitedUser = new User { Id = invite.InvitedUserId, UserName = "invited", Email = "<EMAIL>", PasswordHash = "<PASSWORD>"};
-        var invitedByUser = new User { Id = invite.InvitedByUserId, UserName = "inviter", Email = "<EMAIL2>", PasswordHash = "<PASSWORD2>" };
+        var memberRepo = new TestTeamMemberRepository(db);
+        var repo = new TeamInviteRepository(db, memberRepo);
 
-        db.Teams.Add(team);
-        db.Users.AddRange(invitedUser, invitedByUser);
-        db.TeamInvites.AddRange(invite, invite2);
+        var (invited, inviter, team) = SeedUsersAndTeam(db);
+
+        db.TeamInvites.AddRange(
+            new TeamInvite
+            {
+                Id = Guid.NewGuid(),
+                TeamId = team.Id,
+                InvitedUserId = invited.Id,
+                InvitedByUserId = inviter.Id,
+                CreatedAt = DateTime.UtcNow,
+                Status = InviteStatus.Pending
+            },
+            new TeamInvite
+            {
+                Id = Guid.NewGuid(),
+                TeamId = team.Id,
+                InvitedUserId = invited.Id,
+                InvitedByUserId = inviter.Id,
+                CreatedAt = DateTime.UtcNow,
+                Status = InviteStatus.Accepted
+            });
         await db.SaveChangesAsync();
-    
-        // Act
-        var result = await repo.GetMyPendingInvitesAsync(userId, CancellationToken.None);
-    
-        // Assert
+
+        var result = await repo.GetMyPendingInvitesAsync(invited.Id, CancellationToken.None);
+
         result.Should().HaveCount(1);
         result[0].Status.Should().Be(InviteStatus.Pending);
+        result[0].Team.Should().NotBeNull();
+        result[0].InvitedByUser.Should().NotBeNull();
     }
-    
+
     [Fact]
     public async Task Should_Get_Team_Invites_As_Leader()
     {
-        // Arrange
         await using var db = CreateDbContext();
-        var memberRepo = new Mock<ITeamMemberRepository>();
-        memberRepo.Setup(r => r.IsUserALeaderAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(true);
-        memberRepo.Setup(r => r.IsUserAnAdminAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(false);
-    
-        var repo = new TeamInviteRepository(db, memberRepo.Object);
-    
-        var teamId = Guid.NewGuid();
+        var memberRepo = new TestTeamMemberRepository(db);
+        var repo = new TeamInviteRepository(db, memberRepo);
 
-        var invite = new TeamInvite
+        var (invited, inviter, team) = SeedUsersAndTeam(db);
+        var requestingUserId = Guid.NewGuid();
+        
+        db.TeamInvites.Add(new TeamInvite
         {
             Id = Guid.NewGuid(),
-            TeamId = teamId,
-            InvitedUserId = Guid.NewGuid(),
-            InvitedByUserId = Guid.NewGuid(),
+            TeamId = team.Id,
+            InvitedUserId = invited.Id,
+            InvitedByUserId = inviter.Id,
             CreatedAt = DateTime.UtcNow,
             Status = InviteStatus.Pending
-        };
-        
-        var team = new Team { Id = invite.TeamId, Name = "Test Team" };
-        var invitedUser = new User { Id = invite.InvitedUserId, UserName = "invited", Email = "<EMAIL>", PasswordHash = "<PASSWORD>"};
-        var invitedByUser = new User { Id = invite.InvitedByUserId, UserName = "inviter", Email = "<EMAIL2>", PasswordHash = "<PASSWORD2>" };
-
-        db.Teams.Add(team);
-        db.Users.AddRange(invitedUser, invitedByUser);
-        db.TeamInvites.Add(invite);
+        });
         await db.SaveChangesAsync();
-    
-        // Act
-        var result = await repo.GetTeamInvitesAsync(teamId, Guid.NewGuid(), CancellationToken.None);
-    
-        // Assert
+        
+        await db.TeamMembers.AddAsync(new TeamMember { TeamId = team.Id, UserId = requestingUserId });
+        await db.SaveChangesAsync();
+        
+        memberRepo.MarkLeader(team.Id, requestingUserId);
+
+        var result = await repo.GetTeamInvitesAsync(team.Id, requestingUserId, CancellationToken.None);
+
         result.Should().HaveCount(1);
     }
-    
+
     [Fact]
     public async Task Should_Get_Team_Invites_As_User_Who_Sent_Them()
     {
-        // Arrange
         await using var db = CreateDbContext();
-        var memberRepo = new Mock<ITeamMemberRepository>();
-        memberRepo.Setup(r => r.IsUserALeaderAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(false);
-        memberRepo.Setup(r => r.IsUserAnAdminAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(false);
-    
-        var repo = new TeamInviteRepository(db, memberRepo.Object);
-    
-        var teamId = Guid.NewGuid();
+        var memberRepo = new TestTeamMemberRepository(db);
+        var repo = new TeamInviteRepository(db, memberRepo);
+
+        var (invited, _, team) = SeedUsersAndTeam(db);
         var requestingUserId = Guid.NewGuid();
 
-        var invite = new TeamInvite
+
+        db.Users.Add(new User
+        {
+            Id = requestingUserId, 
+            UserName = "requester", 
+            Email = "r@test", 
+            PasswordHash = "z"
+        });
+
+        db.TeamInvites.Add(new TeamInvite
         {
             Id = Guid.NewGuid(),
-            TeamId = teamId,
-            InvitedUserId = Guid.NewGuid(),
+            TeamId = team.Id,
+            InvitedUserId = invited.Id,
             InvitedByUserId = requestingUserId,
             CreatedAt = DateTime.UtcNow,
             Status = InviteStatus.Pending
-        };
-    
-        var team = new Team { Id = invite.TeamId, Name = "Test Team" };
-        var invitedUser = new User { Id = invite.InvitedUserId, UserName = "invited", Email = "<EMAIL>", PasswordHash = "<PASSWORD>"};
-        var invitedByUser = new User { Id = invite.InvitedByUserId, UserName = "inviter", Email = "<EMAIL2>", PasswordHash = "<PASSWORD2>" };
-
-        db.Teams.Add(team);
-        db.Users.AddRange(invitedUser, invitedByUser);
-        db.TeamInvites.Add(invite);
+        });
         await db.SaveChangesAsync();
-    
-        // Act
-        var result = await repo.GetTeamInvitesAsync(teamId, requestingUserId, CancellationToken.None);
-    
-        // Assert
+
+
+        await db.TeamMembers.AddAsync(new TeamMember { TeamId = team.Id, UserId = requestingUserId });
+        await db.SaveChangesAsync();
+
+        var result = await repo.GetTeamInvitesAsync(team.Id, requestingUserId, CancellationToken.None);
+
         result.Should().HaveCount(1);
+        result.All(x => x.InvitedByUserId == requestingUserId).Should().BeTrue();
     }
+
 }

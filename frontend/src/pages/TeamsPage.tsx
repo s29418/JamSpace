@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     getMyTeams,
-    uploadTeamPicture,
+    changeTeamPicture,
     createTeam,
 } from '../services/teams.service';
 
@@ -43,7 +43,6 @@ const TeamsPage = () => {
 
     const [showForm, setShowForm] = useState(false);
     const [teamName, setTeamName] = useState('');
-    const [teamPictureUrl] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileLabel, setFileLabel] = useState('No file chosen');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -77,23 +76,27 @@ const TeamsPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
         try {
             if (teamName.trim().length < 4) {
                 setErrorMessage('Name of the team must be at least 4 characters long.');
+                setTimeout(() => setErrorMessage(''), 7000);
+                return;
+            }
+            if (teamName.trim().length > 25) {
+                setErrorMessage('Name of the team must be less than 25 characters long.');
+                setTimeout(() => setErrorMessage(''), 7000);
                 return;
             }
 
-            let uploadedUrl = teamPictureUrl.trim();
-
-            if (!selectedFile) {
-            } else {
-                uploadedUrl = await uploadTeamPicture(selectedFile);
-            }
-
-            await createTeam({
+            const createdTeam = await createTeam({
                 name: teamName,
-                teamPictureUrl: uploadedUrl || null,
+                teamPictureUrl: null,
             });
+
+            if (selectedFile) {
+                await changeTeamPicture(createdTeam.id, selectedFile);
+            }
 
             setTeamName('');
             setSelectedFile(null);
@@ -101,13 +104,16 @@ const TeamsPage = () => {
             setErrorMessage('');
 
             setSuccessMessage('The team has been successfully created');
-            setTimeout(() => setSuccessMessage(''), 3000);
+            setTimeout(() => setSuccessMessage(''), 7000);
 
             const updated = await getMyTeams();
             setTeams(updated);
-        } catch (err) {
+
+        } catch (err: any) {
             console.error('Failed to create team:', err);
-            setErrorMessage('Failed to create team. Please try again.');
+            const backendMsg = err?.message ?? 'Failed to create team. Please try again.';
+            setErrorMessage(backendMsg);
+            setTimeout(() => setErrorMessage(''), 7000);
         }
     };
 
@@ -118,8 +124,10 @@ const TeamsPage = () => {
             setInvites(prev => prev.filter(i => i.id !== inviteId));
             const updated = await getMyTeams();
             setTeams(updated);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to accept invite:', err);
+            const backendMsg = err?.message ?? 'Failed to accept invite. Please try again.';
+            setErrorMessage(backendMsg);
         }
     };
 
@@ -134,6 +142,14 @@ const TeamsPage = () => {
 
     const handleLeaveTeam = (teamId: string) => {
         setTeams(prev => prev.filter(t => t.id !== teamId));
+        setSuccessMessage('You have left the team.');
+        setTimeout(() => setSuccessMessage(''), 7000);
+    };
+
+    const handleLeaveError = (err: any) => {
+        const backendMsg = err?.message ?? 'Failed to leave team. Please try again.';
+        setErrorMessage(backendMsg);
+        setTimeout(() => setErrorMessage(''), 7000);
     };
 
         return (
@@ -168,13 +184,6 @@ const TeamsPage = () => {
                     + Create new team
                 </button>
             </div>
-
-            {successMessage &&
-                <p className={styles.successMessage}>{successMessage}</p>
-            }
-            {errorMessage &&
-                <p className={styles.errorMessage}>{errorMessage}</p>
-            }
 
             {showForm && (
                 <form className={styles.form} onSubmit={handleSubmit}>
@@ -212,6 +221,13 @@ const TeamsPage = () => {
                 </form>
             )}
 
+            {successMessage &&
+                <p className={styles.successMessage}>{successMessage}</p>
+            }
+            {errorMessage &&
+                <p className={styles.message}>{errorMessage}</p>
+            }
+
             {teams.map(team => (
                 <TeamCard
                     key={team.id}
@@ -221,6 +237,7 @@ const TeamsPage = () => {
                     members={team.members}
                     onClick={() => navigate(`/teams/${team.id}`)}
                     onLeave={handleLeaveTeam}
+                    onError={handleLeaveError}
                 />
             ))}
         </div>

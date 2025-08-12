@@ -134,7 +134,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
 
             setTeam(updated);
             setShowUpload(false);
-            showMessage(setInviteMessage, successMsg, 'success');
+            showMessage(setTeamMessage, successMsg, 'success');
             onTeamUpdate?.(updated);
         } catch (error: any) {
             console.error("Upload failed", error);
@@ -263,13 +263,16 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                                 : undefined
                         }
                         style={{
-                            cursor: team.currentUserRole === 'Leader' ? 'pointer' : 'default'
+                            cursor: (team.currentUserRole === 'Leader' || team.currentUserRole === 'Admin')
+                                ? 'pointer' : 'default'
                         }}
                     >
                         <img
                             src={team.teamPictureUrl || defaultTeamIcon}
                             alt={team.name}
                             className={styles.avatarModal}
+                            loading="lazy"
+                            decoding="async"
                         />
 
                         {(team.currentUserRole === 'Leader' || team.currentUserRole === 'Admin') && (
@@ -292,12 +295,14 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                                     <EditIcon className={styles.icon}/> Change name
                                 </button>
 
+                                {team.currentUserRole === 'Leader' && (
                                 <button
                                     className={styles.deleteButton}
                                     onClick={handleDeleteTeam}
                                 >
                                     <DeleteIcon className={styles.icon}/> Delete team
                                 </button>
+                                )}
 
                                 <div
                                     className={
@@ -356,9 +361,13 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                     {team && team.members && team.members.map(member => (
 
                         <li key={member.userId} className={styles.member}>
-                            <img src={member.userPictureUrl || defaultTeamIcon}
-                                 alt={member.username}
-                                 className={styles.userAvatar}/>
+
+                            <div className={styles.userAvatarWrapper}>
+                                <img src={member.userPictureUrl || defaultTeamIcon}
+                                     alt={member.username}
+                                     className={styles.userAvatar}/>
+                            </div>
+
                             <div>
                                 <p className={styles.username}>{member.username}</p>
 
@@ -418,7 +427,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
 
 
                                 {editingMusicalUserId === member.userId && (
-                                    <div className={`${styles.expandable} ${styles.expanded}`}>
+                                    <div>
                                         <input
                                             type="text"
                                             value={newMusicalRole}
@@ -473,9 +482,12 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                             {invites.map((invite: Invite) => (
 
                                 <li key={invite.id} className={styles.member}>
-                                    <img src={invite.invitedUserPictureUrl || defaultTeamIcon}
-                                         alt={invite.invitedUserName}
-                                         className={styles.userAvatar}/>
+
+                                    <div className={styles.userAvatarWrapper}>
+                                        <img src={invite.invitedUserPictureUrl || defaultTeamIcon}
+                                             alt={invite.invitedUserName}
+                                             className={styles.userAvatar}/>
+                                    </div>
 
                                     <div className={styles.invitedUserDetails}>
                                         <div>

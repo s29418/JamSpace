@@ -1,6 +1,5 @@
 import {
     getMyTeamsApi,
-    uploadTeamPictureApi,
     createTeamApi,
     getTeamByIdApi,
     deleteTeamApi,
@@ -11,11 +10,6 @@ import {
 export async function getMyTeams() {
     const res = await getMyTeamsApi();
     return res.data;
-}
-
-export async function uploadTeamPicture(file: File): Promise<string> {
-    const res = await uploadTeamPictureApi(file);
-    return res.data.url;
 }
 
 export async function createTeam(teamData: { name: string; teamPictureUrl?: string | null }) {
@@ -29,8 +23,8 @@ export async function getTeamById(id: string) {
 }
 
 export async function deleteTeam(teamId: string): Promise<string> {
-    await deleteTeamApi(teamId);
-    return 'Team deleted successfully.';
+    const res = await deleteTeamApi(teamId);
+    return res.data.message || 'Team deleted successfully.';
 }
 
 export async function changeTeamName(teamId: string, newName: string) {
@@ -45,6 +39,6 @@ export async function changeTeamName(teamId: string, newName: string) {
 }
 
 export async function changeTeamPicture(teamId: string, file: File): Promise<string> {
-    const res = await changeTeamPictureApi(teamId, file);
-    return res.data.url;
+    await changeTeamPictureApi(teamId, file);
+    return "Team picture updated successfully.";
 }

@@ -13,13 +13,13 @@ export async function fetchUserInvites() {
 }
 
 export async function acceptInvite(inviteId: string): Promise<string> {
-    await acceptTeamInvite(inviteId);
-    return 'Invite accepted successfully.';
+    const res = await acceptTeamInvite(inviteId);
+    return res.data.message || 'Invite accepted successfully.';
 }
 
 export async function rejectInvite(inviteId: string): Promise<string> {
-    await rejectTeamInvite(inviteId);
-    return 'Invite rejected successfully.';
+    const res = await rejectTeamInvite(inviteId);
+    return res.data.message || 'Invite rejected successfully.';
 }
 
 export async function fetchTeamInvitesByTeamId(teamId: string) {
@@ -28,8 +28,8 @@ export async function fetchTeamInvitesByTeamId(teamId: string) {
 }
 
 export async function cancelInvite(inviteId: string): Promise<string> {
-    await cancelTeamInvite(inviteId);
-    return 'Invite cancelled successfully.';
+    const res = await cancelTeamInvite(inviteId);
+    return res.data.message || 'Invite cancelled successfully.';
 }
 
 export async function inviteUserToTeam(username: string, teamId: string): Promise<string> {
@@ -37,7 +37,7 @@ export async function inviteUserToTeam(username: string, teamId: string): Promis
         throw new Error('Username cannot be empty.');
     }
 
-    await postInviteUser(username, teamId);
+    const res = await postInviteUser(username, teamId);
 
-    return `User "${username}" has been invited.`;
+    return res.data.message || `User "${username}" has been invited.`;
 }

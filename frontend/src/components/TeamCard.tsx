@@ -21,6 +21,7 @@ interface TeamCardProps {
     members: Member[];
     onClick: () => void;
     onLeave?: (teamId: string) => void;
+    onError?: (error: any) => void;
 }
 
 interface Team {
@@ -35,7 +36,7 @@ interface Team {
     }[];
 }
 
-const TeamCard = ({ id, name, teamPictureUrl, members, onClick, onLeave }: TeamCardProps) => {
+const TeamCard = ({ id, name, teamPictureUrl, members, onClick, onLeave, onError }: TeamCardProps) => {
     const [showModal, setShowModal] = useState(false);
 
     const [team, setTeam] = useState<{
@@ -68,15 +69,23 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick, onLeave }: TeamC
             if (onLeave) {
                 onLeave(team.id);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to leave team:', error);
+
+            if (onError) {
+                onError(error);
+            }
         }
     }
 
     return (
         <div className={styles.card} onClick={handleCardClick}>
             <div className={styles.avatar}>
-                <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} />
+                <img
+                    src={team.teamPictureUrl || defaultTeamIcon}
+                    alt={team.name}
+                    className={styles.avatarImage}
+                />
             </div>
 
             <div className={styles.info}>

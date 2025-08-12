@@ -61,7 +61,17 @@ const TeamDetailsPage = () => {
         <div className={styles.wrapper}>
 
             <div className={styles.teamInfo}>
-                <img src={team.teamPictureUrl || defaultTeamIcon} alt={team.name} className={styles.avatar}/>
+
+                <div className={styles.avatarWrapper}>
+                    <img
+                        src={team.teamPictureUrl || defaultTeamIcon}
+                        alt={team.name}
+                        className={styles.avatar}
+                        loading="lazy"
+                        decoding="async"
+                    />
+                </div>
+
                 <div>
                     <h1 className={styles.title}>{team.name}</h1>
                     <button

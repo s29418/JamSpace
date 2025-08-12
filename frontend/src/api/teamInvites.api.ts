@@ -18,10 +18,10 @@ export const postInviteUser = (username: string, teamId: string) =>
     );
 
 export const acceptTeamInvite = (inviteId: string) =>
-    api.post(`${API_URL}/${inviteId}/accept`, {});
+    api.patch(`${API_URL}/${inviteId}/accept`, {});
 
 export const rejectTeamInvite = (inviteId: string) =>
-    api.post(`${API_URL}/${inviteId}/reject`, {});
+    api.patch(`${API_URL}/${inviteId}/reject`, {});
 
 export const cancelTeamInvite = (inviteId: string) =>
     api.patch(`${API_URL}/${inviteId}/cancel`, null);

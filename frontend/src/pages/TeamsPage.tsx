@@ -44,7 +44,7 @@ const TeamsPage = () => {
     const [showForm, setShowForm] = useState(false);
     const [teamName, setTeamName] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [fileLabel, setFileLabel] = useState('No file chosen');
+    const [fileLabel, setFileLabel] = useState('Upload Image (optional)');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -185,41 +185,55 @@ const TeamsPage = () => {
                 </button>
             </div>
 
-            {showForm && (
-                <form className={styles.form} onSubmit={handleSubmit}>
+            <div
+                className={`${styles.expandable} ${showForm ? styles.expanded : ""}`}
+                aria-hidden={!showForm}
+            >
+                <div className={styles.expandInner}>
+                    <form className={styles.form} onSubmit={handleSubmit}>
 
-                    <input
-                        type="text"
-                        value={teamName}
-                        onChange={(e) => setTeamName(e.target.value)}
-                        placeholder="Team name"
-                        required
-                        className={styles.teamsName}
-                    />
-
-                    <div className={styles.customFileUpload}>
-                        {/*<label>Team picture (optional)</label>*/}
-                        <div className={styles.fileUploadRow}>
-                            <button type="button" onClick={() => fileInputRef.current?.click()}>
-                                Upload Image
-                            </button>
-                            <span className={styles.fileLabel}>{fileLabel}</span>
-                        </div>
                         <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            accept="image/*"
-                            className={styles.hiddenInput}
+                            type="text"
+                            value={teamName}
+                            onChange={(e) => setTeamName(e.target.value)}
+                            placeholder="Team name"
+                            required
+                            className={styles.teamsName}
                         />
-                    </div>
+
+                        <div className={styles.customFileUpload}>
+                            <button
+                                type="button"
+                                className={styles.uploadBtn}
+                                onClick={() => fileInputRef.current?.click()}
+                                onKeyDown={(e) =>
+                                    (e.key === "Enter" || e.key === " ") && fileInputRef.current?.click()}
+                                title={fileLabel ?? "Upload Image"}   // pełna nazwa w tooltipie
+                                aria-live="polite"                           // komunikat dla czytników
+                            >
+  <span className={styles.uploadBtnText}>
+    {fileLabel ?? "Upload Image"}
+  </span>
+                            </button>
+
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept="image/*"
+                                className={styles.hiddenInput}
+                            />
+                        </div>
 
 
-                    <button type="submit">Create</button>
-                    <button type="button" onClick={() => setShowForm(false)}>Cancel</button>
+                        <button type="submit">Create</button>
+                        <button type="button"
+                                onClick={() => setShowForm(false)}>Cancel
+                        </button>
 
-                </form>
-            )}
+                    </form>
+                </div>
+            </div>
 
             {successMessage &&
                 <p className={styles.successMessage}>{successMessage}</p>
@@ -229,19 +243,19 @@ const TeamsPage = () => {
             }
 
             {teams.map(team => (
-                <TeamCard
-                    key={team.id}
-                    id={team.id}
-                    name={team.name}
-                    teamPictureUrl={team.teamPictureUrl}
-                    members={team.members}
-                    onClick={() => navigate(`/teams/${team.id}`)}
-                    onLeave={handleLeaveTeam}
-                    onError={handleLeaveError}
-                />
-            ))}
-        </div>
-        );
-};
+                        <TeamCard
+                            key={team.id}
+                            id={team.id}
+                            name={team.name}
+                            teamPictureUrl={team.teamPictureUrl}
+                            members={team.members}
+                            onClick={() => navigate(`/teams/${team.id}`)}
+                            onLeave={handleLeaveTeam}
+                            onError={handleLeaveError}
+                        />
+                    ))}
+                </div>
+                );
+                };
 
-export default TeamsPage;
+                export default TeamsPage;

@@ -89,7 +89,7 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick, onLeave, onError
             </div>
 
             <div className={styles.info}>
-                <h3>{team.name}</h3>
+                <h3 className={styles.teamName} title={team.name}>{team.name}</h3>
                 <span>{team.members.length} members</span>
             </div>
 

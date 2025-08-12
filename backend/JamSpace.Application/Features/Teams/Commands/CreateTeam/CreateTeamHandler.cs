@@ -29,7 +29,7 @@ public class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, Team
         var teamId = await _repo.CreateTeamAsync(team, request.CreatorUserId);
 
         var createdTeam = await _repo.GetTeamByIdAsync(teamId);
-        return TeamMapper.ToDto(createdTeam!);
+        return TeamMapper.ToDto(createdTeam!, request.CreatorUserId);
     }
 }
 

@@ -13,7 +13,7 @@ public class JamSpaceDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
-    public DbSet<TeamInvite?> TeamInvites => Set<TeamInvite>();
+    public DbSet<TeamInvite> TeamInvites => Set<TeamInvite>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

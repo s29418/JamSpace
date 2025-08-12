@@ -36,6 +36,15 @@ public class TeamInvitesController : ControllerBase
         var invites = await _mediator.Send(new GetMyPendingInvitesQuery(userId));
         return Ok(invites);
     }
+    
+    [HttpGet("team/{teamId}")]
+    [Authorize]
+    public async Task<ActionResult<List<TeamInviteDto>>> GetTeamInvites(Guid teamId)
+    {
+        var requestingUserId = User.GetUserId();
+        var invites = await _mediator.Send(new GetTeamInvitesQuery(teamId, requestingUserId));
+        return Ok(invites);
+    }
 
     [HttpPost("{inviteId}/accept")]
     [Authorize]
@@ -62,14 +71,5 @@ public class TeamInvitesController : ControllerBase
         var requestingUserId = User.GetUserId();
         var inviteDto = await _mediator.Send(new CancelTeamInviteCommand(inviteId, requestingUserId));
         return Ok(inviteDto);
-    }
-
-    [HttpGet("team/{teamId}")]
-    [Authorize]
-    public async Task<ActionResult<List<TeamInviteDto>>> GetTeamInvites(Guid teamId)
-    {
-        var requestingUserId = User.GetUserId();
-        var invites = await _mediator.Send(new GetTeamInvitesQuery(teamId, requestingUserId));
-        return Ok(invites);
     }
 }

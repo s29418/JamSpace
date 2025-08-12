@@ -57,21 +57,23 @@ public class TeamRepository : ITeamRepository
         await _db.SaveChangesAsync(ct);
         return team;
     }
+    
+    public async Task UpdateTeamPictureAsync(
+        Guid teamId, Guid requestingUserId, string pictureUrl, CancellationToken ct)
+    {
+        var team = await GetTeamByIdAsync(teamId);
+        if (!await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == requestingUserId && 
+                                                 (m.Role == FunctionalRole.Leader || m.Role == FunctionalRole.Admin)))
+            throw new ForbiddenAccessException("Only team leader or admin can update team picture.");
+
+        team!.TeamPictureUrl = pictureUrl;
+        await _db.SaveChangesAsync(ct);
+    }
 
     public async Task DeleteTeamAsync(Guid teamId, CancellationToken ct)
     {
         var team = await GetTeamByIdAsync(teamId);
         _db.Teams.Remove(team!);
-        await _db.SaveChangesAsync(ct);
-    }
-
-    public async Task UpdateTeamPictureAsync(Guid teamId, Guid requestingUserId, string pictureUrl, CancellationToken ct)
-    {
-        var team = await GetTeamByIdAsync(teamId);
-        if (!await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == requestingUserId && (m.Role == FunctionalRole.Leader || m.Role == FunctionalRole.Admin)))
-            throw new ForbiddenAccessException("Only team leader or admin can update team picture.");
-
-        team.TeamPictureUrl = pictureUrl;
         await _db.SaveChangesAsync(ct);
     }
 }

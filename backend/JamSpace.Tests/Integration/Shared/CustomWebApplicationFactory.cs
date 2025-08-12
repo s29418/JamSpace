@@ -1,4 +1,5 @@
-﻿using JamSpace.Infrastructure.Data;
+﻿using JamSpace.API;
+using JamSpace.Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;

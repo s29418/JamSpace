@@ -25,7 +25,7 @@ public class CancelTeamInviteHandler : IRequestHandler<CancelTeamInviteCommand, 
         var hasPermission =
             await _teamMemberRepository.IsUserALeaderAsync(teamId, request.RequestingUserId) ||
             await _teamMemberRepository.IsUserAnAdminAsync(teamId, request.RequestingUserId) ||
-            await _teamInviteRepository.WasInviteSentByUserAsync(teamId, request.RequestingUserId, ct);
+            await _teamInviteRepository.WasInviteSentByUserAsync(request.TeamInviteId, request.RequestingUserId, ct);
 
         if (!hasPermission)
             throw new ForbiddenAccessException("Only team leader, admin or user who sent the invite can cancel it.");

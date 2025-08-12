@@ -1,11 +1,12 @@
 ﻿using JamSpace.API.Extensions;
+using JamSpace.Application.Common.Enums;
 using JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
 using JamSpace.Application.Features.Teams.Commands.CreateTeam;
 using JamSpace.Application.Features.Teams.Commands.DeleteTeam;
 using JamSpace.Application.Features.Teams.DTOs;
 using JamSpace.Application.Features.Teams.Queries.GetMyTeams;
 using JamSpace.Application.Features.Teams.Queries.GetTeamById;
-using JamSpace.Application.Features.Uploads.UpdateTeamPicture;
+using JamSpace.Application.Features.Uploads.UploadPicture;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,10 +22,10 @@ public class TeamsController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<TeamDto>> CreateTeam([FromBody] CreateTeamCommand cmd)
+    public async Task<ActionResult<TeamDto>> CreateTeam([FromBody] CreateTeamCommand command)
     {
         var userId = User.GetUserId();
-        var result = await _mediator.Send(new CreateTeamWithUserCommand(cmd, userId));
+        var result = await _mediator.Send(new CreateTeamWithUserCommand(command, userId));
         return Ok(result);
     }
 
@@ -54,6 +55,23 @@ public class TeamsController : ControllerBase
         var updated = await _mediator.Send(new ChangeTeamNameCommand(teamId, requestingUserId, teamName));
         return Ok(updated);
     }
+    
+    [HttpPatch("{teamId}/team-picture")]
+    [Authorize]
+    public async Task<ActionResult<string>> UpdateTeamPicture(
+        Guid teamId, 
+        [FromForm] UploadPictureRequest request)
+    {
+        if (request.File.Length == 0)
+            return BadRequest("No file provided.");
+
+        var requestingUserId = User.GetUserId();
+
+        var command = new UploadPictureCommand(request.File, PictureType.Team, teamId, requestingUserId);
+
+        var url = await _mediator.Send(command);
+        return Ok(new { url });
+    }
 
     [HttpDelete("{teamId}")]
     [Authorize]
@@ -62,25 +80,5 @@ public class TeamsController : ControllerBase
         var requestingUserId = User.GetUserId();
         await _mediator.Send(new DeleteTeamCommand(teamId, requestingUserId));
         return NoContent();
-    }
-
-    [HttpPatch("{teamId}/team-picture")]
-    [Authorize]
-    public async Task<ActionResult<string>> UpdateTeamPicture(Guid teamId, [FromForm] UpdateTeamPictureRequest request)
-    {
-        if (request.File.Length == 0)
-            return BadRequest("No file provided.");
-
-        var requestingUserId = User.GetUserId();
-
-        var command = new UpdateTeamPictureCommand
-        {
-            TeamId = teamId,
-            RequestingUserId = requestingUserId,
-            File = request.File
-        };
-
-        var url = await _mediator.Send(command);
-        return Ok(new { url });
     }
 }

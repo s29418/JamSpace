@@ -26,6 +26,15 @@ public class TeamMembersController : ControllerBase
         var updated = await _mediator.Send(new ChangeTeamMemberFunctionalRoleCommand(teamId, requestingUserId, userId, newRole));
         return Ok(updated);
     }
+    
+    [HttpPatch("{userId}/musical-role")]
+    [Authorize]
+    public async Task<ActionResult<TeamMemberDto>> EditTeamMemberMusicalRole(Guid teamId, Guid userId, [FromQuery] string musicalRole)
+    {
+        var requestingUserId = User.GetUserId();
+        var updated = await _mediator.Send(new EditTeamMemberMusicalRoleCommand(teamId, requestingUserId, userId, musicalRole));
+        return Ok(updated);
+    }
 
     [HttpDelete("{userId}")]
     [Authorize]
@@ -34,15 +43,6 @@ public class TeamMembersController : ControllerBase
         var requestingUserId = User.GetUserId();
         await _mediator.Send(new KickTeamMemberCommand(teamId, requestingUserId, userId));
         return NoContent();
-    }
-
-    [HttpPatch("{userId}/musical-role")]
-    [Authorize]
-    public async Task<ActionResult<TeamMemberDto>> EditTeamMemberMusicalRole(Guid teamId, Guid userId, [FromQuery] string musicalRole)
-    {
-        var requestingUserId = User.GetUserId();
-        var updated = await _mediator.Send(new EditTeamMemberMusicalRoleCommand(teamId, requestingUserId, userId, musicalRole));
-        return Ok(updated);
     }
 
     [HttpDelete("leave")]

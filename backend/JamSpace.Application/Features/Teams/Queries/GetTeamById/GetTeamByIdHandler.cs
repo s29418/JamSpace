@@ -25,6 +25,6 @@ public class GetTeamByIdHandler : IRequestHandler<GetTeamByIdQuery, TeamDto>
 
         var team = await _teamRepository.GetTeamByIdAsync(request.TeamId);
 
-        return TeamMapper.ToDto(team!);
+        return TeamMapper.ToDto(team!, request.RequestingUserId);
     }
 }

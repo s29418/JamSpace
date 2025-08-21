@@ -140,18 +140,6 @@ const TeamsPage = () => {
         }
     };
 
-    const handleLeaveTeam = (teamId: string) => {
-        setTeams(prev => prev.filter(t => t.id !== teamId));
-        setSuccessMessage('You have left the team.');
-        setTimeout(() => setSuccessMessage(''), 7000);
-    };
-
-    const handleLeaveError = (err: any) => {
-        const backendMsg = err?.message ?? 'Failed to leave team. Please try again.';
-        setErrorMessage(backendMsg);
-        setTimeout(() => setErrorMessage(''), 7000);
-    };
-
         return (
         <div className={styles.wrapper}>
 
@@ -202,18 +190,19 @@ const TeamsPage = () => {
                         />
 
                         <div className={styles.customFileUpload}>
+
                             <button
                                 type="button"
                                 className={styles.uploadBtn}
                                 onClick={() => fileInputRef.current?.click()}
                                 onKeyDown={(e) =>
                                     (e.key === "Enter" || e.key === " ") && fileInputRef.current?.click()}
-                                title={fileLabel ?? "Upload Image"}   // pełna nazwa w tooltipie
-                                aria-live="polite"                           // komunikat dla czytników
+                                title={fileLabel ?? "Upload Image"}
+                                aria-live="polite"
                             >
-  <span className={styles.uploadBtnText}>
-    {fileLabel ?? "Upload Image"}
-  </span>
+
+                                  <span className={styles.uploadBtnText}>
+                                      {fileLabel ?? "Upload Image"} </span>
                             </button>
 
                             <input
@@ -250,8 +239,6 @@ const TeamsPage = () => {
                             teamPictureUrl={team.teamPictureUrl}
                             members={team.members}
                             onClick={() => navigate(`/teams/${team.id}`)}
-                            onLeave={handleLeaveTeam}
-                            onError={handleLeaveError}
                         />
                     ))}
                 </div>

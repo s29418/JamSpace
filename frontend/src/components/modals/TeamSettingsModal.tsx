@@ -6,6 +6,7 @@ import defaultTeamIcon from '../../assets/defaultTeamIcon.jpg';
 import {
     TrashIcon as DeleteIcon,
     PencilSquareIcon as EditIcon,
+    ArrowRightStartOnRectangleIcon as LeaveIcon,
     CameraIcon as ChangePictureIcon
 } from '@heroicons/react/24/outline';
 import {
@@ -25,10 +26,12 @@ import {
     changeTeamMemberMusicalRole,
     changeTeamMemberRole,
     kickTeamMember,
+    leaveTeam
 } from '../../services/teamMembers.service';
 
-import ExpandableMessage from '../common/ExpandableMessage';
 import {useNavigate} from "react-router-dom";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import MessageSlot from "../common/MessageSlot";
 
 interface Props {
     teamId: string;
@@ -75,6 +78,10 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
     const navigate = useNavigate();
     const [showUpload, setShowUpload] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+
+    const [membersParent] = useAutoAnimate({ duration: 550, easing: "cubic-bezier(0.22,1,0.36,1)" });
+    const [invitesParent] = useAutoAnimate({ duration: 350, easing: "cubic-bezier(0.22,1,0.36,1)" });
 
     type MessageState = { text: string; color: string } | null;
 
@@ -149,7 +156,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
         try {
             const updatedTeam = await changeTeamName(teamId, newName);
             setTeam(updatedTeam);
-            showMessage(setInviteMessage, 'Team name updated.', 'success');
+            showMessage(setTeamMessage, 'Team name updated.', 'success');
 
             onTeamUpdate?.(updatedTeam);
             setIsEditingName(false);
@@ -175,6 +182,22 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
             showMessage(setTeamMessage, backendMsg, 'error');
         }
     };
+
+    const handleLeaveTeam = async () => {
+        try {
+            if (!window.confirm('Are you sure you want to leave this team?')) return;
+
+            const successMsg = await leaveTeam(teamId);
+            showMessage(setTeamMessage, successMsg, 'success');
+            onClose();
+            navigate('/teams');
+            window.location.reload();
+        } catch (error: any) {
+            console.error('Failed to leave team:', error);
+            const backendMsg = error?.message ?? 'Failed to leave team.';
+            showMessage(setTeamMessage, backendMsg, 'error');
+        }
+    }
 
     const handleChangeMemberRole = async (userId: string, newRole: string) => {
         try {
@@ -284,7 +307,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                         <h1 className={styles.title} title={team.name}>{team.name}</h1>
 
                         {(team.currentUserRole === 'Leader' || team.currentUserRole === 'Admin') && (
-                            <div>
+                            <div className={styles.actions}>
                                 <button
                                     className={styles.editButton}
                                     onClick={() => {
@@ -296,13 +319,22 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                                 </button>
 
                                 {team.currentUserRole === 'Leader' && (
-                                <button
-                                    className={styles.deleteButton}
-                                    onClick={handleDeleteTeam}
-                                >
-                                    <DeleteIcon className={styles.icon}/> Delete team
-                                </button>
+                                    <button
+                                        className={styles.deleteButton}
+                                        onClick={handleDeleteTeam}
+                                    >
+                                        <DeleteIcon className={styles.icon}/> Delete team
+                                    </button>
                                 )}
+
+                                <button
+                                    className={styles.leaveButton}
+                                    onClick={() => {
+                                        handleLeaveTeam();
+                                    }}
+                                >
+                                    <LeaveIcon className={styles.icon}/> Leave team
+                                </button>
 
                                 <div
                                     className={
@@ -330,12 +362,13 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                                         >
                                             Cancel
                                         </button>
+
                                     </div>
                                 </div>
                             </div>
                         )}
+                        <MessageSlot message={teamMessage} className={styles.teamInfoMsg}/>
 
-                        <ExpandableMessage message={teamMessage}/>
                     </div>
                 </div>
 
@@ -357,7 +390,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
 
                 <h2 className={styles.subtitle}>Members</h2>
 
-                <ul className={styles.memberList}>
+                <ul className={styles.memberList} ref={membersParent}>
                     {team && team.members && team.members.map(member => (
 
                         <li key={member.userId} className={styles.member}>
@@ -387,7 +420,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                                 </p>
 
                                 {editingRoleUserId === member.userId && (
-                                    <div className={`${styles.expandable} ${styles.expanded}`}>
+                                    <div>
                                         <select
                                             className={styles.roleSelect}
                                             value={""}
@@ -468,45 +501,45 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                     ))}
                 </ul>
 
-                <ExpandableMessage message={teamMemberMessage}/>
+                <MessageSlot message={teamMemberMessage} className={styles.teamInfoMsg} />
 
                 <hr className={styles.lineBreak}/>
+                <div className={styles.memberSection}>
+                    <h2 className={styles.subtitle}>Invites</h2>
 
-                {invites.length > 0 && (
 
-                    <div className={styles.memberSection}>
+                    <ul className={styles.memberList} ref={invitesParent}>
+                        {invites.map((invite: Invite) => (
+                            <li key={invite.id} className={styles.member}>
+                                <div className={styles.userAvatarWrapper}>
+                                    <img
+                                        src={invite.invitedUserPictureUrl || defaultTeamIcon}
+                                        alt={invite.invitedUserName}
+                                        className={styles.userAvatar}
+                                    />
+                                </div>
 
-                        <h2 className={styles.subtitle}>Invites</h2>
-
-                        <ul className={styles.memberList}>
-                            {invites.map((invite: Invite) => (
-
-                                <li key={invite.id} className={styles.member}>
-
-                                    <div className={styles.userAvatarWrapper}>
-                                        <img src={invite.invitedUserPictureUrl || defaultTeamIcon}
-                                             alt={invite.invitedUserName}
-                                             className={styles.userAvatar}/>
+                                <div className={styles.invitedUserDetails}>
+                                    <div>
+                                        <p className={styles.username}>{invite.invitedUserName}</p>
+                                        <p className={styles.role}>Invited by: {invite.invitedByUserName}</p>
                                     </div>
 
-                                    <div className={styles.invitedUserDetails}>
-                                        <div>
-                                            <p className={styles.username}>{invite.invitedUserName}</p>
-                                            <p className={styles.role}>
-                                                Invited by: {invite.invitedByUserName} </p>
-                                        </div>
+                                    <button
+                                        className={styles.userActionButton}
+                                        onClick={() => handleCancelInvite(invite.id)}
+                                    >
+                                        ✖ Cancel Invite
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
 
-
-                                        <button className={styles.userActionButton} onClick={() =>
-                                            handleCancelInvite(invite.id)}>
-                                            ✖ Cancel Invite
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
+                    {invites.length === 0 && (
+                        <p className={styles.emptyNote}>No pending invites</p>
+                    )}
+                </div>
 
                 <h2 className={styles.subtitle}>Invite User</h2>
 
@@ -528,7 +561,7 @@ const TeamSettingsModal: React.FC<Props> = ({ teamId, onClose, onTeamUpdate }) =
                     <button className={styles.inviteButton} type="submit">Invite</button>
                 </form>
 
-                <ExpandableMessage message={inviteMessage} />
+                <MessageSlot message={inviteMessage} className={styles.teamInfoMsg}/>
 
             </div>
         </div>,

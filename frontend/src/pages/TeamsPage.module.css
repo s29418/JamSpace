@@ -44,7 +44,7 @@
 
 .teamsName {
     min-width: 0;
-    padding: 10px 14px;
+    padding: 6px 14px;
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,.6);
     background-color: #1a1a1a;
@@ -93,10 +93,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 
-}
-
-.customFileUpload button {
-    margin-top: 8px;
 }
 
 .expandable {

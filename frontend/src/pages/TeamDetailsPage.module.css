@@ -10,8 +10,10 @@
 }
 
 .textCol {
+    display: flex;
     min-width: 0;
-    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .title {
@@ -166,7 +168,7 @@
     border-radius: 12px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-left: 20px;
+    margin-left: 22px;
 }
 
 .inviteButton:hover, .uploadButton:hover {
@@ -211,23 +213,29 @@
     font-weight: bold;
 }
 
-.editButton, .deleteButton {
+.editButton, .deleteButton, .leaveButton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
 
     background-color: transparent;
     border: 1px solid #26cdd4;
     color: #26cdd4;
-    padding: 4px 16px;
+    padding: 4px 8px;
     border-radius: 12px;
     cursor: pointer;
     transition: background-color 0.2s;
     margin-right: 8px;
+    font-size: 14px;
+    /*margin-top: 8px;*/
 }
 
-.editButton:hover {
+.leaveButton{
+    margin-top: 8px;
+}
+
+.editButton:hover, .leaveButton:hover {
     background-color: #26cdd41f;
 }
 
@@ -299,4 +307,24 @@
     display: flex;
     gap: 8px;
     margin-top: 2px;
+}
+
+.teamInfoMsg {
+    margin-top: 8px;
+}
+
+.uploadPanel{
+    display: none;
+}
+
+.changeNamePanel{
+    margin-top: 10px;
+}
+
+.emptyNote{
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+    /*text-align: center;*/
+    padding-bottom: 16px;
+    font-style: italic;
 }

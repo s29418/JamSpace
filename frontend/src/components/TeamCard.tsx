@@ -4,9 +4,7 @@ import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
 import TeamSettingsModal from "../components/modals/TeamSettingsModal";
 import {
     CogIcon as SettingsIcon,
-    ArrowRightStartOnRectangleIcon as LeaveIcon
 } from '@heroicons/react/24/outline';
-import { leaveTeam } from '../services/teamMembers.service';
 
 interface Member {
     userId: string;
@@ -20,8 +18,6 @@ interface TeamCardProps {
     teamPictureUrl?: string;
     members: Member[];
     onClick: () => void;
-    onLeave?: (teamId: string) => void;
-    onError?: (error: any) => void;
 }
 
 interface Team {
@@ -36,7 +32,7 @@ interface Team {
     }[];
 }
 
-const TeamCard = ({ id, name, teamPictureUrl, members, onClick, onLeave, onError }: TeamCardProps) => {
+const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps) => {
     const [showModal, setShowModal] = useState(false);
 
     const [team, setTeam] = useState<{
@@ -61,22 +57,6 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick, onLeave, onError
         setTeam(updatedTeam);
     };
 
-    const handleLeaveTeam = async () => {
-        try {
-            if(!window.confirm("Are you sure you want to leave the team? This action cannot be undone.")) return;
-
-            await leaveTeam(team.id);
-            if (onLeave) {
-                onLeave(team.id);
-            }
-        } catch (error: any) {
-            console.error('Failed to leave team:', error);
-
-            if (onError) {
-                onError(error);
-            }
-        }
-    }
 
     return (
         <div className={styles.card} onClick={handleCardClick}>
@@ -103,16 +83,6 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick, onLeave, onError
                     className={styles.settingsButton}
                 >
                     <SettingsIcon className={styles.icon}/> Settings
-                </button>
-
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleLeaveTeam();
-                    }}
-                    className={styles.settingsButton}>
-
-                    <LeaveIcon className={styles.icon}/> Leave team
                 </button>
 
             </div>

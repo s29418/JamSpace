@@ -17,7 +17,7 @@ public class ChangeTeamMemberFunctionalRoleHandlerTests
         var repo = new Mock<ITeamMemberRepository>();
 
         repo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>()))
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         repo.Setup(r => r.ChangeTeamMemberFunctionalRoleAsync(
                 It.IsAny<Guid>(), It.IsAny<Guid>(), 
@@ -47,7 +47,7 @@ public class ChangeTeamMemberFunctionalRoleHandlerTests
         // Arrange
         var repo = new Mock<ITeamMemberRepository>();
         repo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>()))
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         var handler = new ChangeTeamMemberFunctionalRoleHandler(repo.Object);

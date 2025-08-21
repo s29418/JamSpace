@@ -14,13 +14,13 @@ public class EditTeamMemberMusicalRoleHandler : IRequestHandler<EditTeamMemberMu
         _repo = repo;
     }
 
-    public async Task<TeamMemberDto> Handle(EditTeamMemberMusicalRoleCommand request, CancellationToken cancellationToken)
+    public async Task<TeamMemberDto> Handle(EditTeamMemberMusicalRoleCommand request, CancellationToken ct)
     {
-        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId) &&
-            !await _repo.IsUserAnAdminAsync(request.TeamId, request.RequestingUserId))
+        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId, ct) &&
+            !await _repo.IsUserAnAdminAsync(request.TeamId, request.RequestingUserId, ct))
             throw new ForbiddenAccessException("Only team leaders and admins can edit members musial roles.");
         
-        var teamMember = await _repo.EditTeamMemberMusicalRole(request.TeamId, request.UserId, request.MusicalRole, cancellationToken);
+        var teamMember = await _repo.EditTeamMemberMusicalRole(request.TeamId, request.UserId, request.MusicalRole, ct);
 
         return new TeamMemberDto
         {

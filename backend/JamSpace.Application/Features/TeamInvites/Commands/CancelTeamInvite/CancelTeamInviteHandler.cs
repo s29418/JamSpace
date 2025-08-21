@@ -23,8 +23,8 @@ public class CancelTeamInviteHandler : IRequestHandler<CancelTeamInviteCommand, 
         var teamId = teamInvite.TeamId;
         
         var hasPermission =
-            await _teamMemberRepository.IsUserALeaderAsync(teamId, request.RequestingUserId) ||
-            await _teamMemberRepository.IsUserAnAdminAsync(teamId, request.RequestingUserId) ||
+            await _teamMemberRepository.IsUserALeaderAsync(teamId, request.RequestingUserId, ct) ||
+            await _teamMemberRepository.IsUserAnAdminAsync(teamId, request.RequestingUserId, ct) ||
             await _teamInviteRepository.WasInviteSentByUserAsync(request.TeamInviteId, request.RequestingUserId, ct);
 
         if (!hasPermission)

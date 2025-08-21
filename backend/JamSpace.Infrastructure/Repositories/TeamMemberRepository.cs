@@ -13,24 +13,21 @@ public class TeamMemberRepository : ITeamMemberRepository
 
     public TeamMemberRepository(JamSpaceDbContext db) => _db = db;
 
-    public async Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId)
+    public async Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId, CancellationToken ct)
     {
-        Console.WriteLine($"TEAM EXISTS: {_db.Teams.Any(t => t.Id == teamId)}");
-        Console.WriteLine($"IS USER IN TEAM: {await _db.TeamMembers.AnyAsync(
-            m => m.TeamId == teamId && m.UserId == userId)}");
-        return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == userId);
+        return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == userId, ct);
     }
 
-    public async Task<bool> IsUserALeaderAsync(Guid teamId, Guid userId)
+    public async Task<bool> IsUserALeaderAsync(Guid teamId, Guid userId, CancellationToken ct)
     {
         return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId 
-                                                   && m.UserId == userId && m.Role == FunctionalRole.Leader);
+                                                   && m.UserId == userId && m.Role == FunctionalRole.Leader, ct);
     }
 
-    public async Task<bool> IsUserAnAdminAsync(Guid teamId, Guid userId)
+    public async Task<bool> IsUserAnAdminAsync(Guid teamId, Guid userId, CancellationToken ct)
     {
         return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId 
-                                                   && m.UserId == userId && m.Role == FunctionalRole.Admin);
+                                                   && m.UserId == userId && m.Role == FunctionalRole.Admin, ct);
     }
 
     public async Task<TeamMember> GetTeamMemberAsync(Guid teamId, Guid userId, CancellationToken ct)

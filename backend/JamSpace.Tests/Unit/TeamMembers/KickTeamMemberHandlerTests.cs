@@ -9,6 +9,7 @@ namespace JamSpace.Tests.Unit.TeamMembers;
 
 public class KickTeamMemberHandlerTests
 {
+    
     [Fact]
     public async Task Should_Kick_Member_When_Leader()
     {
@@ -19,10 +20,10 @@ public class KickTeamMemberHandlerTests
         var requestingUserId = Guid.NewGuid();
         var targetUserId = Guid.NewGuid();
         
-        repo.Setup(r => r.IsUserALeaderAsync(teamId, requestingUserId))
+        repo.Setup(r => r.IsUserALeaderAsync(teamId, requestingUserId, CancellationToken.None))
             .ReturnsAsync(true);
         
-        repo.Setup(r => r.IsUserALeaderAsync(teamId, targetUserId))
+        repo.Setup(r => r.IsUserALeaderAsync(teamId, targetUserId, CancellationToken.None))
             .ReturnsAsync(false);
 
         repo.Setup(r => r.GetTeamMemberAsync(
@@ -53,7 +54,8 @@ public class KickTeamMemberHandlerTests
         // Arrange
         var repo = new Mock<ITeamMemberRepository>();
         
-        repo.Setup(r => r.IsUserALeaderAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+        repo.Setup(r => r.IsUserALeaderAsync(
+                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         
         repo.Setup(r => r.GetTeamMemberAsync(
@@ -80,7 +82,7 @@ public class KickTeamMemberHandlerTests
         // Arrange
         var repo = new Mock<ITeamMemberRepository>();
         repo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(false);
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         var handler = new KickTeamMemberHandler(repo.Object);
 

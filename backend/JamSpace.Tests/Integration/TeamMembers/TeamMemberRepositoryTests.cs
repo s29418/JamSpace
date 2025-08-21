@@ -10,6 +10,8 @@ namespace JamSpace.Tests.Integration.TeamMembers;
 
 public class TeamMemberRepositoryTests
 {
+    private static readonly CancellationToken Ct = CancellationToken.None;
+
     private static JamSpaceDbContext CreateDb()
     {
         var opts = new DbContextOptionsBuilder<JamSpaceDbContext>()
@@ -58,7 +60,7 @@ public class TeamMemberRepositoryTests
         var (team, user) = SeedMember(db);
         var repo = new TeamMemberRepository(db);
 
-        var exists = await repo.IsUserInTeamAsync(team.Id, user.Id);
+        var exists = await repo.IsUserInTeamAsync(team.Id, user.Id, Ct);
 
         exists.Should().BeTrue();
     }
@@ -80,7 +82,7 @@ public class TeamMemberRepositoryTests
 
         var repo = new TeamMemberRepository(db);
 
-        var exists = await repo.IsUserInTeamAsync(team.Id, otherUser.Id);
+        var exists = await repo.IsUserInTeamAsync(team.Id, otherUser.Id, Ct);
 
         exists.Should().BeFalse();
     }
@@ -108,11 +110,11 @@ public class TeamMemberRepositoryTests
 
         var repo = new TeamMemberRepository(db);
 
-        (await repo.IsUserALeaderAsync(team.Id, userLeader.Id)).Should().BeTrue();
-        (await repo.IsUserAnAdminAsync(team.Id, userLeader.Id)).Should().BeFalse();
+        (await repo.IsUserALeaderAsync(team.Id, userLeader.Id, Ct)).Should().BeTrue();
+        (await repo.IsUserAnAdminAsync(team.Id, userLeader.Id, Ct)).Should().BeFalse();
 
-        (await repo.IsUserAnAdminAsync(team.Id, adminUser.Id)).Should().BeTrue();
-        (await repo.IsUserALeaderAsync(team.Id, adminUser.Id)).Should().BeFalse();
+        (await repo.IsUserAnAdminAsync(team.Id, adminUser.Id, Ct)).Should().BeTrue();
+        (await repo.IsUserALeaderAsync(team.Id, adminUser.Id, Ct)).Should().BeFalse();
     }
 
     [Fact]

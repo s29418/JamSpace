@@ -15,12 +15,12 @@ public class DeleteTeamHandler : IRequestHandler<DeleteTeamCommand, Unit>
         _teamMemberRepository = teamMemberRepository;
     }
 
-    public async Task<Unit> Handle(DeleteTeamCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(DeleteTeamCommand request, CancellationToken ct)
     {
-        if (!await _teamMemberRepository.IsUserALeaderAsync(request.TeamId, request.RequestingUserId))
+        if (!await _teamMemberRepository.IsUserALeaderAsync(request.TeamId, request.RequestingUserId, ct))
             throw new ForbiddenAccessException("Only team leader can delete teams.");
         
-        await _teamRepository.DeleteTeamAsync(request.TeamId, cancellationToken);
+        await _teamRepository.DeleteTeamAsync(request.TeamId, ct);
         return Unit.Value;
     }
 }

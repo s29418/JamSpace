@@ -10,7 +10,7 @@ public class RejectTeamInviteHandler : IRequestHandler<RejectTeamInviteCommand, 
 {
     private readonly ITeamInviteRepository _teamInviteRepository;
 
-    public RejectTeamInviteHandler(ITeamInviteRepository repo, ITeamMemberRepository teamMemberRepository)
+    public RejectTeamInviteHandler(ITeamInviteRepository repo)
     {
         _teamInviteRepository = repo;
     }
@@ -20,6 +20,7 @@ public class RejectTeamInviteHandler : IRequestHandler<RejectTeamInviteCommand, 
         var invited = await _teamInviteRepository.GetTeamInviteByIdAsync(request.InviteId, cancellationToken);
         if (invited.InvitedUserId != request.UserId)
             throw new ForbiddenAccessException("Only the invited user can reject the invite.");
+        
         
         var invite = await _teamInviteRepository.RejectInviteAsync(request.InviteId, request.UserId, cancellationToken);
         return TeamInviteMapper.ToDto(invite);

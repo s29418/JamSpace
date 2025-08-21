@@ -19,7 +19,7 @@ public class RejectTeamInviteHandlerTests
                 It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new TeamInvite { InvitedUserId = Guid.NewGuid() });
 
-        var handler = new RejectTeamInviteHandler(repo.Object, Mock.Of<ITeamMemberRepository>());
+        var handler = new RejectTeamInviteHandler(repo.Object);
 
         var command = new RejectTeamInviteCommand(Guid.NewGuid(), Guid.NewGuid());
 
@@ -48,7 +48,7 @@ public class RejectTeamInviteHandlerTests
                 InvitedUser = new User { Id = Guid.NewGuid(), UserName = "Invitee" }
             });
 
-        var handler = new RejectTeamInviteHandler(repo.Object, Mock.Of<ITeamMemberRepository>());
+        var handler = new RejectTeamInviteHandler(repo.Object);
 
         // Act
         var result = await handler.Handle(

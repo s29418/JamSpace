@@ -13,7 +13,7 @@ public class TeamRepository : ITeamRepository
 
     public TeamRepository(JamSpaceDbContext db) => _db = db;
 
-    public async Task<Guid> CreateTeamAsync(Team team, Guid creatorUserId)
+    public async Task<Guid> CreateTeamAsync(Team team, Guid creatorUserId, CancellationToken ct)
     {
         await _db.Teams.AddAsync(team);
         await _db.TeamMembers.AddAsync(new TeamMember
@@ -22,17 +22,17 @@ public class TeamRepository : ITeamRepository
             UserId = creatorUserId,
             Role = FunctionalRole.Leader
         });
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(ct);
         return team.Id;
     }
 
-    public async Task<Team?> GetTeamByIdAsync(Guid id)
+    public async Task<Team?> GetTeamByIdAsync(Guid id, CancellationToken ct)
     {
         var team = await _db.Teams
             .Include(t => t.CreatedBy)
             .Include(t => t.Members)
             .ThenInclude(m => m.User)
-            .FirstOrDefaultAsync(t => t.Id == id);
+            .FirstOrDefaultAsync(t => t.Id == id, ct);
 
         if (team is null)
             throw new NotFoundException("Team not found.");
@@ -52,7 +52,7 @@ public class TeamRepository : ITeamRepository
 
     public async Task<Team> ChangeTeamNameAsync(Guid teamId, string name, CancellationToken ct)
     {
-        var team = await GetTeamByIdAsync(teamId);
+        var team = await GetTeamByIdAsync(teamId, ct);
         team!.Name = name;
         await _db.SaveChangesAsync(ct);
         return team;
@@ -61,7 +61,7 @@ public class TeamRepository : ITeamRepository
     public async Task UpdateTeamPictureAsync(
         Guid teamId, Guid requestingUserId, string pictureUrl, CancellationToken ct)
     {
-        var team = await GetTeamByIdAsync(teamId);
+        var team = await GetTeamByIdAsync(teamId, ct);
         if (!await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == requestingUserId && 
                                                  (m.Role == FunctionalRole.Leader || m.Role == FunctionalRole.Admin)))
             throw new ForbiddenAccessException("Only team leader or admin can update team picture.");
@@ -72,7 +72,7 @@ public class TeamRepository : ITeamRepository
 
     public async Task DeleteTeamAsync(Guid teamId, CancellationToken ct)
     {
-        var team = await GetTeamByIdAsync(teamId);
+        var team = await GetTeamByIdAsync(teamId, ct);
         _db.Teams.Remove(team!);
         await _db.SaveChangesAsync(ct);
     }

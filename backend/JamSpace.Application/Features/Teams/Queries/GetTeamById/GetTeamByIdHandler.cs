@@ -17,13 +17,13 @@ public class GetTeamByIdHandler : IRequestHandler<GetTeamByIdQuery, TeamDto>
         _teamMemberRepository = teamMemberRepository;
     }
 
-    public async Task<TeamDto> Handle(GetTeamByIdQuery request, CancellationToken cancellationToken)
+    public async Task<TeamDto> Handle(GetTeamByIdQuery request, CancellationToken ct)
     {
-        var isMember = await _teamMemberRepository.IsUserInTeamAsync(request.TeamId, request.RequestingUserId);
+        var isMember = await _teamMemberRepository.IsUserInTeamAsync(request.TeamId, request.RequestingUserId, ct);
         if (!isMember)
             throw new ForbiddenAccessException("You are not a member of this team.");
 
-        var team = await _teamRepository.GetTeamByIdAsync(request.TeamId);
+        var team = await _teamRepository.GetTeamByIdAsync(request.TeamId, ct);
 
         return TeamMapper.ToDto(team!, request.RequestingUserId);
     }

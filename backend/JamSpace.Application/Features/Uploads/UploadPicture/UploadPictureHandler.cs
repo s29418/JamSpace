@@ -15,25 +15,22 @@ public class UploadPictureHandler : IRequestHandler<UploadPictureCommand, string
         _teamRepository = teamRepository;
     }
 
-    public async Task<string> Handle(UploadPictureCommand request, CancellationToken cancellationToken)
+    public async Task<string> Handle(UploadPictureCommand request, CancellationToken ct)
     {
-        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(request.File.FileName)}";
-
-        using var stream = request.File.OpenReadStream();
         var url = await _fileStorageService.UploadAsync(
-            stream,
-            fileName,
-            request.File.ContentType,
-            request.Type 
+            request.File, 
+            request.Type, 
+            request.RelatedEntityId, 
+            ct
         );
 
-        if (request.Type == PictureType.Team && request.RelatedEntityId.HasValue)
+        if (request.Type == PictureType.TeamPicture && request.RelatedEntityId.HasValue)
         {
             await _teamRepository.UpdateTeamPictureAsync(
                 request.RelatedEntityId.Value,
                 request.RequestingUserId ?? Guid.Empty,
                 url,
-                cancellationToken
+                ct
             );
         }
 

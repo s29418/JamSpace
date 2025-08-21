@@ -1,4 +1,5 @@
 ﻿using JamSpace.API.Extensions;
+using JamSpace.API.Requests;
 using JamSpace.Application.Common.Enums;
 using JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
 using JamSpace.Application.Features.Teams.Commands.CreateTeam;
@@ -22,63 +23,69 @@ public class TeamsController : ControllerBase
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<TeamDto>> CreateTeam([FromBody] CreateTeamCommand command)
+    public async Task<ActionResult<TeamDto>> CreateTeam([FromBody] CreateTeamCommand command, CancellationToken ct)
     {
         var userId = User.GetUserId();
-        var result = await _mediator.Send(new CreateTeamWithUserCommand(command, userId));
-        return Ok(result);
+        var result = await _mediator.Send(new CreateTeamWithUserCommand(command, userId), ct);
+        return CreatedAtRoute("GetTeamById", new { id = result.Id }, result);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}", Name = "GetTeamById")]
     [Authorize]
-    public async Task<ActionResult<TeamDto>> GetTeamById(Guid id)
+    public async Task<ActionResult<TeamDto>> GetTeamById(Guid id, CancellationToken ct)
     {
         var userId = User.GetUserId();
-        var result = await _mediator.Send(new GetTeamByIdQuery(id, userId));
+        var result = await _mediator.Send(new GetTeamByIdQuery(id, userId), ct);
         return Ok(result);
     }
 
     [HttpGet("my")]
     [Authorize]
-    public async Task<ActionResult<List<TeamDto>>> GetMyTeams()
+    public async Task<ActionResult<List<TeamDto>>> GetMyTeams(CancellationToken ct)
     {
         var userId = User.GetUserId();
-        var result = await _mediator.Send(new GetMyTeamsQuery(userId));
+        var result = await _mediator.Send(new GetMyTeamsQuery(userId), ct);
         return Ok(result);
     }
 
     [HttpPatch("{teamId}/teamName")]
     [Authorize]
-    public async Task<ActionResult<TeamDto>> ChangeTeamName(Guid teamId, [FromQuery] string teamName)
+    public async Task<ActionResult<TeamDto>> ChangeTeamName(Guid teamId, [FromQuery] string teamName, CancellationToken ct)
     {
         var requestingUserId = User.GetUserId();
-        var updated = await _mediator.Send(new ChangeTeamNameCommand(teamId, requestingUserId, teamName));
+        var updated = await _mediator.Send(new ChangeTeamNameCommand(teamId, requestingUserId, teamName), ct);
         return Ok(updated);
     }
     
     [HttpPatch("{teamId}/team-picture")]
     [Authorize]
     public async Task<ActionResult<string>> UpdateTeamPicture(
-        Guid teamId, 
-        [FromForm] UploadPictureRequest request)
+        Guid teamId,
+        [FromForm] UploadPictureRequest request,
+        CancellationToken ct)
     {
         if (request.File.Length == 0)
             return BadRequest("No file provided.");
 
         var requestingUserId = User.GetUserId();
 
-        var command = new UploadPictureCommand(request.File, PictureType.Team, teamId, requestingUserId);
+        var command = new UploadPictureCommand(
+            request.File.ToFileUpload(),     
+            PictureType.TeamPicture,         
+            teamId,                          
+            requestingUserId                 
+        );
 
-        var url = await _mediator.Send(command);
+        var url = await _mediator.Send(command, ct);
         return Ok(new { url });
     }
 
     [HttpDelete("{teamId}")]
     [Authorize]
-    public async Task<IActionResult> DeleteTeam(Guid teamId)
+    public async Task<IActionResult> DeleteTeam(Guid teamId, CancellationToken ct)
     {
         var requestingUserId = User.GetUserId();
-        await _mediator.Send(new DeleteTeamCommand(teamId, requestingUserId));
+        await _mediator.Send(new DeleteTeamCommand(teamId, requestingUserId), ct);
         return NoContent();
     }
 }

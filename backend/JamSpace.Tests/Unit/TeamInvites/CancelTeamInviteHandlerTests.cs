@@ -10,6 +10,7 @@ namespace JamSpace.Tests.Unit.TeamInvites;
 
 public class CancelTeamInviteHandlerTests
 {
+    private static readonly CancellationToken Ct = CancellationToken.None;
     [Fact]
     public async Task Should_Throw_Forbidden_When_User_Has_No_Permission()
     {
@@ -17,6 +18,7 @@ public class CancelTeamInviteHandlerTests
         var inviteId = Guid.NewGuid();
         var teamId = Guid.NewGuid();
         var userId = Guid.NewGuid();
+        
 
         var inviteRepo = new Mock<ITeamInviteRepository>();
         inviteRepo.Setup(r => r.GetTeamInviteByIdAsync(
@@ -24,8 +26,8 @@ public class CancelTeamInviteHandlerTests
                   .ReturnsAsync(new TeamInvite { TeamId = teamId });
 
         var memberRepo = new Mock<ITeamMemberRepository>();
-        memberRepo.Setup(r => r.IsUserALeaderAsync(teamId, userId)).ReturnsAsync(false);
-        memberRepo.Setup(r => r.IsUserAnAdminAsync(teamId, userId)).ReturnsAsync(false);
+        memberRepo.Setup(r => r.IsUserALeaderAsync(teamId, userId, Ct)).ReturnsAsync(false);
+        memberRepo.Setup(r => r.IsUserAnAdminAsync(teamId, userId, Ct)).ReturnsAsync(false);
         inviteRepo.Setup(r => r.WasInviteSentByUserAsync(
             teamId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
@@ -59,7 +61,7 @@ public class CancelTeamInviteHandlerTests
                   });
 
         var memberRepo = new Mock<ITeamMemberRepository>();
-        memberRepo.Setup(r => r.IsUserALeaderAsync(teamId, userId)).ReturnsAsync(true);
+        memberRepo.Setup(r => r.IsUserALeaderAsync(teamId, userId, Ct)).ReturnsAsync(true);
 
         var handler = new CancelTeamInviteHandler(inviteRepo.Object, memberRepo.Object);
 

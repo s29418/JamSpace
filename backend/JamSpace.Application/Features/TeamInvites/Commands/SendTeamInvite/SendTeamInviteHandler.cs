@@ -19,19 +19,19 @@ public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Team
         _userRepository = userRepository;
     }
 
-    public async Task<TeamInviteDto> Handle(SendTeamInviteCommand request, CancellationToken cancellationToken)
+    public async Task<TeamInviteDto> Handle(SendTeamInviteCommand request, CancellationToken ct)
     {
-        var isMember = await _teamMemberRepository.IsUserInTeamAsync(request.TeamId, request.InvitingUserId);
+        var isMember = await _teamMemberRepository.IsUserInTeamAsync(request.TeamId, request.InvitingUserId, ct);
         if (!isMember)
             throw new ForbiddenAccessException("You are not a member of this team.");
 
-        var invitedUserId = await _userRepository.GetUserIdByUsernameAsync(request.InvitedUserName, cancellationToken);
+        var invitedUserId = await _userRepository.GetUserIdByUsernameAsync(request.InvitedUserName, ct);
         if (invitedUserId is null)
             throw new NotFoundException($"User '{request.InvitedUserName}' not found.");
 
         var invite = 
             await _teamInviteRepository.SendTeamInviteAsync(request.TeamId, invitedUserId.Value, 
-                request.InvitingUserId, cancellationToken);
+                request.InvitingUserId, ct);
         
         return TeamInviteMapper.ToDto(invite);
     }

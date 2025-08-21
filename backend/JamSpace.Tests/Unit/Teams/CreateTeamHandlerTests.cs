@@ -16,10 +16,10 @@ public class CreateTeamHandlerTests
         var createdTeamId = Guid.NewGuid();
         var creator = new User { UserName = "creator" };
 
-        repo.Setup(r => r.CreateTeamAsync(It.IsAny<Team>(), It.IsAny<Guid>()))
+        repo.Setup(r => r.CreateTeamAsync(It.IsAny<Team>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdTeamId);
 
-        repo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>()))
+        repo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Team
             {
                 Id = Guid.NewGuid(),

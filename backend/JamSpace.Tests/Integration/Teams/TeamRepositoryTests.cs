@@ -6,10 +6,12 @@ using JamSpace.Infrastructure.Data;
 using JamSpace.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace JamSpace.Tests.Integration.Teams
-{
+namespace JamSpace.Tests.Integration.Teams;
+
     public class TeamRepositoryTests
     {
+        private static readonly CancellationToken Ct = CancellationToken.None;
+
         private static JamSpaceDbContext CreateDbContext()
         {
             var options = new DbContextOptionsBuilder<JamSpaceDbContext>()
@@ -67,7 +69,7 @@ namespace JamSpace.Tests.Integration.Teams
 
             var (creator, team) = SeedUserAndTeamShell(db);
 
-            var id = await repo.CreateTeamAsync(team, creator.Id);
+            var id = await repo.CreateTeamAsync(team, creator.Id, Ct);
 
             id.Should().Be(team.Id);
             var created = await db.Teams
@@ -90,9 +92,9 @@ namespace JamSpace.Tests.Integration.Teams
             var repo = new TeamRepository(db);
             var (creator, team) = SeedUserAndTeamShell(db);
 
-            await repo.CreateTeamAsync(team, creator.Id);
+            await repo.CreateTeamAsync(team, creator.Id, Ct);
 
-            var fetched = await repo.GetTeamByIdAsync(team.Id);
+            var fetched = await repo.GetTeamByIdAsync(team.Id, Ct);
 
             fetched.Should().NotBeNull();
             fetched.CreatedBy.Should().NotBeNull();
@@ -105,7 +107,7 @@ namespace JamSpace.Tests.Integration.Teams
             await using var db = CreateDbContext();
             var repo = new TeamRepository(db);
 
-            Func<Task> act = async () => await repo.GetTeamByIdAsync(Guid.NewGuid());
+            Func<Task> act = async () => await repo.GetTeamByIdAsync(Guid.NewGuid(), Ct);
 
             await act.Should().ThrowAsync<NotFoundException>()
                 .WithMessage("*Team not found*");
@@ -122,9 +124,9 @@ namespace JamSpace.Tests.Integration.Teams
             var (_, t2) = SeedUserAndTeamShell(db);
             var (_, t3) = SeedUserAndTeamShell(db);
             
-            await repo.CreateTeamAsync(t1, creator.Id);
-            await repo.CreateTeamAsync(t2, creator.Id);
-            await repo.CreateTeamAsync(t3, creator.Id);
+            await repo.CreateTeamAsync(t1, creator.Id, Ct);
+            await repo.CreateTeamAsync(t2, creator.Id, Ct);
+            await repo.CreateTeamAsync(t3, creator.Id, Ct);
             
             db.TeamMembers.Add(new TeamMember
             {
@@ -153,7 +155,7 @@ namespace JamSpace.Tests.Integration.Teams
             var repo = new TeamRepository(db);
             var (creator, team) = SeedUserAndTeamShell(db);
 
-            await repo.CreateTeamAsync(team, creator.Id);
+            await repo.CreateTeamAsync(team, creator.Id, Ct);
 
             var newName = "New Grooves";
             var updated = await repo.ChangeTeamNameAsync(team.Id, newName, CancellationToken.None);
@@ -169,7 +171,7 @@ namespace JamSpace.Tests.Integration.Teams
             var repo = new TeamRepository(db);
             var (creator, team) = SeedUserAndTeamShell(db);
 
-            await repo.CreateTeamAsync(team, creator.Id);
+            await repo.CreateTeamAsync(team, creator.Id, Ct);
 
             var url = "https://cdn.example.com/pic.png";
             await repo.UpdateTeamPictureAsync(team.Id, creator.Id, url, CancellationToken.None);
@@ -183,7 +185,7 @@ namespace JamSpace.Tests.Integration.Teams
             await using var db = CreateDbContext();
             var repo = new TeamRepository(db);
             var (creator, team) = SeedUserAndTeamShell(db);
-            await repo.CreateTeamAsync(team, creator.Id);
+            await repo.CreateTeamAsync(team, creator.Id, Ct);
 
             var admin = SeedUser(db, "adminUser");
             db.TeamMembers.Add(new TeamMember
@@ -206,7 +208,7 @@ namespace JamSpace.Tests.Integration.Teams
             await using var db = CreateDbContext();
             var repo = new TeamRepository(db);
             var (creator, team) = SeedUserAndTeamShell(db);
-            await repo.CreateTeamAsync(team, creator.Id);
+            await repo.CreateTeamAsync(team, creator.Id, Ct);
 
             var plainMember = SeedUser(db, "plainMember");
             db.TeamMembers.Add(new TeamMember
@@ -230,7 +232,7 @@ namespace JamSpace.Tests.Integration.Teams
             await using var db = CreateDbContext();
             var repo = new TeamRepository(db);
             var (creator, team) = SeedUserAndTeamShell(db);
-            await repo.CreateTeamAsync(team, creator.Id);
+            await repo.CreateTeamAsync(team, creator.Id, Ct);
 
             await repo.DeleteTeamAsync(team.Id, CancellationToken.None);
 
@@ -238,4 +240,4 @@ namespace JamSpace.Tests.Integration.Teams
             (await db.TeamMembers.Where(m => m.TeamId == team.Id).ToListAsync()).Should().BeEmpty();
         }
     }
-}
+

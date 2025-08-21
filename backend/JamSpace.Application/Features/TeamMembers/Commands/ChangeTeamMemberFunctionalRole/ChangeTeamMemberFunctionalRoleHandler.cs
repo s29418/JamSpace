@@ -16,7 +16,7 @@ public class ChangeTeamMemberFunctionalRoleHandler : IRequestHandler<ChangeTeamM
 
     public async Task<TeamMemberDto> Handle(ChangeTeamMemberFunctionalRoleCommand request, CancellationToken ct)
     {
-        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId))
+        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId, ct))
             throw new ForbiddenAccessException("Only team leader can change roles.");
 
         if (request.RequestingUserId == request.UserId)

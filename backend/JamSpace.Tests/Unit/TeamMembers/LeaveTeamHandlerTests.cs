@@ -50,7 +50,7 @@ public class LeaveTeamHandlerTests
             });
 
         repo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(true);
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         var handler = new LeaveTeamHandler(repo.Object);
 

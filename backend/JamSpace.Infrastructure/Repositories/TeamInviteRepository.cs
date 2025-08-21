@@ -18,11 +18,13 @@ public class TeamInviteRepository : ITeamInviteRepository
         _memberRepo = memberRepo;
     }
     
-    public async Task<TeamInvite> SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct)
+    public async Task<TeamInvite> SendTeamInviteAsync(
+        Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct)
     {
         var alreadyExists = await _db.TeamInvites
-            .AnyAsync(i => i.TeamId == teamId && i.InvitedUserId == invitedUserId && i.Status == InviteStatus.Pending, ct);
-        if (alreadyExists || await _memberRepo.IsUserInTeamAsync(teamId, invitedUserId))
+            .AnyAsync(i => i.TeamId == teamId && i.InvitedUserId == invitedUserId 
+                                              && i.Status == InviteStatus.Pending, ct);
+        if (alreadyExists || await _memberRepo.IsUserInTeamAsync(teamId, invitedUserId, ct))
             throw new ConflictException("Invite already exists or user is in the team.");
 
         var invite = new TeamInvite
@@ -65,7 +67,8 @@ public class TeamInviteRepository : ITeamInviteRepository
             .Include(i => i.InvitedByUser)
             .Include(i => i.InvitedUser);
 
-        if (await _memberRepo.IsUserALeaderAsync(teamId, requestingUserId) || await _memberRepo.IsUserAnAdminAsync(teamId, requestingUserId))
+        if (await _memberRepo.IsUserALeaderAsync(teamId, requestingUserId, ct) 
+            || await _memberRepo.IsUserAnAdminAsync(teamId, requestingUserId, ct))
             return await query.ToListAsync(ct);
 
         return await query.Where(i => i.InvitedByUserId == requestingUserId).ToListAsync(ct);

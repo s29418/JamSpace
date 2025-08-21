@@ -15,7 +15,7 @@ public class DeleteTeamHandlerTests
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
 
         teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>()))
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         var handler = new DeleteTeamHandler(teamRepo.Object, teamMemberRepo.Object);
@@ -37,7 +37,7 @@ public class DeleteTeamHandlerTests
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
 
         teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(false);
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         var handler = new DeleteTeamHandler(teamRepo.Object, teamMemberRepo.Object);
 

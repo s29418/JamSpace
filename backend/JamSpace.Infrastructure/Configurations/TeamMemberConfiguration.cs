@@ -26,5 +26,7 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
             .WithMany(t => t.Members)
             .HasForeignKey(tm => tm.TeamId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.HasIndex(tm => new { tm.TeamId, tm.UserId }).IsUnique();
     }
 }

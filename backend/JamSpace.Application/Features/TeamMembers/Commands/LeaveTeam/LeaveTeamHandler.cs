@@ -17,7 +17,7 @@ public class LeaveTeamHandler : IRequestHandler<LeaveTeamCommand, Unit>
     {
         var leaders = await _repo.GetLeadersAsync(request.TeamId, ct);
 
-        if (await _repo.IsUserALeaderAsync(request.TeamId, request.UserId) && leaders.Count == 1)
+        if (await _repo.IsUserALeaderAsync(request.TeamId, request.UserId, ct) && leaders.Count == 1)
             throw new ConflictException("Last team leader cannot leave the team. You can delete the team instead.");
         
         await _repo.DeleteTeamMemberAsync(request.TeamId, request.UserId, ct);

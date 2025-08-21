@@ -15,7 +15,7 @@ public class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, Team
         _repo = repo;
     }
 
-    public async Task<TeamDto> Handle(CreateTeamWithUserCommand request, CancellationToken cancellationToken)
+    public async Task<TeamDto> Handle(CreateTeamWithUserCommand request, CancellationToken ct)
     {
         var team = new Team
         {
@@ -26,9 +26,9 @@ public class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, Team
             TeamPictureUrl = request.Command.TeamPictureUrl
         };
 
-        var teamId = await _repo.CreateTeamAsync(team, request.CreatorUserId);
+        var teamId = await _repo.CreateTeamAsync(team, request.CreatorUserId, ct);
 
-        var createdTeam = await _repo.GetTeamByIdAsync(teamId);
+        var createdTeam = await _repo.GetTeamByIdAsync(teamId, ct);
         return TeamMapper.ToDto(createdTeam!, request.CreatorUserId);
     }
 }

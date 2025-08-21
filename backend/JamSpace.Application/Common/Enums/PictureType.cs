@@ -2,7 +2,7 @@
 
 public enum PictureType
 {
-    Team,
-    UserAvatar,
-    Project
+    TeamPicture,
+    UserPicture,
+    ProjectPicture
 }

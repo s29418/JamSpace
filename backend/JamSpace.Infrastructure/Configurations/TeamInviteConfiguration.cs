@@ -33,5 +33,9 @@ public class TeamInviteConfiguration : IEntityTypeConfiguration<TeamInvite>
             .WithMany()
             .HasForeignKey(ti => ti.InvitedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasIndex(ti => new { ti.TeamId, ti.InvitedUserId, ti.Status })
+            .HasFilter("[Status] = 'Pending'")
+            .IsUnique();
     }
 }

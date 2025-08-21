@@ -1,131 +1,45 @@
 using System.Text;
-using Azure.Storage.Blobs;
-using FluentValidation;
-using FluentValidation.AspNetCore;
 using JamSpace.API.Middleware;
-using JamSpace.Application.Common.Interfaces;
-using JamSpace.Application.Features.Teams.Commands.CreateTeam;
-using JamSpace.Infrastructure.Data;
-using JamSpace.Infrastructure.Repositories;
-using JamSpace.Infrastructure.Services;
-using MediatR;
+using JamSpace.Application;
+using JamSpace.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-// using JamSpace.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000") 
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 });
 
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
-if (builder.Environment.EnvironmentName != "Testing")
-{
-    builder.Services.AddDbContext<JamSpaceDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-}
+var jwt = builder.Configuration.GetSection("Jwt");
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!));
 
-builder.Services.AddSingleton<IFileStorageService>(sp =>
-{
-    var connectionString = builder.Configuration["AzureBlobStorage:ConnectionString"];
-    var containerName = builder.Configuration["AzureBlobStorage:ContainerName"];
-
-    var blobServiceClient = new BlobServiceClient(connectionString);
-    return new AzureBlobStorageService(blobServiceClient, containerName);
-});
-
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ITeamRepository, TeamRepository>();
-builder.Services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
-builder.Services.AddScoped<ITeamInviteRepository, TeamInviteRepository>();
-builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-
-builder.Services.AddMediatR(cfg =>
-{
-    cfg.RegisterServicesFromAssemblyContaining<CreateTeamCommand>();
-});
-
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssembly(typeof(CreateTeamCommandValidator).Assembly);
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(JamSpace.Application.Common.Behaviors.ValidationBehavior<,>));
-
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
+            ValidIssuer = jwt["Issuer"],
             ValidateAudience = true,
-            ValidateLifetime = true,
+            ValidAudience = jwt["Audience"],
             ValidateIssuerSigningKey = true,
-
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
-            )
+            IssuerSigningKey = key,
+            ValidateLifetime = true
         };
     });
 
-builder.Services.Configure<FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; 
-});
-
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "JamSpace API",
-        Version = "v1"
-    });
-    
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Wklej JWT w formacie: **Bearer &lt;twój_token&gt;**"
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] { }
-        }
-    });
-});
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-app.UseCors("AllowFrontend");
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -133,15 +47,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseCors();
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 app.Run();
 
-namespace JamSpace.API
-{
-    public partial class Program {}
-}
+public partial class Program { }

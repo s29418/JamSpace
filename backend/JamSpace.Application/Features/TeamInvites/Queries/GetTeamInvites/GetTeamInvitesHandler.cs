@@ -19,7 +19,7 @@ public class GetTeamInvitesHandler : IRequestHandler<GetTeamInvitesQuery, List<T
 
     public async Task<List<TeamInviteDto>> Handle(GetTeamInvitesQuery request, CancellationToken ct)
     {
-        if (!await _teamMemberRepository.IsUserInTeamAsync(request.TeamId, request.RequestingUserId))
+        if (!await _teamMemberRepository.IsUserInTeamAsync(request.TeamId, request.RequestingUserId, ct))
             throw new ForbiddenAccessException("User is not in the team.");
 
         var invites = await _teamInviteRepository

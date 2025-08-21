@@ -17,13 +17,13 @@ public class ChangeTeamNameHandler : IRequestHandler<ChangeTeamNameCommand, Team
         _teamMemberRepo = teamMemberRepo;
     }
 
-    public async Task<TeamDto> Handle(ChangeTeamNameCommand request, CancellationToken cancellationToken)
+    public async Task<TeamDto> Handle(ChangeTeamNameCommand request, CancellationToken ct)
     {
-        if (!await _teamMemberRepo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId) &&
-            !await _teamMemberRepo.IsUserAnAdminAsync(request.TeamId, request.RequestingUserId))
+        if (!await _teamMemberRepo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId, ct) &&
+            !await _teamMemberRepo.IsUserAnAdminAsync(request.TeamId, request.RequestingUserId, ct))
             throw new ForbiddenAccessException("Only team leaders and admins can change team names.");
         
-        var team = await _teamRepository.ChangeTeamNameAsync(request.TeamId,request.Name, cancellationToken);
+        var team = await _teamRepository.ChangeTeamNameAsync(request.TeamId,request.Name, ct);
 
         return TeamMapper.ToDto(team, request.RequestingUserId);
     }

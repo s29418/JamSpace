@@ -33,13 +33,13 @@ public class TeamInviteRepositoryTests
 
         public void MarkLeader(Guid teamId, Guid userId) => _leaders[(teamId, userId)] = true;
 
-        public Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId)
+        public Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId, CancellationToken ct)
             => Task.FromResult(_db.TeamMembers.Any(tm => tm.TeamId == teamId && tm.UserId == userId));
 
-        public Task<bool> IsUserALeaderAsync(Guid teamId, Guid userId)
+        public Task<bool> IsUserALeaderAsync(Guid teamId, Guid userId, CancellationToken ct)
             => Task.FromResult(_leaders.ContainsKey((teamId, userId)));
 
-        public Task<bool> IsUserAnAdminAsync(Guid teamId, Guid userId)
+        public Task<bool> IsUserAnAdminAsync(Guid teamId, Guid userId, CancellationToken ct)
         {
             var isAdmin = _db.TeamMembers
                 .Any(m => m.TeamId == teamId 

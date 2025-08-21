@@ -19,10 +19,10 @@ public class GetTeamByIdHandlerTests
         var creator = new User { UserName = "creator" };
 
         teamMemberRepo.Setup(r => r.IsUserInTeamAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>()))
+                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
         
-        teamRepo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>()))
+        teamRepo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Team
             {
                 Id = Guid.NewGuid(),
@@ -53,10 +53,10 @@ public class GetTeamByIdHandlerTests
         var creator = new User { UserName = "creator" };
 
         teamMemberRepo.Setup(r => r.IsUserInTeamAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>()))
+                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
     
-        teamRepo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>()))
+        teamRepo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Team
             {
                 Id = Guid.NewGuid(),

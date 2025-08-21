@@ -18,7 +18,7 @@ public class ChangeTeamNameHandlerTests
         var creator = new User { UserName = "creator" };
 
         teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>()))
+                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         teamRepo.Setup(r => r.ChangeTeamNameAsync(
@@ -57,9 +57,9 @@ public class ChangeTeamNameHandlerTests
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
 
         teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(false);
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
         teamMemberRepo.Setup(r => r.IsUserAnAdminAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(false);
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
         
         var handler = new ChangeTeamNameHandler(teamRepo.Object, teamMemberRepo.Object);
 

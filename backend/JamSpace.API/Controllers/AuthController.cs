@@ -2,6 +2,7 @@
 using JamSpace.Application.Features.Authentication.Login;
 using JamSpace.Application.Features.Authentication.Register;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JamSpace.API.Controllers;
@@ -18,6 +19,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<ActionResult<AuthResultDto>> Login([FromBody] LoginUserQuery query)
     {
         var result = await _mediator.Send(query);
@@ -25,6 +27,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<ActionResult<AuthResultDto>> Register([FromBody] RegisterUserCommand command)
     {
         var result = await _mediator.Send(command);

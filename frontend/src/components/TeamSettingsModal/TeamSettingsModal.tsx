@@ -1,0 +1,407 @@
+import React, {useEffect, useLayoutEffect, useMemo, useRef} from 'react';
+import ReactDOM from 'react-dom';
+import styles from './TeamSettingsModal.module.css';
+
+// HOOKS & TYPES
+import { useTeam } from '../../hooks/useTeam';
+import { useTeamInvites } from '../../hooks/useTeamInvites';
+import { useTeamActions } from '../../hooks/useTeamActions';
+import { useToast } from '../../hooks/useToast';
+import {TeamRoleCode, TeamInvite, TeamMember} from '../../types/team';
+
+// UI BLOCKS
+import { TeamHeader } from './Header/TeamHeader';
+import { MembersList } from './MembersList/MembersList';
+import { InvitesList, InviteView } from './Invites/InvitesList';
+import { InviteForm } from './Invites/InviteForm';
+import MessageSlot from '../common/MessageSlot'; // TODO: dostosuj ścieżkę, jeśli inna
+
+// SERVICES (zaproszenia)
+// TODO: podmień na swoje nazwy i ścieżki
+import { inviteUserToTeam, cancelInvite } from '../../services/teamInvites.service';
+import {AvatarUploader} from "./Header/AvatarUploader";
+
+type Props = {
+    isOpen: boolean;
+    teamId: string;
+    currentUserId: string;
+    onClose: () => void;
+    onTeamDeleted?: () => void; // np. navigate('/teams')
+    onLeftTeam?: () => void;    // np. navigate('/teams')
+};
+
+export default function TeamSettingsModal({
+                                              isOpen,
+                                              teamId,
+                                              currentUserId,
+                                              onClose,
+                                              onTeamDeleted,
+                                              onLeftTeam,
+                                          }: Props) {
+    // ====== DANE ZESPOŁU ======
+    const { team, setTeam, loading: teamLoading, error: teamError, refreshTeam } = useTeam(teamId);
+
+    // ====== ZAPROSZENIA ======
+    const {
+        invites,
+        loading: invitesLoading,
+        error: invitesError,
+        refreshInvites,
+    } = useTeamInvites(teamId);
+
+    // ====== WIADOMOŚCI (inline) ======
+    const {
+        message: headerMsg, show: showHeaderMsg, showError: showHeaderErr,
+    } = useToast();
+    const {
+        message: membersMsg, show: showMembersMsg, showError: showMembersErr,
+    } = useToast();
+    const {
+        message: invitesMsg, show: showInvitesMsg, showError: showInvitesErr,
+    } = useToast();
+
+    // ====== AKCJE — osobno dla nagłówka i listy członków, żeby komunikaty leciały w dobre miejsce ======
+    const headerActions = useTeamActions({
+        teamId,
+        team,
+        setTeam,
+        refreshTeam,
+        toast: showHeaderMsg,
+    });
+
+    const memberActions = useTeamActions({
+        teamId,
+        team,
+        setTeam,
+        refreshTeam,
+        toast: showMembersMsg,
+    });
+
+    // ====== MAPOWANIE zaproszeń do widoku ======
+    const inviteViews: InviteView[] = useMemo(() => {
+        // Staramy się być odporni na kształt odpowiedzi backendu.
+        const toView = (inv: TeamInvite & any): InviteView => ({
+            id: inv.id,
+            invitedUserName:
+                inv.invitedUserName ??
+                inv.invitedUserEmail ??
+                inv.userName ??
+                'User',
+            invitedUserPictureUrl:
+                inv.invitedUserPictureUrl ?? inv.userPictureUrl ?? null,
+            invitedByUserName:
+                inv.invitedByUserName ?? inv.createdByUserName ?? 'You',
+        });
+        return invites.map(toView);
+    }, [invites]);
+
+    // ====== AKCJE: zaproszenia ======
+    async function handleInvite(username: string) {
+        try {
+            // @NOTE: dopasuj do swojego serwisu (argumenty i zwracany komunikat)
+            const msg: string = await inviteUserToTeam(username, teamId);
+            await refreshInvites();
+            showInvitesMsg(msg || 'Invite sent.', 'success');
+        } catch (e: any) {
+            showInvitesErr(e?.message ?? 'Failed to send invite.');
+        }
+    }
+
+    async function handleCancelInvite(inviteId: string) {
+        try {
+            const msg: string = await cancelInvite(inviteId);
+            await refreshInvites();
+            showInvitesMsg(msg || 'Invite cancelled.', 'success');
+        } catch (e: any) {
+            showInvitesErr(e?.message ?? 'Failed to cancel invite.');
+        }
+    }
+
+    // ====== PERMISJE ======
+    const canRename = team?.currentUserRole === 'Leader' || team?.currentUserRole === 'Admin';
+    const canChangePicture = canRename;
+    const canDeleteTeam = team?.currentUserRole === 'Leader';
+    const canLeaveTeam = true;
+
+    // Dla listy członków
+    const canChangeRole = (m: TeamMember): boolean =>
+        (team?.currentUserRole === 'Leader')
+        // && (m.userId !== currentUserId);
+
+    const canEditMusicalRole = (_m: TeamMember): boolean =>
+        team?.currentUserRole === 'Leader' || team?.currentUserRole === 'Admin';
+
+    const canKick = (m: TeamMember): boolean =>
+        (team?.currentUserRole === 'Leader') && (m.role !== 'Leader');
+
+    // ====== Zamykanie ESC ======
+    useEffect(() => {
+        if (!isOpen) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [isOpen, onClose]);
+
+    if (!isOpen) return null;
+
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) {
+        // awaryjnie renderuj bez portalu (np. testy)
+        return (
+            <ModalBody
+                teamId={teamId}
+                onClose={onClose}
+                teamLoading={teamLoading}
+                teamError={teamError}
+                invitesLoading={invitesLoading}
+                invitesError={invitesError}
+                // dane
+                teamName={team?.name ?? ''}
+                teamPictureUrl={team?.teamPictureUrl ?? null}
+                members={team?.members ?? []}
+                // header
+                canRename={!!canRename}
+                canChangePicture={!!canChangePicture}
+                canDeleteTeam={!!canDeleteTeam}
+                canLeaveTeam={!!canLeaveTeam}
+                onRename={(n) => headerActions.renameTeam(n)}
+                onChangePicture={(f) => headerActions.changeTeamPicture(f)}
+                onDeleteTeam={async () => {
+                    const ok = await headerActions.deleteTeam();
+                    if (ok) onTeamDeleted ? onTeamDeleted() : onClose();
+                }}
+                onLeaveTeam={async () => {
+                    const ok = await headerActions.leaveTeam();
+                    if (ok) onLeftTeam ? onLeftTeam() : onClose();
+                }}
+                headerMsg={headerMsg}
+                // members
+                currentUserId={currentUserId}
+                onChangeRole={(userId, role) => memberActions.changeMemberRole(userId, role)}
+                onChangeMusicalRole={(userId, val) => memberActions.changeMemberMusicalRole(userId, val)}
+                onKick={(userId) => memberActions.kickMember(userId)}
+                canChangeRoleFn={canChangeRole}
+                canEditMusicalRoleFn={canEditMusicalRole}
+                canKickFn={canKick}
+                membersMsg={membersMsg}
+                // invites
+                invites={inviteViews}
+                onInvite={handleInvite}
+                onCancelInvite={handleCancelInvite}
+                invitesMsg={invitesMsg}
+            />
+        );
+    }
+
+    return ReactDOM.createPortal(
+        <ModalBody
+            teamId={teamId}
+            onClose={onClose}
+            teamLoading={teamLoading}
+            teamError={teamError}
+            invitesLoading={invitesLoading}
+            invitesError={invitesError}
+            // dane
+            teamName={team?.name ?? ''}
+            teamPictureUrl={team?.teamPictureUrl ?? null}
+            members={team?.members ?? []}
+            // header
+            canRename={!!canRename}
+            canChangePicture={!!canChangePicture}
+            canDeleteTeam={!!canDeleteTeam}
+            canLeaveTeam={!!canLeaveTeam}
+            onRename={(n) => headerActions.renameTeam(n)}
+            onChangePicture={(f) => headerActions.changeTeamPicture(f)}
+            onDeleteTeam={async () => {
+                const ok = await headerActions.deleteTeam();
+                if (ok) onTeamDeleted ? onTeamDeleted() : onClose();
+            }}
+            onLeaveTeam={async () => {
+                const ok = await headerActions.leaveTeam();
+                if (ok) onLeftTeam ? onLeftTeam() : onClose();
+            }}
+            headerMsg={headerMsg}
+            // members
+            currentUserId={currentUserId}
+            onChangeRole={(userId, role) => memberActions.changeMemberRole(userId, role)}
+            onChangeMusicalRole={(userId, val) => memberActions.changeMemberMusicalRole(userId, val)}
+            onKick={(userId) => memberActions.kickMember(userId)}
+            canChangeRoleFn={canChangeRole}
+            canEditMusicalRoleFn={canEditMusicalRole}
+            canKickFn={canKick}
+            membersMsg={membersMsg}
+            // invites
+            invites={inviteViews}
+            onInvite={handleInvite}
+            onCancelInvite={handleCancelInvite}
+            invitesMsg={invitesMsg}
+        />,
+        modalRoot,
+    );
+}
+
+/* ========================= */
+/* ====== Modal Body  ====== */
+/* ========================= */
+
+type BodyProps = {
+    teamId: string;
+    onClose: () => void;
+
+    teamLoading: boolean;
+    teamError: string | null;
+    invitesLoading: boolean;
+    invitesError: string | null;
+
+    teamName: string;
+    teamPictureUrl: string | null;
+    members: TeamMember[];
+
+    // Header
+    canRename: boolean;
+    canChangePicture: boolean;
+    canDeleteTeam: boolean;
+    canLeaveTeam: boolean;
+    onRename: (n: string) => void | Promise<void>;
+    onChangePicture: (f: File) => void | Promise<void>;
+    onDeleteTeam: () => void | Promise<void>;
+    onLeaveTeam: () => void | Promise<void>;
+    headerMsg: { text: string; color: string } | null;
+
+    // Members
+    currentUserId: string;
+    onChangeRole: (userId: string, role: TeamRoleCode) => void | Promise<void>;
+    onChangeMusicalRole: (userId: string, val: string) => void | Promise<void>;
+    onKick: (userId: string) => void | Promise<void>;
+    canChangeRoleFn: (m: TeamMember) => boolean;
+    canEditMusicalRoleFn: (m: TeamMember) => boolean;
+    canKickFn: (m: TeamMember) => boolean;
+    membersMsg: { text: string; color: string } | null;
+
+    // Invites
+    invites: InviteView[];
+    onInvite: (username: string) => void | Promise<void>;
+    onCancelInvite: (inviteId: string) => void | Promise<void>;
+    invitesMsg: { text: string; color: string } | null;
+};
+
+const ModalBody: React.FC<BodyProps> = (p) => {
+    const {
+        onClose,
+        teamLoading, teamError,
+        invitesLoading, invitesError,
+        teamName, teamPictureUrl, members,
+        canRename, canChangePicture, canDeleteTeam, canLeaveTeam,
+        onRename, onChangePicture, onDeleteTeam, onLeaveTeam, headerMsg,
+        currentUserId, onChangeRole, onChangeMusicalRole, onKick,
+        canChangeRoleFn, canEditMusicalRoleFn, canKickFn, membersMsg,
+        invites, onInvite, onCancelInvite, invitesMsg,
+    } = p;
+
+    const modalRef = useRef<HTMLDivElement|null>(null);
+    const scrollRef = useRef<HTMLDivElement|null>(null);
+
+    useLayoutEffect(() => {
+        const el = scrollRef.current, modal = modalRef.current;
+        if (!el || !modal) return;
+        const sbw = el.offsetWidth - el.clientWidth;
+        modal.style.setProperty('--sbw', `${sbw}px`);
+    }, []);
+
+    return (
+        <div
+            className={styles.modalBackdrop}
+            role="dialog"
+            aria-modal="true"
+            onClick={onClose}
+        >
+            <div
+                ref={modalRef}
+                className={styles.modalBody}
+                onClick={(e) => e.stopPropagation()}
+            >
+
+                <button
+                    type="button"
+                    className={styles.modalClose}
+                    aria-label="Close settings"
+                    onClick={onClose}
+                >
+                    ×
+                </button>
+
+
+                <div ref={scrollRef} className={styles.contentScrollable}>
+
+                    <div className={styles.heroAvatarDock}>
+                        <AvatarUploader
+                            imageUrl={teamPictureUrl ?? null}
+                            canEdit={canChangePicture}
+                            onUpload={onChangePicture}
+                            className={styles.avatar}
+
+                        />
+                    </div>
+
+                    <div id="avatar-controls-slot" className={styles.avatarControlsSlot}/>
+
+                    {/* HEADER */}
+                    <TeamHeader
+                        teamName={teamName}
+                        teamPictureUrl={teamPictureUrl}
+                        canRename={canRename}
+                        canChangePicture={canChangePicture}
+                        canDeleteTeam={canDeleteTeam}
+                        canLeaveTeam={canLeaveTeam}
+                        onRename={onRename}
+                        onChangePicture={onChangePicture}
+                        onDeleteTeam={onDeleteTeam}
+                        onLeaveTeam={onLeaveTeam}
+                    />
+                    <MessageSlot message={headerMsg} className={styles.teamInfoMsg}/>
+
+                    {/* STAN ŁADOWANIA/ERRORY */}
+                    {(teamLoading || invitesLoading) && (
+                        <p className={styles.role} >Loading…</p>
+                    )}
+                    {teamError && (
+                        <p className={styles.role}>
+                            {teamError}
+                        </p>
+                    )}
+                    {invitesError && (
+                        <p className={styles.role}>
+                            {invitesError}
+                        </p>
+                    )}
+
+                    <hr className={styles.lineBreak}/>
+
+                    {/* MEMBERS */}
+                    <h3 className={styles.subtitle} style={{marginTop: 16}}>Members</h3>
+                    <MembersList
+                        members={members}
+                        currentUserId={currentUserId}
+                        onChangeRole={onChangeRole}
+                        onChangeMusicalRole={onChangeMusicalRole}
+                        onKick={onKick}
+                        canChangeRole={canChangeRoleFn}
+                        canEditMusicalRole={canEditMusicalRoleFn}
+                        canKick={canKickFn}
+                    />
+                    <MessageSlot message={membersMsg} className={styles.teamInfoMsg}/>
+
+                    <hr className={styles.lineBreak}/>
+                    {/* INVITES */}
+                    <h3 className={styles.subtitle} style={{marginTop: 16}}>Invites</h3>
+                    <InvitesList invites={invites} onCancel={onCancelInvite}/>
+                    <h3 className={styles.subtitle} style={{marginTop: 12}}>Invite User</h3>
+                    <InviteForm onInvite={onInvite}/>
+                    <MessageSlot message={invitesMsg} className={styles.teamInfoMsg}/>
+                </div>
+            </div>
+        </div>
+    );
+};

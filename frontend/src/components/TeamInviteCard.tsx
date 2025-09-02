@@ -6,7 +6,7 @@ import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 interface TeamInviteCardProps {
     id: string;
     name: string;
-    teamPictureUrl?: string;
+    teamPictureUrl?: string | null;
     onAccept: (id: string) => void;
     onReject: (id: string) => void;
 }

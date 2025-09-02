@@ -1,51 +1,56 @@
-import React, {useState} from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styles from './TeamCard.module.css';
 import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
-import TeamSettingsModal from "../components/modals/TeamSettingsModal";
-import {
-    CogIcon as SettingsIcon,
-} from '@heroicons/react/24/outline';
+import TeamSettingsModal from './TeamSettingsModal/TeamSettingsModal';
+import { CogIcon as SettingsIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
+import { getCurrentUserId } from '../utils/auth';
+import type { Team } from '../types/team';
 
-interface Member {
-    userId: string;
-    username: string;
-    role: string;
-}
-
-interface TeamCardProps {
-    id: string;
-    name: string;
-    teamPictureUrl?: string;
-    members: Member[];
+type TeamCardProps = Pick<Team, 'id' | 'name' | 'teamPictureUrl' | 'members'> & {
     onClick: () => void;
-}
+};
 
-interface Team {
-    id: string;
-    name: string;
-    teamPictureUrl?: string;
-    members: {
-        userId: string;
-        username: string;
-        role: string;
-        userPictureUrl?: string;
-    }[];
-}
+const TeamCard: React.FC<TeamCardProps> = ({ id, name, teamPictureUrl, members, onClick }) => {
+    const navigate = useNavigate();
+    const currentUserId = useMemo(() => getCurrentUserId(), []);
 
-const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps) => {
-    const [showModal, setShowModal] = useState(false);
-
-    const [team, setTeam] = useState<{
-        id: string;
-        name: string;
-        teamPictureUrl?: string;
-        members: Member[];
-    }>({
+    // lekki snapshot do natychmiastowego UI
+    const [team, setTeam] = useState<Pick<Team, 'id' | 'name' | 'teamPictureUrl'>>({
         id,
         name,
-        teamPictureUrl,
-        members,
+        teamPictureUrl: teamPictureUrl ?? null,
     });
+
+    const [imgSrc, setImgSrc] = useState<string>(team.teamPictureUrl || defaultTeamIcon);
+    const membersCount = members?.length ?? 0;
+
+    // sync po zmianie propsów (np. przeładowanie listy)
+    useEffect(() => {
+        setTeam({ id, name, teamPictureUrl: teamPictureUrl ?? null });
+    }, [id, name, teamPictureUrl]);
+
+    // aktualizacja obrazka przy zmianie URL
+    useEffect(() => {
+        setImgSrc(team.teamPictureUrl || defaultTeamIcon);
+    }, [team.teamPictureUrl]);
+
+    // live-patche z modala (rename/avatar)
+    useEffect(() => {
+        function onTeamUpdated(e: any) {
+            const d = e?.detail;
+            if (!d || d.teamId !== team.id) return;
+            setTeam((prev) => ({
+                ...prev,
+                ...(d.patch?.name ? { name: d.patch.name } : {}),
+                ...(d.patch?.teamPictureUrl ? { teamPictureUrl: d.patch.teamPictureUrl } : {}),
+            }));
+        }
+        window.addEventListener('team:updated', onTeamUpdated);
+        return () => window.removeEventListener('team:updated', onTeamUpdated);
+    }, [team.id]);
+
+    const [showModal, setShowModal] = useState(false);
 
     const handleCardClick = (e: React.MouseEvent) => {
         if ((e.target as HTMLElement).closest('button')) return;
@@ -53,50 +58,49 @@ const TeamCard = ({ id, name, teamPictureUrl, members, onClick }: TeamCardProps)
         onClick();
     };
 
-    const handleTeamUpdate = (updatedTeam: Team) => {
-        setTeam(updatedTeam);
-    };
-
+    const onImgError = useCallback(() => setImgSrc(defaultTeamIcon), []);
 
     return (
-        <div className={styles.card} onClick={handleCardClick}>
+        <div className={styles.card} onClick={handleCardClick} role="button" tabIndex={0}>
             <div className={styles.avatar}>
                 <img
-                    src={team.teamPictureUrl || defaultTeamIcon}
+                    src={imgSrc}
                     alt={team.name}
                     className={styles.avatarImage}
+                    loading="lazy"
+                    decoding="async"
+                    onError={onImgError}
                 />
             </div>
 
             <div className={styles.info}>
                 <h3 className={styles.teamName} title={team.name}>{team.name}</h3>
-                <span>{team.members.length} members</span>
+                <span>{membersCount} members</span>
             </div>
 
             <div className={styles.actions}>
-
                 <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setShowModal(true);
-                    }}
+                    type="button"
                     className={styles.settingsButton}
+                    aria-haspopup="dialog"
+                    onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
                 >
-                    <SettingsIcon className={styles.icon}/> Settings
+                    <SettingsIcon className={styles.icon} /> Settings
                 </button>
-
             </div>
 
             {showModal && (
                 <TeamSettingsModal
+                    isOpen={showModal}
                     teamId={team.id}
+                    currentUserId={currentUserId ?? ''}
                     onClose={() => setShowModal(false)}
-                    onTeamUpdate={handleTeamUpdate}
+                    onTeamDeleted={() => { setShowModal(false); navigate('/teams'); }}
+                    onLeftTeam={() => { setShowModal(false); navigate('/teams'); }}
                 />
             )}
         </div>
     );
 };
-
 
 export default TeamCard;

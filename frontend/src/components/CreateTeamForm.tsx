@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { createTeam } from '../services/teams.service';
+import styles from '../pages/TeamsPage.module.css';
 
 interface Props {
     onTeamCreated: () => void;
@@ -26,15 +27,19 @@ const CreateTeamForm: React.FC<Props> = ({ onTeamCreated }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <input
-                type="text"
-                placeholder="Team name"
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                disabled={loading}
-            />
-        </form>
+        <div>
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    placeholder="Team name"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    disabled={loading}
+                />
+            </form>
+
+            <hr className={styles.lineBreak}/>
+        </div>
     );
 };
 

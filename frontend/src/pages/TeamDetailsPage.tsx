@@ -1,67 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-    getTeamById
-} from '../services/teams.service';
+import React, { useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TeamDetailsPage.module.css';
 import defaultTeamIcon from '../assets/defaultTeamIcon.jpg';
-import TeamSettingsModal from "../components/modals/TeamSettingsModal";
-import {
-    CogIcon as SettingsIcon,
-} from '@heroicons/react/24/outline';
-
-interface Member {
-    userId: string;
-    username: string;
-    role: string;
-    userPictureUrl?: string;
-}
-
-interface Team {
-    id: string;
-    name: string;
-    teamPictureUrl?: string;
-    members: Member[];
-}
+import { getCurrentUserId } from '../utils/auth';
+import TeamSettingsModal from '../components/TeamSettingsModal/TeamSettingsModal';
+import { CogIcon as SettingsIcon } from '@heroicons/react/24/outline';
+import { useTeam } from '../hooks/useTeam';
 
 const TeamDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
-    const [team, setTeam] = useState<Team | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { team, loading, error } = useTeam(id);
     const [showModal, setShowModal] = useState(false);
-
-    useEffect(() => {
-        const fetchTeam = async () => {
-            try {
-                if (!id) return;
-                const data = await getTeamById(id);
-                setTeam(data);
-            } catch (error) {
-                console.error('Failed to fetch team details:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTeam();
-    }, [id]);
-
-    const handleSettingsClick = () => {
-        setShowModal(true);
-    };
-
-    const handleTeamNameUpdate = (updatedTeam: Team) => {
-        setTeam(updatedTeam);
-    };
+    const currentUserId = useMemo(() => getCurrentUserId(), []);
+    const navigate = useNavigate();
 
     if (loading) return <p>Loading...</p>;
+    if (error) return <p>{error}</p>;
     if (!team) return <p>Team not found</p>;
 
     return (
         <div className={styles.wrapper}>
-
             <div className={styles.teamInfo}>
-
                 <div className={styles.avatarWrapper}>
                     <img
                         src={team.teamPictureUrl || defaultTeamIcon}
@@ -75,28 +34,24 @@ const TeamDetailsPage = () => {
                 <div>
                     <h1 className={styles.title}>{team.name}</h1>
                     <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowModal(true);
-                        }}
-                        className={styles.editButton}>
-                        <SettingsIcon
-                            className={styles.icon}
-                            onClick={handleSettingsClick}
-                        /> Settings
+                        onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+                        className={styles.editButton}
+                    >
+                        <SettingsIcon className={styles.icon} /> Settings
                     </button>
                 </div>
-
             </div>
 
             {showModal && (
                 <TeamSettingsModal
+                    isOpen={showModal}
                     teamId={team.id}
+                    currentUserId={currentUserId ?? ''}
                     onClose={() => setShowModal(false)}
-                    onTeamUpdate={handleTeamNameUpdate}
+                    onTeamDeleted={() => { setShowModal(false); navigate('/teams'); }}
+                    onLeftTeam={() => { setShowModal(false); navigate('/teams'); }}
                 />
             )}
-
         </div>
     );
 };

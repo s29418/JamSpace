@@ -12,7 +12,6 @@ type Props = {
 
 export const InviteForm: React.FC<Props> = ({
                                                 onInvite,
-                                                className,
                                                 placeholder = 'Enter username',
                                                 autoFocus = false,
                                                 disabled = false,
@@ -29,7 +28,7 @@ export const InviteForm: React.FC<Props> = ({
             try {
                 setSubmitting(true);
                 console.log('[InviteForm] submit', value);
-                await Promise.resolve(onInvite(value));
+                await onInvite(value);
                 setUsername('');
             } finally {
                 setSubmitting(false);

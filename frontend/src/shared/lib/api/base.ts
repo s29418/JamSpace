@@ -1,4 +1,3 @@
-// src/shared/lib/api/base.ts
 import axios, { AxiosError, AxiosInstance } from 'axios';
 import { getToken } from '../utils/auth'
 

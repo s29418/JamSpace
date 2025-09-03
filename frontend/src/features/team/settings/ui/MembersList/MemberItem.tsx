@@ -35,17 +35,17 @@ const _MemberItem: React.FC<Props> = ({
 
     return (
         <li className={styles.member}>
-            {/* Avatar */}
+            {/* AVATAR */}
             <div className={styles.userAvatarWrapper}>
                 <img src={avatarSrc} alt={member.username} className={styles.userAvatar} />
             </div>
 
-            {/* Dane + akcje */}
+            {/* DATA & ACTIONS */}
             <div className={styles.invitedUserDetails}>
                 <div>
                     <p className={styles.username}>{member.username}</p>
 
-                    {/* Rola w zespole */}
+                    {/* FUNCTIONAL ROLE */}
                     <p className={styles.role}>
                         Team role: {member.role}
                         {canChangeRole && (
@@ -72,7 +72,7 @@ const _MemberItem: React.FC<Props> = ({
                         />
                     )}
 
-                    {/* Rola muzyczna */}
+                    {/* MUSICAL ROLE */}
                     <p
                         className={styles.role}
                     >
@@ -100,7 +100,7 @@ const _MemberItem: React.FC<Props> = ({
                     )}
                 </div>
 
-                {/* Kick */}
+                {/* KICK TEAM MEMBER */}
                 {canKick && !isSelf && (
                     <button
                         type="button"

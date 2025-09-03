@@ -3,7 +3,6 @@ import styles from './TeamCard.module.css';
 import defaultTeamIcon from '../../../../shared/assets/defaultTeamIcon.jpg';
 import TeamSettingsModal from '../../settings/ui/TeamSettingsModal';
 import { CogIcon as SettingsIcon } from '@heroicons/react/24/outline';
-import { useNavigate } from 'react-router-dom';
 import { getCurrentUserId } from '../../../../shared/lib/utils/auth';
 import type { Team } from '../../../../entities/team/model/types';
 
@@ -12,10 +11,9 @@ type TeamCardProps = Pick<Team, 'id' | 'name' | 'teamPictureUrl' | 'members'> & 
 };
 
 const TeamCard: React.FC<TeamCardProps> = ({ id, name, teamPictureUrl, members, onClick }) => {
-    const navigate = useNavigate();
     const currentUserId = useMemo(() => getCurrentUserId(), []);
 
-    // lekki snapshot do natychmiastowego UI
+
     const [team, setTeam] = useState<Pick<Team, 'id' | 'name' | 'teamPictureUrl'>>({
         id,
         name,
@@ -25,17 +23,17 @@ const TeamCard: React.FC<TeamCardProps> = ({ id, name, teamPictureUrl, members, 
     const [imgSrc, setImgSrc] = useState<string>(team.teamPictureUrl || defaultTeamIcon);
     const membersCount = members?.length ?? 0;
 
-    // sync po zmianie propsów (np. przeładowanie listy)
+
     useEffect(() => {
         setTeam({ id, name, teamPictureUrl: teamPictureUrl ?? null });
     }, [id, name, teamPictureUrl]);
 
-    // aktualizacja obrazka przy zmianie URL
+
     useEffect(() => {
         setImgSrc(team.teamPictureUrl || defaultTeamIcon);
     }, [team.teamPictureUrl]);
 
-    // live-patche z modala (rename/avatar)
+
     useEffect(() => {
         function onTeamUpdated(e: any) {
             const d = e?.detail;

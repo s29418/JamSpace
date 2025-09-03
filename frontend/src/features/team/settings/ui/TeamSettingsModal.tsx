@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import styles from './TeamSettingsModal.module.css';
 
@@ -23,8 +23,8 @@ type Props = {
     teamId: string;
     currentUserId: string;
     onClose: () => void;
-    onTeamDeleted?: () => void; // np. navigate('/teams')
-    onLeftTeam?: () => void;    // np. navigate('/teams')
+    onTeamDeleted?: () => void;
+    onLeftTeam?: () => void;
 };
 
 export default function TeamSettingsModal({
@@ -35,7 +35,7 @@ export default function TeamSettingsModal({
                                               onTeamDeleted,
                                               onLeftTeam,
                                           }: Props) {
-    // ====== DANE ZESPOŁU ======
+    // TEAM DATA
     const {
         team,
         setTeam,
@@ -44,17 +44,16 @@ export default function TeamSettingsModal({
         refresh: refreshTeam,
     } = useTeam(teamId);
 
-    // ====== ZAPROSZENIA ======
+    // INVITES DATA
     const {
         invites,
         loading: invitesLoading,
         error: invitesError,
-        refresh: refreshInvites,
         inviteUserToTeam,
         cancelInvite,
     } = useTeamInvites({ teamId });
 
-    // ====== WIADOMOŚCI (inline) ======
+    // MESSAGES/ERRORS
     const {
         message: headerMsg, show: showHeaderMsg, showError: showHeaderErr,
     } = useToast();
@@ -65,14 +64,14 @@ export default function TeamSettingsModal({
         message: invitesMsg, show: showInvitesMsg, showError: showInvitesErr,
     } = useToast();
 
-    // ====== AKCJE — jeden hook + cienkie „wrappery” dla sekcji (żeby toasty trafiały w dobre miejsce) ======
+    // ACTIONS
     const actions = useTeamActions(teamId, { onUpdated: refreshTeam, setTeam });
 
-    // Header actions
+    // HEADER ACTIONS
     const renameTeam = async (name: string) => {
         try {
             await actions.renameTeam(name);
-            emitTeamUpdated(teamId, { name });       // <<<<<<
+            emitTeamUpdated(teamId, { name });
             showHeaderMsg('Team name updated.', 'success');
         } catch (e: any) {
             showHeaderErr(e?.message ?? 'Failed to update team name.');
@@ -142,7 +141,7 @@ export default function TeamSettingsModal({
         }
     };
 
-    // ====== MAPOWANIE zaproszeń do widoku ======
+    // MAPPING INVITES TO VIEW
     const inviteViews: InviteView[] = useMemo(() => {
         const toView = (inv: TeamInvite & any): InviteView => ({
             id: inv.id,
@@ -159,7 +158,7 @@ export default function TeamSettingsModal({
         return invites.map(toView);
     }, [invites]);
 
-    // ====== AKCJE: zaproszenia (hook już robi refresh; tu tylko toasty) ======
+    // INVITE ACTIONS
     async function handleInvite(username: string) {
         try {
             await inviteUserToTeam(username, teamId);
@@ -178,13 +177,13 @@ export default function TeamSettingsModal({
         }
     }
 
-    // ====== PERMISJE ======
+    // PERMISSIONS
     const canRename = team?.currentUserRole === 'Leader' || team?.currentUserRole === 'Admin';
     const canChangePicture = canRename;
     const canDeleteTeam = team?.currentUserRole === 'Leader';
     const canLeaveTeam = true;
 
-    const canChangeRole = (m: TeamMember): boolean =>
+    const canChangeRole = (): boolean =>
         team?.currentUserRole === 'Leader';
 
     const canEditMusicalRole = (_m: TeamMember): boolean =>
@@ -193,7 +192,7 @@ export default function TeamSettingsModal({
     const canKick = (m: TeamMember): boolean =>
         team?.currentUserRole === 'Leader' && m.role !== 'Leader';
 
-    // ====== Zamykanie ESC ======
+    // CLOSE ON ESCAPE
     useEffect(() => {
         if (!isOpen) return;
         const onKey = (e: KeyboardEvent) => {
@@ -214,20 +213,23 @@ export default function TeamSettingsModal({
             teamError={teamError}
             invitesLoading={invitesLoading}
             invitesError={invitesError}
-            // dane
+
+            // Data
             teamName={team?.name ?? ''}
             teamPictureUrl={team?.teamPictureUrl ?? null}
             members={team?.members ?? []}
-            // header
-            canRename={!!canRename}
-            canChangePicture={!!canChangePicture}
-            canDeleteTeam={!!canDeleteTeam}
-            canLeaveTeam={!!canLeaveTeam}
+
+            // Header
+            canRename={canRename}
+            canChangePicture={canChangePicture}
+            canDeleteTeam={canDeleteTeam}
+            canLeaveTeam={canLeaveTeam}
             onRename={renameTeam}
             onChangePicture={changeTeamPicture}
             onDeleteTeam={deleteTeam}
             onLeaveTeam={leaveTeam}
             headerMsg={headerMsg}
+
             // members
             currentUserId={currentUserId}
             onChangeRole={changeMemberRole}
@@ -237,6 +239,7 @@ export default function TeamSettingsModal({
             canEditMusicalRoleFn={canEditMusicalRole}
             canKickFn={canKick}
             membersMsg={membersMsg}
+
             // invites
             invites={inviteViews}
             onInvite={handleInvite}
@@ -245,13 +248,13 @@ export default function TeamSettingsModal({
         />
     );
 
-    if (!modalRoot) return body; // awaryjnie bez portalu (np. testy)
+    if (!modalRoot) return body;
     return ReactDOM.createPortal(body, modalRoot);
 }
 
-/* ========================= */
-/* ====== Modal Body  ====== */
-/* ========================= */
+// ==========
+// MODAL BODY
+// ==========
 
 type BodyProps = {
     teamId: string;
@@ -310,12 +313,7 @@ const ModalBody: React.FC<BodyProps> = (p) => {
     const modalRef = useRef<HTMLDivElement | null>(null);
     const scrollRef = useRef<HTMLDivElement | null>(null);
 
-    useLayoutEffect(() => {
-        const el = scrollRef.current, modal = modalRef.current;
-        if (!el || !modal) return;
-        const sbw = el.offsetWidth - el.clientWidth;
-        modal.style.setProperty('--sbw', `${sbw}px`);
-    }, []);
+
 
     return (
         <div
@@ -365,7 +363,7 @@ const ModalBody: React.FC<BodyProps> = (p) => {
                     />
                     <MessageSlot message={headerMsg} className={styles.teamInfoMsg} />
 
-                    {/* STAN ŁADOWANIA/ERRORY */}
+                    {/* LOADING/ERRORS */}
                     {(teamLoading || invitesLoading) && (
                         <p className={styles.role}>Loading…</p>
                     )}
@@ -375,7 +373,7 @@ const ModalBody: React.FC<BodyProps> = (p) => {
                     <hr className={styles.lineBreak} />
 
                     {/* MEMBERS */}
-                    <h3 className={styles.subtitle} style={{ marginTop: 16 }}>Members</h3>
+                    <h3 className={styles.subtitle}>Members</h3>
                     <MembersList
                         members={members}
                         currentUserId={currentUserId}
@@ -391,9 +389,9 @@ const ModalBody: React.FC<BodyProps> = (p) => {
                     <hr className={styles.lineBreak} />
 
                     {/* INVITES */}
-                    <h3 className={styles.subtitle} style={{ marginTop: 16 }}>Invites</h3>
+                    <h3 className={styles.subtitle}>Invites</h3>
                     <InvitesList invites={invites} onCancel={onCancelInvite} />
-                    <h3 className={styles.subtitle} style={{ marginTop: 12 }}>Invite User</h3>
+                    <h3 className={styles.subtitle}>Invite User</h3>
                     <InviteForm onInvite={onInvite} />
                     <MessageSlot message={invitesMsg} className={styles.teamInfoMsg} />
                 </div>

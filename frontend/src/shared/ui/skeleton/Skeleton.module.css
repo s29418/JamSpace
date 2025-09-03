@@ -1,0 +1,16 @@
+.skeleton {
+    position: relative;
+    overflow: hidden;
+    background: #e6e6e6;
+    border-radius: 8px;
+}
+.shimmer {
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    animation: shimmer 1.3s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+}
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}

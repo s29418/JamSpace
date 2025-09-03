@@ -3,7 +3,7 @@ import { createTeam, changeTeamPicture } from 'entities/team/api/teams.api';
 import { ApiError, isApiError } from 'shared/lib/api/base';
 
 type Options = {
-    onDone?: () => void | Promise<void>;          // np. odświeżenie listy
+    onDone?: () => void | Promise<void>;
 };
 
 export function useCreateTeam(opts: Options = {}) {

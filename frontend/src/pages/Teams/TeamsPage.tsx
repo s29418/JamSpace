@@ -8,11 +8,11 @@ import { useCreateTeam } from './model/useCreateTeam';
 import TeamCard from '../../features/team/teamCard/ui/TeamCard';
 import TeamInviteCard from '../../features/team/inviteCard/ui/TeamInviteCard';
 import styles from './TeamsPage.module.css';
+import TeamCardSkeleton from "../../features/team/teamCard/ui/TeamCardSkeleton";
 
 const TeamsPage: React.FC = () => {
     const navigate = useNavigate();
 
-    // Hooki – źródła prawdy dla list
     const {
         teams,
         loading: teamsLoading,
@@ -22,28 +22,23 @@ const TeamsPage: React.FC = () => {
 
     const {
         invites,
-        loading: invitesLoading,
         error: invitesError,
         refresh: refreshInvites,
         acceptInvite,
         rejectInvite,
     } = useTeamInvites();
 
-    // Tworzenie zespołu (odśwież po sukcesie obie listy)
     const { create, loading: creating, error: createError } = useCreateTeam({
         onDone: async () => {
             await Promise.all([refreshTeams(), refreshInvites()]);
         },
     });
 
-    // UI (formularz)
     const [showForm, setShowForm] = useState(false);
     const [teamName, setTeamName] = useState('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [fileLabel, setFileLabel] = useState('Upload Image (optional)');
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // Komunikaty
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const setSuccess = useCallback((msg: string) => {
@@ -55,14 +50,12 @@ const TeamsPage: React.FC = () => {
         window.setTimeout(() => setErrorMessage(''), 7000);
     }, []);
 
-    // Zmiana pliku (avatar nowej drużyny)
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
         setSelectedFile(file);
         setFileLabel(file?.name || 'No file chosen');
     };
 
-    // Tworzenie zespołu przez hook
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const nm = teamName.trim();
@@ -70,23 +63,21 @@ const TeamsPage: React.FC = () => {
         if (nm.length > 25) return setErrorMsg('Name of the team must be less than 25 characters long.');
 
         try {
-            await create(nm, selectedFile); // hook sam wrzuci obrazek i odświeży listy przez onDone
+            await create(nm, selectedFile);
             setTeamName('');
             setSelectedFile(null);
             setShowForm(false);
             setErrorMessage('');
             setSuccess('The team has been successfully created');
         } catch (err: any) {
-            // useCreateTeam już ustawia własny error, ale możemy dołożyć komunikat UI
             setErrorMsg(err?.message ?? 'Failed to create team. Please try again.');
         }
     };
 
-    // Akcje na zaproszeniach (po akceptacji odświeżamy też listę drużyn)
     const handleAccept = async (inviteId: string) => {
         try {
-            await acceptInvite(inviteId);     // hook sam odświeży listę zaproszeń
-            await refreshTeams();             // nowa drużyna pojawi się na liście
+            await acceptInvite(inviteId);
+            await refreshTeams();
             setSuccess('Invitation accepted.');
         } catch (err: any) {
             setErrorMsg(err?.message ?? 'Failed to accept invite. Please try again.');
@@ -95,17 +86,17 @@ const TeamsPage: React.FC = () => {
 
     const handleReject = async (inviteId: string) => {
         try {
-            await rejectInvite(inviteId);     // hook sam odświeży listę zaproszeń
+            await rejectInvite(inviteId);
             setSuccess('Invitation rejected.');
         } catch (err: any) {
             setErrorMsg(err?.message ?? 'Failed to reject invite. Please try again.');
         }
     };
 
-    // Render
+
     return (
         <div className={styles.wrapper}>
-            {/* Sekcja zaproszeń */}
+            {/* INVITES */}
             {invites.length > 0 && (
                 <div className={styles.inviteSection}>
                     <h1 className={styles.title}>Team Invites</h1>
@@ -125,7 +116,7 @@ const TeamsPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Nagłówek + przycisk tworzenia */}
+            {/* HEADER */}
             <div className={styles.header}>
                 <h1 className={styles.title}>Teams</h1>
                 <button
@@ -137,7 +128,7 @@ const TeamsPage: React.FC = () => {
                 </button>
             </div>
 
-            {/* Formularz tworzenia */}
+            {/* CREATE FORM */}
             <div
                 className={`${styles.expandable} ${showForm ? styles.expanded : ''}`}
                 aria-hidden={!showForm}
@@ -187,7 +178,7 @@ const TeamsPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Komunikaty */}
+            {/* MESSAGES/ERRORS */}
             {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
             {(errorMessage || createError || teamsError || invitesError) && (
                 <p className={styles.message}>
@@ -195,9 +186,16 @@ const TeamsPage: React.FC = () => {
                 </p>
             )}
 
-            {/* Lista drużyn */}
-            {teamsLoading && <p className={styles.message}>Loading teams…</p>}
+            {/* TEAM LIST */}
+            {teamsLoading && (
+                <>
+                    <TeamCardSkeleton />
+                    <TeamCardSkeleton />
+                    <TeamCardSkeleton />
+                </>
+            )}
             {!teamsLoading && teams.map((team) => (
+
                 <TeamCard
                     key={team.id}
                     id={team.id}

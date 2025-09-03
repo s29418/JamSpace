@@ -30,7 +30,7 @@ const NavigationBar = () => {
 
     return (
         <nav className={styles.navbar}>
-            {/* LEWA STRONA */}
+            {/* LEFT SIDE */}
             <NavButton
                 iconSolid={HomeSolid}
                 iconOutline={HomeOutline}
@@ -58,7 +58,7 @@ const NavigationBar = () => {
                 <img src={logo} alt="JamSpace logo" className={styles.logo}/>
             </div>
 
-            {/* PRAWA STRONA */}
+            {/* RIGHT SIDE */}
             <NavButton
                 iconSolid={ChatSolid}
                 iconOutline={ChatOutline}

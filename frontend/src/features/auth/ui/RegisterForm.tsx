@@ -26,11 +26,38 @@ const RegisterForm = () => {
     return (
         <form onSubmit={handleSubmit}>
             <h2>Register</h2>
-            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-            <input type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} required />
-            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-            <input type="password" placeholder="Confirm password" value={confirm} onChange={e => setConfirm(e.target.value)} required />
+
+            <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+            />
+            <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                required
+            />
+            <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+            />
+            <input
+                type="password"
+                placeholder="Confirm password"
+                value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                required
+            />
+
             <button type="submit">Register</button>
+
         </form>
     );
 };

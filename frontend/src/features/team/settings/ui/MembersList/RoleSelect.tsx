@@ -29,7 +29,7 @@ export const RoleSelect: React.FC<Props> = ({ onPick, onClose, initialValue }) =
                 <option value="Leader">Leader</option>
             </select>
 
-            <div className={styles.editButtonsRow} style={{ marginTop: 8 }}>
+            <div className={styles.editButtonsRow}>
                 <button
                     className={styles.userActionButton}
                     type="button"

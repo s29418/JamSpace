@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import styles from '../TeamSettingsModal.module.css';
 import { EditableTeamName } from './EditableTeamName';
-import { AvatarUploader } from './AvatarUploader';
 import {TrashIcon, ArrowRightStartOnRectangleIcon} from '@heroicons/react/24/outline';
 
 type Props = {
@@ -23,13 +22,10 @@ type Props = {
 
 export const TeamHeader: React.FC<Props> = ({
                                                 teamName,
-                                                teamPictureUrl,
                                                 canRename = false,
-                                                canChangePicture = false,
                                                 canDeleteTeam = false,
                                                 canLeaveTeam = false,
                                                 onRename,
-                                                onChangePicture,
                                                 onDeleteTeam,
                                                 onLeaveTeam,
                                                 className,

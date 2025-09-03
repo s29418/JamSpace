@@ -23,11 +23,10 @@ export const AvatarUploader: React.FC<Props> = ({
     const [submitting, setSubmitting] = useState(false);
     const lastUrlRef = useRef<string | null>(imageUrl ?? null);
 
-    // sprzątanie URL podglądu
     useEffect(() => {
         if (preview && imageUrl && imageUrl !== lastUrlRef.current) {
             URL.revokeObjectURL(preview);
-            setPreview(null);     // przełącz się na świeży URL z propsów
+            setPreview(null);
         }
         lastUrlRef.current = imageUrl ?? null;
     }, [imageUrl, preview]);

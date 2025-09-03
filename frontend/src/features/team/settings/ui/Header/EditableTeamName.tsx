@@ -41,7 +41,7 @@ export const EditableTeamName: React.FC<Props> = ({
         if (!trimmed || submitting) return;
         setSubmitting(true);
         try {
-            await Promise.resolve(onSave(trimmed));
+            await onSave(trimmed);
             setEditing(false);
         } finally {
             setSubmitting(false);

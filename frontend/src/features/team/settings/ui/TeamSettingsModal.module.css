@@ -1,0 +1,565 @@
+.wrapper {
+    padding: 48px 128px;
+}
+
+.teamInfo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.textCol {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.title {
+    font-size: 32px;
+    margin: 0 0 16px;
+    color: white;
+
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.avatar  {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    margin-bottom: 8px;
+}
+
+.avatarWrapper {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    flex: 0 0 160px;
+    border-radius: 100%;
+    overflow: hidden;
+    border: 2px solid #26cdd4;
+    pointer-events: auto;
+}
+
+.avatarModal {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    transition: all .4s ease;
+}
+
+.avatarWrapper:hover .avatarModal {
+    filter: brightness(0.6);
+    border-color: #ffffff;
+    cursor: pointer;
+}
+
+.cameraIcon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    color: rgb(239, 239, 239);
+}
+
+.avatarHoverable {
+    cursor: pointer;
+    position: relative;
+}
+
+.avatarHoverable:hover img {
+    filter: grayscale(1) brightness(0.85);
+    transition: filter .2s ease;
+}
+
+.cameraIconOverlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    color: #e5e7eb;
+    transition: opacity .2s ease;
+    pointer-events: none;
+}
+
+.avatarHoverable:hover .cameraIconOverlay {
+    opacity: 1;
+}
+
+
+.avatarWrapper:hover .cameraIcon {
+    opacity: 1;
+}
+
+.userAvatarWrapper {
+    width: 96px;
+    height: 96px;
+    border-radius: 100%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.userAvatar {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 100%;
+}
+
+
+.subtitle {
+    font-size: 24px;
+    margin: 16px 0;
+    color: white;
+}
+
+.memberList {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 32px;
+}
+
+.member {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    margin-bottom: 16px;
+}
+
+.username {
+    font-size: 24px;
+    /*line-height: 1.2;*/
+}
+
+.role {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.musicalRole {
+    font-size: 16px;
+    color: #26cdd4;
+}
+
+.editRoleIcon {
+    width: 20px;
+    height: 20px;
+    color: #26cdd4;
+    cursor: pointer;
+    transition: transform 0.3s;
+    margin-left: 6px;
+}
+
+.editRoleIcon:hover, .editMusicalRoleIcon:hover {
+    transform: scale(1.2);
+}
+
+.editMusicalRoleIcon {
+    width: 16px;
+    height: 16px;
+    color: #26cdd4;
+    cursor: pointer;
+    transition: transform 0.3s;
+    margin-left: 6px;
+}
+
+
+.inviteButton {
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    font-size: 18px;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+.uploadButton {
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 16px;
+}
+
+.inviteButton:hover, .uploadButton:hover {
+    background-color: #26cdd41f;
+}
+
+.inviteForm {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+}
+
+.inviteInput {
+    flex: 1;
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: #1a1a1a;
+    color: white;
+    font-size: 24px;
+}
+
+.teamNameInput {
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: #1a1a1a;
+    color: white;
+    font-size: 24px;
+    margin: 8px;
+    text-align: center;
+}
+
+.teamNameInput:focus {
+    outline: none;
+    border-color: #ffffff;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    color: #26cdd4;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    justify-self: center;
+    transition: transform 0.3s;
+}
+
+.miniIcon {
+    width: 12px;
+    height: 12px;
+    color: #26cdd4;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    justify-self: center;
+    transition: transform 0.3s;
+}
+
+.message {
+    color: #ff6666;
+    margin-top: 16px;
+    font-weight: bold;
+}
+
+.editButton, .deleteButton, .leaveButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-right: 8px;
+    font-size: 16px;
+    /*margin-top: 8px;*/
+}
+
+.leaveButton{
+    margin-top: 8px;
+}
+
+.editButton:hover, .leaveButton:hover {
+    background-color: #26cdd41f;
+}
+
+.deleteButton:hover {
+    background-color: rgba(255, 102, 102, 0.12);
+}
+
+.changeNameOptions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+.lineBreak {
+    border: none;
+    height: 1px;
+    background-color: #707070;
+    margin: 16px 0;
+}
+
+.invitedUserDetails {
+    display: flex;
+    flex-direction: column;
+    /*align-items: center;*/
+    gap: 4px;
+    margin-bottom: 8px;
+    margin-top: 8px;
+
+}
+
+.userActionButton, .nameActionButton {
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 4px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 12px;
+    align-self: flex-start;
+}
+
+.nameActionButton{
+    font-size: 16px;
+}
+
+.userRoleButton {
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    margin-left: 8px;
+    padding: 2px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 12px;
+}
+
+.userActionButton:hover, .userRoleButton:hover, .nameActionButton:hover {
+    background-color: #26cdd41f;
+}
+
+.roleSelect {
+    padding: 2px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: #1a1a1a;
+    color: white;
+    font-size: 16px;
+    width: 100%;
+    margin: 6px 0 6px 0;
+}
+
+.musicalRoleInput {
+    padding: 2px 8px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-size: 16px;
+    width: 100%;
+    margin: 6px 0;
+}
+
+.musicalRoleInput:focus {
+    outline: none;
+    border-color: #ffffff;
+}
+
+.editButtonsRow, .changeNameButtonsRow {
+    display: flex;
+    gap: 8px;
+}
+
+.changeNameButtonsRow{
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.teamInfoMsg {
+    margin-top: 8px;
+}
+
+.changeNamePanel{
+    margin-top: 10px;
+}
+
+.emptyNote{
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+    /*text-align: center;*/
+    padding-bottom: 16px;
+    font-style: italic;
+}
+
+.modalBackdrop, .confirmBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 800;
+}
+
+.modalBody, .confirmBody {
+    --pad: 16px;
+    --hero: 96px;
+    background: #0c0c0c;
+    padding: var(--pad);
+    /*border: #aaaaaa 1px solid;*/
+    border-radius: 16px;
+    max-width: 900px;
+    /*width: 100%;*/
+    width: min(600px, 92vw);
+    max-height: 90vh;
+    /*overflow-y: auto;*/
+    position: relative;
+    color: white;
+}
+
+.modalBody{
+    overflow: visible;
+    padding-top: 96px;
+}
+
+.contentScrollable {
+    max-height: calc(90vh - 180px);
+    overflow-y: auto;
+    scrollbar-gutter: stable both-edges;
+    padding-right: 16px;
+    margin-right: -16px;
+}
+
+.confirmBody{
+    max-width: 400px;
+}
+
+.confirmContent{
+    margin-bottom: 16px;
+    color: #aaaaaa;
+}
+
+.modalClose {
+    position: absolute;
+    margin: 0 4px;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 32px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.modalClose:hover {
+    transform: scale(1.1);
+}
+
+.expandable {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease, opacity .35s ease;
+    align-items: center;
+    /*margin: 16px 0;*/
+    opacity: 0;
+    /*padding: 0.5px 2px;*/
+}
+
+.expanded {
+    max-height: 90px;
+    opacity: 1;
+}
+
+.uploadPanel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease, opacity .2s ease;
+    opacity: 0;
+    display: block;
+}
+
+.uploadPanelVisible {
+    display: block;
+    max-height: 80px;
+    margin-top: 10px;
+    opacity: 1;
+}
+
+.hiddenInput {
+    display: none;
+    /*background-color: #26cdd4;*/
+}
+
+.visible{}
+
+.teamHeaderCenter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.nameRow {
+    /*display: flex;*/
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    text-align: center;
+
+}
+.centerText {
+    text-align: center;
+}
+
+.heroAvatarDock {
+    position: absolute;
+
+    top: -64px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: flex;
+    justify-content: center;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.teamHeaderCenter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatarControlsSlot{
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    /*min-height: 28px;*/
+    margin-top: 8px;
+    margin-bottom: 8px;
+}

@@ -36,6 +36,13 @@ public class TeamRepository : ITeamRepository
 
         if (team is null)
             throw new NotFoundException("Team not found.");
+        
+        team.Members = team.Members
+            .OrderBy(m => m.Role == FunctionalRole.Leader ? 0
+                : m.Role == FunctionalRole.Admin  ? 1
+                : 2)
+            .ThenBy(m => m.User.UserName)
+            .ToList();
 
         return team;
     }

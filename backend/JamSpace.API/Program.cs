@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using JamSpace.API.Middleware;
 using JamSpace.Application;
 using JamSpace.Infrastructure;
@@ -35,7 +36,12 @@ builder.Services
         };
     });
 
-builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

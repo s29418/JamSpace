@@ -14,7 +14,7 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
 
         builder.Property(t => t.Name)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(25);
 
         builder.Property(t => t.CreatedAt);
         

@@ -15,7 +15,7 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
         builder.Property(tm => tm.Role)
             .IsRequired()
             .HasConversion<string>()
-            .HasMaxLength(50);
+            .HasMaxLength(25);
 
         builder.HasOne(tm => tm.User)
             .WithMany(u => u.Teams)

@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using JamSpace.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DefaultNamespace;
+namespace JamSpace.Infrastructure.Configurations;
 
 public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
 {
@@ -13,7 +14,8 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
 
         builder.Property(tm => tm.Role)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasConversion<string>()
+            .HasMaxLength(25);
 
         builder.HasOne(tm => tm.User)
             .WithMany(u => u.Teams)
@@ -23,6 +25,8 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
         builder.HasOne(tm => tm.Team)
             .WithMany(t => t.Members)
             .HasForeignKey(tm => tm.TeamId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder.HasIndex(tm => new { tm.TeamId, tm.UserId }).IsUnique();
     }
 }

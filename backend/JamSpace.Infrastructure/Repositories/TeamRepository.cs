@@ -1,7 +1,8 @@
-﻿using DefaultNamespace;
-using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Interfaces;
+﻿using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
+using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
+using JamSpace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace JamSpace.Infrastructure.Repositories;
@@ -9,42 +10,43 @@ namespace JamSpace.Infrastructure.Repositories;
 public class TeamRepository : ITeamRepository
 {
     private readonly JamSpaceDbContext _db;
-    
-    public TeamRepository(JamSpaceDbContext db)
-    {
-        _db = db;
-    }
-    
-    public async Task<Guid> CreateTeamAsync(Team team, Guid creatorUserId)
+
+    public TeamRepository(JamSpaceDbContext db) => _db = db;
+
+    public async Task<Guid> CreateTeamAsync(Team team, Guid creatorUserId, CancellationToken ct)
     {
         await _db.Teams.AddAsync(team);
         await _db.TeamMembers.AddAsync(new TeamMember
         {
             Team = team,
             UserId = creatorUserId,
-            Role = "Owner"
+            Role = FunctionalRole.Leader
         });
-
-        await _db.SaveChangesAsync();
-
+        await _db.SaveChangesAsync(ct);
         return team.Id;
     }
 
-
-    public async Task<Team?> GetTeamByIdAsync(Guid id)
+    public async Task<Team?> GetTeamByIdAsync(Guid id, CancellationToken ct)
     {
-        return await _db.Teams
+        var team = await _db.Teams
             .Include(t => t.CreatedBy)
             .Include(t => t.Members)
-                .ThenInclude(m => m.User)
-            .FirstOrDefaultAsync(t => t.Id == id);
+            .ThenInclude(m => m.User)
+            .FirstOrDefaultAsync(t => t.Id == id, ct);
+
+        if (team is null)
+            throw new NotFoundException("Team not found.");
+        
+        team.Members = team.Members
+            .OrderBy(m => m.Role == FunctionalRole.Leader ? 0
+                : m.Role == FunctionalRole.Admin  ? 1
+                : 2)
+            .ThenBy(m => m.User.UserName)
+            .ToList();
+
+        return team;
     }
-    
-    public async Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId)
-    {
-        return await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == userId);
-    }
-    
+
     public async Task<List<Team>> GetTeamsByUserIdAsync(Guid userId, CancellationToken ct)
     {
         return await _db.Teams
@@ -54,88 +56,31 @@ public class TeamRepository : ITeamRepository
             .ThenInclude(m => m.User)
             .ToListAsync(ct);
     }
-    
-    public async Task<Guid?> GetUserIdByUsernameAsync(string username, CancellationToken ct)
+
+    public async Task<Team> ChangeTeamNameAsync(Guid teamId, string name, CancellationToken ct)
     {
-        var user = await _db.Users
-            .Where(u => u.UserName == username)
-            .Select(u => new { u.Id })
-            .FirstOrDefaultAsync(ct);
-
-        return user?.Id;
-    }
-
-    public async Task SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct)
-    {
-        var alreadyExists = await _db.TeamInvites.AnyAsync(
-            i => i.TeamId == teamId 
-                 && i.InvitedUserId == invitedUserId 
-                 && i.Status == InviteStatus.Pending,
-            ct);
-
-        if (alreadyExists)
-            return;
-
-        var invite = new TeamInvite
-        {
-            Id = Guid.NewGuid(),
-            TeamId = teamId,
-            InvitedUserId = invitedUserId,
-            InvitedByUserId = invitedByUserId,
-            CreatedAt = DateTime.UtcNow,
-            Status = InviteStatus.Pending
-        };
-
-        _db.TeamInvites.Add(invite);
+        var team = await GetTeamByIdAsync(teamId, ct);
+        team!.Name = name;
         await _db.SaveChangesAsync(ct);
+        return team;
     }
     
-    public async Task<List<TeamInvite>> GetMyPendingInvitesAsync(Guid userId, CancellationToken ct)
+    public async Task UpdateTeamPictureAsync(
+        Guid teamId, Guid requestingUserId, string pictureUrl, CancellationToken ct)
     {
-        return await _db.TeamInvites
-            .Where(i => i.InvitedUserId == userId && i.Status == InviteStatus.Pending)
-            .Include(i => i.Team)
-            .Include(i => i.InvitedByUser)
-            .ToListAsync(ct);
-    }
+        var team = await GetTeamByIdAsync(teamId, ct);
+        if (!await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == requestingUserId && 
+                                                 (m.Role == FunctionalRole.Leader || m.Role == FunctionalRole.Admin)))
+            throw new ForbiddenAccessException("Only team leader or admin can update team picture.");
 
-    public async Task AcceptInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
-    {
-        var invite = await _db.TeamInvites
-            .Include(i => i.Team)
-            .FirstOrDefaultAsync(i => i.Id == inviteId && i.InvitedUserId == userId, ct);
-
-        if (invite is null)
-            throw new NotFoundException("Invite not found.");
-
-        if (invite.Status != InviteStatus.Pending)
-            throw new InvalidOperationException("Invite is no longer pending.");
-
-        invite.Status = InviteStatus.Accepted;
-
-        _db.TeamMembers.Add(new TeamMember
-        {
-            TeamId = invite.TeamId,
-            UserId = userId
-        });
-
+        team!.TeamPictureUrl = pictureUrl;
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task RejectInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
+    public async Task DeleteTeamAsync(Guid teamId, CancellationToken ct)
     {
-        var invite = await _db.TeamInvites
-            .FirstOrDefaultAsync(i => i.Id == inviteId && i.InvitedUserId == userId, ct);
-
-        if (invite is null)
-            throw new NotFoundException("Invite not found.");
-
-        if (invite.Status != InviteStatus.Pending)
-            throw new InvalidOperationException("Invite is no longer pending.");
-
-        invite.Status = InviteStatus.Rejected;
+        var team = await GetTeamByIdAsync(teamId, ct);
+        _db.Teams.Remove(team!);
         await _db.SaveChangesAsync(ct);
     }
-
-
 }

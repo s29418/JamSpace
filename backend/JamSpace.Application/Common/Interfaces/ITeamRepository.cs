@@ -1,16 +1,12 @@
-﻿using DefaultNamespace;
-
-namespace JamSpace.Application.Interfaces;
+﻿using JamSpace.Domain.Entities;
+namespace JamSpace.Application.Common.Interfaces;
 
 public interface ITeamRepository
 {
-    Task<Guid> CreateTeamAsync(Team team, Guid creatorUserId);
-    Task<Team?> GetTeamByIdAsync(Guid id);
-    Task<bool> IsUserInTeamAsync(Guid teamId, Guid userId);
+    Task<Guid> CreateTeamAsync(Team team, Guid creatorUserId, CancellationToken ct);
+    Task<Team?> GetTeamByIdAsync(Guid id, CancellationToken ct);
     Task<List<Team>> GetTeamsByUserIdAsync(Guid userId, CancellationToken ct);
-    Task<Guid?> GetUserIdByUsernameAsync(string username, CancellationToken ct);
-    Task SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct);
-    Task<List<TeamInvite>> GetMyPendingInvitesAsync(Guid userId, CancellationToken ct);
-    Task AcceptInviteAsync(Guid inviteId, Guid userId, CancellationToken ct);
-    Task RejectInviteAsync(Guid inviteId, Guid userId, CancellationToken ct);
+    Task<Team> ChangeTeamNameAsync(Guid teamId, string name, CancellationToken ct);
+    Task UpdateTeamPictureAsync(Guid teamId, Guid requestingUserId, string pictureUrl, CancellationToken ct);
+    Task DeleteTeamAsync(Guid teamId, CancellationToken ct);
 }

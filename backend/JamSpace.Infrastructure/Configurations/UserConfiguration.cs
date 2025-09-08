@@ -1,7 +1,8 @@
-﻿namespace DefaultNamespace;
-
+﻿using JamSpace.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace JamSpace.Infrastructure.Configurations;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
@@ -19,6 +20,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Email)
             .IsRequired()
             .HasMaxLength(100);
+        builder.HasIndex(u => u.Email).IsUnique();
 
         builder.Property(u => u.PasswordHash)
             .IsRequired()

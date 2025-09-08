@@ -1,0 +1,35 @@
+﻿using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Features.Teams.DTOs;
+using JamSpace.Application.Features.Teams.Mappers;
+using JamSpace.Domain.Entities;
+using MediatR;
+
+namespace JamSpace.Application.Features.Teams.Commands.CreateTeam;
+
+public class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, TeamDto>
+{
+    private readonly ITeamRepository _repo;
+
+    public CreateTeamHandler(ITeamRepository repo)
+    {
+        _repo = repo;
+    }
+
+    public async Task<TeamDto> Handle(CreateTeamWithUserCommand request, CancellationToken ct)
+    {
+        var team = new Team
+        {
+            Id = Guid.NewGuid(),
+            Name = request.Command.Name,
+            CreatedAt = DateTime.UtcNow,
+            CreatedById = request.CreatorUserId,
+            TeamPictureUrl = request.Command.TeamPictureUrl
+        };
+
+        var teamId = await _repo.CreateTeamAsync(team, request.CreatorUserId, ct);
+
+        var createdTeam = await _repo.GetTeamByIdAsync(teamId, ct);
+        return TeamMapper.ToDto(createdTeam!, request.CreatorUserId);
+    }
+}
+

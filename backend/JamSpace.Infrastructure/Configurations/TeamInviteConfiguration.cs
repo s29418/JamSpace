@@ -1,7 +1,8 @@
-﻿namespace DefaultNamespace;
-
+﻿using JamSpace.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace JamSpace.Infrastructure.Configurations;
 
 public class TeamInviteConfiguration : IEntityTypeConfiguration<TeamInvite>
 {
@@ -21,7 +22,7 @@ public class TeamInviteConfiguration : IEntityTypeConfiguration<TeamInvite>
         builder.HasOne(ti => ti.Team)
             .WithMany()
             .HasForeignKey(ti => ti.TeamId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(ti => ti.InvitedUser)
             .WithMany()
@@ -32,5 +33,9 @@ public class TeamInviteConfiguration : IEntityTypeConfiguration<TeamInvite>
             .WithMany()
             .HasForeignKey(ti => ti.InvitedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasIndex(ti => new { ti.TeamId, ti.InvitedUserId, ti.Status })
+            .HasFilter("[Status] = 'Pending'")
+            .IsUnique();
     }
 }

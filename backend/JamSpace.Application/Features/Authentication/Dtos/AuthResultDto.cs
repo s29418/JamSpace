@@ -1,4 +1,4 @@
-﻿namespace DefaultNamespace;
+﻿namespace JamSpace.Application.Features.Authentication.Dtos;
 
 public record AuthResultDto(
     Guid Id,

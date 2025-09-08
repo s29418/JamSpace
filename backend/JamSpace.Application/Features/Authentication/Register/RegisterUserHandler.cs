@@ -1,23 +1,26 @@
-﻿namespace JamSpace.Application.Authentication;
-
+﻿using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Features.Authentication.Dtos;
+using JamSpace.Domain.Entities;
 using MediatR;
-using JamSpace.Application.Interfaces;
-using DefaultNamespace;
+
+namespace JamSpace.Application.Features.Authentication.Register;
 
 public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResultDto>
 {
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public RegisterUserHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator)
+    public RegisterUserHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator, IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _passwordHasher = passwordHasher;
     }
 
-    public async Task<AuthResultDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<AuthResultDto> Handle(RegisterUserCommand request, CancellationToken ct)
     {
-        var existingUser = await _userRepository.GetByEmailAsync(request.Email);
+        var existingUser = await _userRepository.GetByEmailAsync(request.Email, ct);
         if (existingUser != null)
         {
             throw new Exception("Email already in use.");
@@ -28,11 +31,11 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResu
             Id = Guid.NewGuid(),
             Email = request.Email,
             UserName = request.Username,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            PasswordHash = _passwordHasher.Hash(request.Password),
             CreatedAt = DateTime.UtcNow
         };
 
-        await _userRepository.AddAsync(user);
+        await _userRepository.AddAsync(user, ct);
 
         var token = _jwtTokenGenerator.GenerateToken(user);
 

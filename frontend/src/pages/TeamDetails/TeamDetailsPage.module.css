@@ -1,0 +1,330 @@
+.wrapper {
+    padding: 48px 128px;
+}
+
+.teamInfo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.textCol {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.title {
+    font-size: 32px;
+    margin: 0 0 16px;
+    color: white;
+
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.avatar  {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+}
+
+.avatarWrapper {
+    position: relative;
+    width: 144px;
+    height: 144px;
+    flex: 0 0 144px;
+    border-radius: 100%;
+    overflow: hidden;
+    border: 2px solid #26cdd4;
+}
+
+.avatarModal {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    transition: all .4s ease;
+}
+
+.avatarWrapper:hover .avatarModal {
+    filter: brightness(0.6);
+    border-color: #ffffff;
+    cursor: pointer;
+}
+
+.cameraIcon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    color: rgb(239, 239, 239);
+}
+
+.avatarWrapper:hover .cameraIcon {
+    opacity: 1;
+}
+
+.userAvatarWrapper {
+    width: 96px;
+    height: 96px;
+    border-radius: 100%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.userAvatar {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 100%;
+}
+
+
+.subtitle {
+    font-size: 24px;
+    margin: 16px 0;
+    color: white;
+}
+
+.memberList {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 32px;
+}
+
+.member {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+    margin-bottom: 16px;
+}
+
+.username {
+    font-size: 24px;
+    /*line-height: 1.2;*/
+}
+
+.role {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.musicalRole {
+    font-size: 16px;
+    color: #26cdd4;
+}
+
+.editRoleIcon {
+    width: 16px;
+    height: 16px;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: transform 0.3s;
+    margin-left: 6px;
+}
+
+.editRoleIcon:hover, .editMusicalRoleIcon:hover {
+    transform: scale(1.2);
+}
+
+.editMusicalRoleIcon {
+    width: 16px;
+    height: 16px;
+    color: #26cdd4;
+    cursor: pointer;
+    transition: transform 0.3s;
+    margin-left: 6px;
+}
+
+
+.inviteButton {
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.uploadButton {
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-left: 22px;
+}
+
+.inviteButton:hover, .uploadButton:hover {
+    background-color: #26cdd41f;
+}
+
+.inviteForm {
+    display: flex;
+    gap: 16px;
+}
+
+.inviteInput, .teamNameInput {
+    /*flex: 1;*/
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: #1a1a1a;
+    color: white;
+    font-size: 24px;
+}
+
+.teamNameInput:focus {
+    outline: none;
+    border-color: #ffffff;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    color: #26cdd4;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    justify-self: center;
+    transition: transform 0.3s;
+}
+
+.message {
+    color: #ff6666;
+    margin-top: 16px;
+    font-weight: bold;
+}
+
+.editButton, .deleteButton, .leaveButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 4px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-right: 8px;
+    font-size: 14px;
+    /*margin-top: 8px;*/
+}
+
+.leaveButton{
+    margin-top: 8px;
+}
+
+.editButton:hover, .leaveButton:hover {
+    background-color: #26cdd41f;
+}
+
+.deleteButton:hover {
+    background-color: rgba(255, 102, 102, 0.12);
+}
+
+.changeNameOptions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+.lineBreak {
+    border: none;
+    height: 1px;
+    background-color: #707070;
+    margin: 16px 0;
+}
+
+.invitedUserDetails {
+    display: flex;
+    flex-direction: column;
+    /*align-items: center;*/
+    gap: 4px;
+    margin-bottom: 8px;
+    margin-top: 8px;
+
+}
+
+.userActionButton {
+    background-color: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    padding: 4px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 12px;
+}
+
+.userActionButton:hover {
+    background-color: #26cdd41f;
+}
+
+.roleSelect {
+    padding: 2px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: #1a1a1a;
+    color: white;
+    font-size: 16px;
+    width: 100%;
+    margin: 4px 0;
+}
+
+.musicalRoleInput {
+    padding: 2px 8px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-size: 16px;
+    width: 100%;
+    margin: 4px 0;
+}
+
+.editButtonsRow {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.teamInfoMsg {
+    margin-top: 8px;
+}
+
+.uploadPanel{
+    display: none;
+}
+
+.changeNamePanel{
+    margin-top: 10px;
+}
+
+.emptyNote{
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 16px;
+    /*text-align: center;*/
+    padding-bottom: 16px;
+    font-style: italic;
+}

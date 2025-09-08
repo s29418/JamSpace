@@ -1,7 +1,8 @@
-﻿namespace DefaultNamespace;
-
+﻿using JamSpace.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace JamSpace.Infrastructure.Configurations;
 
 public class TeamConfiguration : IEntityTypeConfiguration<Team>
 {
@@ -13,7 +14,7 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
 
         builder.Property(t => t.Name)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(25);
 
         builder.Property(t => t.CreatedAt);
         

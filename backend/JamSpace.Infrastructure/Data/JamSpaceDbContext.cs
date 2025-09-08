@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using JamSpace.Domain.Entities;
+using JamSpace.Infrastructure.Configurations;
+using Microsoft.EntityFrameworkCore;
 
-namespace DefaultNamespace;
+namespace JamSpace.Infrastructure.Data;
 
 public class JamSpaceDbContext : DbContext
 {

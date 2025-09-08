@@ -1,4 +1,4 @@
-﻿namespace DefaultNamespace;
+﻿namespace JamSpace.Domain.Entities;
 
 public class Team
 {

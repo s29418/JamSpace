@@ -1,4 +1,5 @@
 ﻿using JamSpace.Application.Common.Interfaces;
+using JamSpace.Domain.Common;
 using JamSpace.Domain.Entities;
 using JamSpace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ public class GenreRepository : IGenreRepository
         if (string.IsNullOrWhiteSpace(name))
             return null;
 
-        var normalized = NormalizeForQuery(name);
+        var normalized = NameConventions.NormalizeForQuery(name);
         return await _db.Genres.FirstOrDefaultAsync(
             g => g.Name.Replace(" ", "").Replace("-", "").Replace("_", "").ToLower() == normalized, ct);
     }
@@ -36,7 +37,7 @@ public class GenreRepository : IGenreRepository
         if (string.IsNullOrWhiteSpace(genreName))
             throw new ArgumentException("Genre name is required.", nameof(genreName));
         
-        var pretty = PrettifyForDisplay(genreName);
+        var pretty = NameConventions.PrettifyForDisplay(genreName);
 
         var genre = new Genre
         {
@@ -47,38 +48,5 @@ public class GenreRepository : IGenreRepository
         _db.Genres.Add(genre);
         await _db.SaveChangesAsync(ct);
         return genre;
-    }
-
-
-    private static string NormalizeForQuery(string input)
-    {
-        var trimmed = input.Trim();
-        var compact = trimmed
-            .Replace(" ", string.Empty)
-            .Replace("-", string.Empty)
-            .Replace("_", string.Empty);
-        return compact.ToLowerInvariant();
-    }
-
-
-    private static string PrettifyForDisplay(string input)
-    {
-        if (string.IsNullOrWhiteSpace(input))
-            return string.Empty;
-
-        var compactSpaces = string.Join(" ", input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
-
-        var words = compactSpaces.Split(' ');
-        for (int i = 0; i < words.Length; i++)
-        {
-            var w = words[i];
-            if (w.Length == 0) continue;
-
-            var first = char.ToUpper(w[0]);
-            var rest = w.Length > 1 ? w.Substring(1).ToLower() : string.Empty;
-            words[i] = first + rest;
-        }
-
-        return string.Join(' ', words);
     }
 }

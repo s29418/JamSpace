@@ -1,4 +1,5 @@
-﻿using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
 using JamSpace.Domain.Entities;
 using JamSpace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -29,11 +30,26 @@ public class UserGenreRepository : IUserGenreRepository
 
     public async Task<UserGenre> AddUserGenreAsync(Guid userId, Guid genreId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var userGenre = new UserGenre
+        {
+            UserId = userId,
+            GenreId = genreId
+        };
+        
+        _db.UserGenres.Add(userGenre);
+        await _db.SaveChangesAsync(ct);
+        return userGenre;
     }
 
     public async Task RemoveUserGenreAsync(Guid userId, Guid genreId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var userGenre = await _db.UserGenres
+            .FirstOrDefaultAsync(ug => ug.UserId == userId && ug.GenreId == genreId, ct);
+
+        if (userGenre == null)
+            throw new NotFoundException("UserGenre not found.");
+        
+        _db.UserGenres.Remove(userGenre);
+        await _db.SaveChangesAsync(ct);
     }
 }

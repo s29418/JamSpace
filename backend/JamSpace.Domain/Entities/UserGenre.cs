@@ -3,7 +3,7 @@
 public class UserGenre
 {
     public Guid GenreId { get; set; }
-    public required Genre Genre { get; set; }
+    public Genre Genre { get; set; } = null!;
     public Guid UserId { get; set; }
-    public required User User { get; set; }
+    public User User { get; set; } = null!;
 }

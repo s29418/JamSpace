@@ -5,16 +5,16 @@ using MediatR;
 
 namespace JamSpace.Application.Features.UserGenres.Queries.GetUsersGenres;
 
-public class GetUsersGenresHandler : IRequestHandler<GetUsersGenresQuery, List<UserGenreDto>>
+public class GetUserGenresHandler : IRequestHandler<GetUserGenresQuery, List<UserGenreDto>>
 {
     private readonly IUserGenreRepository _repo;
     
-    public GetUsersGenresHandler(IUserGenreRepository repo)
+    public GetUserGenresHandler(IUserGenreRepository repo)
     {
         _repo = repo;
     }
     
-    public async Task<List<UserGenreDto>> Handle(GetUsersGenresQuery request, CancellationToken ct)
+    public async Task<List<UserGenreDto>> Handle(GetUserGenresQuery request, CancellationToken ct)
     {
         var userGenres = await _repo.GetAllUserGenresAsync(request.UserId, ct);
         

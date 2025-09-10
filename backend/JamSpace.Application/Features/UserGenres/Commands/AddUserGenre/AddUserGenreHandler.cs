@@ -2,7 +2,7 @@
 using JamSpace.Application.Features.UserGenres.DTOs;
 using MediatR;
 
-namespace JamSpace.Application.Features.UserGenres.AddUserGenre;
+namespace JamSpace.Application.Features.UserGenres.Commands.AddUserGenre;
 
 public class AddUserGenreHandler : IRequestHandler<AddUserGenreCommand, UserGenreDto>
 {

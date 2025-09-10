@@ -3,4 +3,4 @@ using MediatR;
 
 namespace JamSpace.Application.Features.UserGenres.Queries.GetUsersGenres;
 
-public record GetUsersGenresQuery(Guid UserId) : IRequest<List<UserGenreDto>>;
+public record GetUserGenresQuery(Guid UserId) : IRequest<List<UserGenreDto>>;

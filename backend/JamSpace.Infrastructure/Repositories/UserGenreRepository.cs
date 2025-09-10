@@ -25,6 +25,8 @@ public class UserGenreRepository : IUserGenreRepository
     {
         return await _db.UserGenres
             .Where(ug => ug.UserId == userId)
+            .OrderBy(ug => ug.AddedAt)
+            .Include(ug => ug.Genre)
             .ToListAsync(ct);
     }
 
@@ -33,7 +35,8 @@ public class UserGenreRepository : IUserGenreRepository
         var userGenre = new UserGenre
         {
             UserId = userId,
-            GenreId = genreId
+            GenreId = genreId,
+            AddedAt = DateTime.UtcNow
         };
         
         _db.UserGenres.Add(userGenre);

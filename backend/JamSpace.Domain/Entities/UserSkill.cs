@@ -6,4 +6,5 @@ public class UserSkill
     public Skill Skill { get; set; } = null!;
     public Guid UserId { get; set; }
     public User User { get; set; } = null!;
+    public DateTime AddeddAt { get; set; }
 }

@@ -14,7 +14,7 @@ public class DeleteUserGenreHandler : IRequestHandler<DeleteUserGenreCommand, Un
     
     public async Task<Unit> Handle(DeleteUserGenreCommand request, CancellationToken ct)
     {
-        if(await _repo.UserHasGenreAsync(request.UserId, request.GenreId, ct))
+        if(!await _repo.UserHasGenreAsync(request.UserId, request.GenreId, ct))
             throw new InvalidOperationException("User does not have this genre.");
         
         await _repo.RemoveUserGenreAsync(request.UserId, request.GenreId, ct);

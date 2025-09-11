@@ -1,5 +1,4 @@
-﻿using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.UserGenres.DTOs;
 using MediatR;
 
@@ -18,8 +17,6 @@ public class GetUserGenresHandler : IRequestHandler<GetUserGenresQuery, List<Use
     {
         var userGenres = await _repo.GetAllUserGenresAsync(request.UserId, ct);
         
-        if(userGenres == null)
-            throw new NotFoundException("No genres found for the user.");
 
         return userGenres
             .Select(ug => new UserGenreDto

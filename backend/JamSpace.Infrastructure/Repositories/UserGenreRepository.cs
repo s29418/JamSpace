@@ -25,7 +25,7 @@ public class UserGenreRepository : IUserGenreRepository
     {
         return await _db.UserGenres
             .Where(ug => ug.UserId == userId)
-            .OrderBy(ug => ug.AddedAt)
+            .OrderByDescending(ug => ug.AddedAt)
             .Include(ug => ug.Genre)
             .ToListAsync(ct);
     }

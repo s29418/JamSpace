@@ -1,6 +1,6 @@
 ﻿using JamSpace.API.Extensions;
 using JamSpace.Application.Features.UserGenres.Commands.AddUserGenre;
-using JamSpace.Application.Features.UserGenres.Commands.RemoveUserGenre;
+using JamSpace.Application.Features.UserGenres.Commands.DeleteUserGenre;
 using JamSpace.Application.Features.UserGenres.DTOs;
 using JamSpace.Application.Features.UserGenres.Queries.GetUsersGenres;
 using MediatR;

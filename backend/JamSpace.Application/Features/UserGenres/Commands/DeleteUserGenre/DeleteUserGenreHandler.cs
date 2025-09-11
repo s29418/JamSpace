@@ -1,7 +1,8 @@
-﻿using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
 using MediatR;
 
-namespace JamSpace.Application.Features.UserGenres.Commands.RemoveUserGenre;
+namespace JamSpace.Application.Features.UserGenres.Commands.DeleteUserGenre;
 
 public class DeleteUserGenreHandler : IRequestHandler<DeleteUserGenreCommand, Unit>
 {
@@ -15,7 +16,7 @@ public class DeleteUserGenreHandler : IRequestHandler<DeleteUserGenreCommand, Un
     public async Task<Unit> Handle(DeleteUserGenreCommand request, CancellationToken ct)
     {
         if(!await _repo.UserHasGenreAsync(request.UserId, request.GenreId, ct))
-            throw new InvalidOperationException("User does not have this genre.");
+            throw new ConflictException("User does not have this genre.");
         
         await _repo.RemoveUserGenreAsync(request.UserId, request.GenreId, ct);
         return Unit.Value;

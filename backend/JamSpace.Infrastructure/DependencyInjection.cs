@@ -17,9 +17,13 @@ public static class DependencyInjection
             opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IUserRepository, UserRepository>();
+        
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<ITeamInviteRepository, TeamInviteRepository>();
+        
+        services.AddScoped<IGenreRepository, GenreRepository>();
+        services.AddScoped<IUserGenreRepository, UserGenreRepository>();
 
         services.AddSingleton(sp =>
         {

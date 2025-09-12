@@ -18,7 +18,7 @@ public class JamSpaceDbContext : DbContext
     public DbSet<UserGenre> UserGenres => Set<UserGenre>();
     public DbSet<Skill> Skills => Set<Skill>();
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
-    public DbSet<UserFollows> UserFollows => Set<UserFollows>();
+    public DbSet<UserFollow> UserFollows => Set<UserFollow>();
     
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,7 +32,7 @@ public class JamSpaceDbContext : DbContext
         modelBuilder.ApplyConfiguration(new UserGenreConfiguration());
         modelBuilder.ApplyConfiguration(new SkillConfiguration());
         modelBuilder.ApplyConfiguration(new UserSkillConfiguration());
-        modelBuilder.ApplyConfiguration(new UserFollowsConfiguration());
+        modelBuilder.ApplyConfiguration(new UserFollowConfiguration());
     }
     
 }

@@ -4,16 +4,16 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace JamSpace.Infrastructure.Configurations;
 
-public class UserFollowsConfiguration : IEntityTypeConfiguration<UserFollows>
+public class UserFollowConfiguration : IEntityTypeConfiguration<UserFollow>
 {
-    public void Configure(EntityTypeBuilder<UserFollows> builder)
+    public void Configure(EntityTypeBuilder<UserFollow> builder)
     {
         builder.ToTable("UserFollows", t =>
         {
             t.HasCheckConstraint("CK_UserFollows_NoSelfFollow", "[FollowerId] <> [FollowedId]");
         });
 
-        builder.HasKey(uf => new { uf.FollowerId, uf.FollowedId });
+        builder.HasKey(uf => new { uf.FollowerId, FollowedId = uf.FolloweeId });
 
         builder.Property(uf => uf.FollowedAt)
             .HasDefaultValueSql("GETUTCDATE()")
@@ -25,13 +25,13 @@ public class UserFollowsConfiguration : IEntityTypeConfiguration<UserFollows>
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(uf => uf.Followed)
+        builder.HasOne(uf => uf.Followee)
             .WithMany(u => u.Followers)
-            .HasForeignKey(uf => uf.FollowedId)
+            .HasForeignKey(uf => uf.FolloweeId)
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
         
-        builder.HasIndex(uf => uf.FollowedId)
+        builder.HasIndex(uf => uf.FolloweeId)
             .HasDatabaseName("IX_UserFollows_FollowedId");
         
         builder.HasIndex(uf => uf.FollowerId)

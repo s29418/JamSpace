@@ -18,8 +18,8 @@ public class User
     public ICollection<TeamMember> Teams { get; set; } = new List<TeamMember>();
     public ICollection<Team> CreatedTeams { get; set; } = new List<Team>();
     
-    public ICollection<UserFollows> Followers { get; set; } = new List<UserFollows>();
-    public ICollection<UserFollows> Following { get; set; } = new List<UserFollows>();
+    public ICollection<UserFollow> Followers { get; set; } = new List<UserFollow>();
+    public ICollection<UserFollow> Following { get; set; } = new List<UserFollow>();
     
     public ICollection<UserGenre> UserGenres { get; set; } = new List<UserGenre>();
     public ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();

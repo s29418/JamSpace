@@ -1,6 +1,7 @@
-﻿namespace JamSpace.Application.Features.UserFollows.Commands.FollowUser;
+﻿using JamSpace.Application.Features.UserFollows.DTOs;
+using JamSpace.Domain.Entities;
+using MediatR;
 
-public class FollowUserCommand
-{
-    
-}
+namespace JamSpace.Application.Features.UserFollows.Commands.FollowUser;
+
+public record FollowUserCommand(Guid FollowerId, Guid FollowedId) : IRequest<UserFollowDto>;

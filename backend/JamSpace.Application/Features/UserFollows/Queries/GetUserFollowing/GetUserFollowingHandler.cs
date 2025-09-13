@@ -2,7 +2,7 @@
 using JamSpace.Application.Features.UserFollows.DTOs;
 using MediatR;
 
-namespace JamSpace.Application.Features.UserFollows.Queires.GetUserFollowing;
+namespace JamSpace.Application.Features.UserFollows.Queries.GetUserFollowing;
 
 public class GetUserFollowingHandler : IRequestHandler<GetUserFollowingQuery, List<UserFollowDto>>
 {

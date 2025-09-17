@@ -1,5 +1,4 @@
-﻿using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Interfaces;
 using JamSpace.Domain.Entities;
 using JamSpace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -34,23 +33,37 @@ public class UserRepository : IUserRepository
         return user?.Id;
     }
 
-    public Task<bool> ExistsAsync(Guid userId, CancellationToken ct)
+    public async Task<bool> ExistsAsync(Guid userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        return await _db.Users.AnyAsync(u => u.Id == userId, ct);
     }
 
-    public Task<User> GetByIdAsync(Guid userId, CancellationToken ct)
+    public async Task<User?> GetByIdAsync(Guid userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        
+        return user;
     }
 
-    public Task<User> UpdateAsync(User user, CancellationToken ct)
+    public async Task<User> UpdateAsync(User user, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var existingUser = GetByIdAsync(user.Id, ct).Result;
+        
+        existingUser!.UserName = user.UserName;
+        existingUser.Email = user.Email;
+        existingUser.Bio = user.Bio;
+        existingUser.Location = user.Location;
+        existingUser.ProfilePictureUrl = user.ProfilePictureUrl;
+        existingUser.PasswordHash = user.PasswordHash;
+        
+        await _db.SaveChangesAsync(ct);
+        return existingUser;
     }
 
-    public Task DeleteAsync(Guid userId, CancellationToken ct)
+    public async Task DeleteAsync(Guid userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var user = GetByIdAsync(userId, ct).Result;
+        _db.Users.Remove(user!);
+        await _db.SaveChangesAsync(ct);
     }
 }

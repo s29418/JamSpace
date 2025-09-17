@@ -9,7 +9,7 @@ public interface IUserRepository
     Task<Guid?> GetUserIdByUsernameAsync(string username, CancellationToken ct);
     
     Task<bool> ExistsAsync(Guid userId, CancellationToken ct);
-    Task<User> GetByIdAsync(Guid userId, CancellationToken ct);
+    Task<User?> GetByIdAsync(Guid userId, CancellationToken ct);
     Task<User> UpdateAsync(User user, CancellationToken ct);
     Task DeleteAsync(Guid userId, CancellationToken ct);
 }

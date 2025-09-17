@@ -18,7 +18,7 @@ public class UserGenreController : ControllerBase
     public UserGenreController(IMediator mediator) => _mediator = mediator;
     
     [HttpPost]
-    // [Authorize]
+    [Authorize]
     public async Task<ActionResult<UserGenreDto>> AddUserGenre([FromRoute] Guid userId, [FromBody] string genreName, CancellationToken ct)
     {
         var authId = User.GetUserId();
@@ -36,7 +36,7 @@ public class UserGenreController : ControllerBase
     }
 
     [HttpDelete("{genreId:guid}")]
-    // [Authorize]
+    [Authorize]
     public async Task<IActionResult> DeleteUserGenre([FromRoute] Guid userId, Guid genreId, CancellationToken ct)
     {
         var authId = User.GetUserId();

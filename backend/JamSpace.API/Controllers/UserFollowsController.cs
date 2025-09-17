@@ -19,7 +19,7 @@ public class UserFollowsController : ControllerBase
     public UserFollowsController(IMediator mediator) => _mediator = mediator;
     
     [HttpPost("following")]
-    // [Authorize]
+    [Authorize]
     public async Task<ActionResult<UserFollowDto>> FollowUser([FromRoute] Guid userId, [FromBody] Guid targetUserId, CancellationToken ct)
     {
         var authId = User.GetUserId();
@@ -30,7 +30,7 @@ public class UserFollowsController : ControllerBase
     }
 
     [HttpDelete("following/{targetUserId:guid}")]
-    // [Authorize]
+    [Authorize]
     public async Task<IActionResult> UnfollowUser([FromRoute] Guid userId, [FromRoute] Guid targetUserId, CancellationToken ct)
     {
         var authId = User.GetUserId();

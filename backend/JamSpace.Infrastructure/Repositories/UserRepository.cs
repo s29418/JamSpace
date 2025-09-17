@@ -33,4 +33,24 @@ public class UserRepository : IUserRepository
 
         return user?.Id;
     }
+
+    public Task<bool> ExistsAsync(Guid userId, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<User> GetByIdAsync(Guid userId, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<User> UpdateAsync(User user, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task DeleteAsync(Guid userId, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
 }

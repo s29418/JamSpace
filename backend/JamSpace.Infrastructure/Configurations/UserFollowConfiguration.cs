@@ -10,7 +10,7 @@ public class UserFollowConfiguration : IEntityTypeConfiguration<UserFollow>
     {
         builder.ToTable("UserFollows", t =>
         {
-            t.HasCheckConstraint("CK_UserFollows_NoSelfFollow", "[FollowerId] <> [FollowedId]");
+            t.HasCheckConstraint("CK_UserFollows_NoSelfFollow", "[FollowerId] <> [FolloweeId]");
         });
 
         builder.HasKey(uf => new { uf.FollowerId, FollowedId = uf.FolloweeId });

@@ -24,6 +24,8 @@ public static class DependencyInjection
         
         services.AddScoped<IGenreRepository, GenreRepository>();
         services.AddScoped<IUserGenreRepository, UserGenreRepository>();
+        services.AddScoped<ISkillRepository, SkillRepository>();
+        services.AddScoped<IUserSkillRepository, UserSkillRepository>();
         services.AddScoped<IUserFollowRepository, UserFollowRepository>();
 
         services.AddSingleton(sp =>

@@ -1,4 +1,5 @@
-﻿using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
 using JamSpace.Domain.Common;
 using JamSpace.Domain.Entities;
 using JamSpace.Infrastructure.Data;
@@ -17,7 +18,7 @@ public class GenreRepository : IGenreRepository
     public async Task<Genre> GetGenreByIdAsync(Guid genreId, CancellationToken ct)
     {
         var genre = await _db.Genres.FirstOrDefaultAsync(g => g.Id == genreId, ct) 
-            ?? throw new KeyNotFoundException("Genre not found.");
+            ?? throw new NotFoundException("Genre not found.");
         
         return genre;
     }

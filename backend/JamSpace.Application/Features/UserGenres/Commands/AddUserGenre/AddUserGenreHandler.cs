@@ -1,4 +1,5 @@
-﻿using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.UserGenres.DTOs;
 using MediatR;
 
@@ -21,7 +22,7 @@ public class AddUserGenreHandler : IRequestHandler<AddUserGenreCommand, UserGenr
             ?? await _genreRepo.CreateGenreAsync(request.GenreName, ct);
         
         if(await _repo.UserHasGenreAsync(request.UserId, genre.Id, ct))
-            throw new InvalidOperationException("User already has this genre.");
+            throw new ConflictException("User already has this genre.");
         
         await _repo.AddUserGenreAsync(request.UserId, genre.Id, ct);
         return new UserGenreDto

@@ -19,7 +19,8 @@ public class UserGenreController : ControllerBase
     
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<UserGenreDto>> AddUserGenre([FromRoute] Guid userId, [FromBody] string genreName, CancellationToken ct)
+    public async Task<ActionResult<UserGenreDto>> AddUserGenre(
+        [FromRoute] Guid userId, [FromBody] string genreName, CancellationToken ct)
     {
         var authId = User.GetUserId();
         if (authId != userId) return Unauthorized("You can only modify your own genres.");

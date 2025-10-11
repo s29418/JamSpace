@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Infrastructure.Data;
 using JamSpace.Infrastructure.Repositories;
 using JamSpace.Infrastructure.Services;
@@ -17,6 +18,7 @@ public static class DependencyInjection
             opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<JamSpaceDbContext>());
         
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();

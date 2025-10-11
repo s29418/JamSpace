@@ -1,7 +1,7 @@
-﻿using JamSpace.Application.Features.User.DTOs;
+﻿using JamSpace.Application.Features.Users.DTOs;
 using MediatR;
 
-namespace JamSpace.Application.Features.User.Commands.UpdateUserProfile;
+namespace JamSpace.Application.Features.Users.Commands.UpdateUserProfile;
 
 public record UpdateUserProfileCommand(    
     Guid UserId,

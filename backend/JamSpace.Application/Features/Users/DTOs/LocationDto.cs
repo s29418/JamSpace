@@ -1,4 +1,4 @@
-﻿namespace JamSpace.Application.Features.User.DTOs;
+﻿namespace JamSpace.Application.Features.Users.DTOs;
 
 public class LocationDto
 {

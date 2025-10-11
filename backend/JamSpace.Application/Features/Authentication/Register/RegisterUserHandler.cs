@@ -32,7 +32,8 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResu
             Email = request.Email,
             UserName = request.Username,
             PasswordHash = _passwordHasher.Hash(request.Password),
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsDeleted = false
         };
 
         await _userRepository.AddAsync(user, ct);

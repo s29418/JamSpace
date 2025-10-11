@@ -44,6 +44,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.SoundcloudUrl)
             .HasMaxLength(255);
         
+        builder.Property(u => u.RowVersion).IsRowVersion();
+        builder.HasQueryFilter(u => !u.IsDeleted);
+        
         builder.OwnsOne(u => u.Location, loc =>
         {
             var upperStr = new ValueConverter<string?, string?>(

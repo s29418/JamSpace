@@ -1,10 +1,11 @@
-﻿using JamSpace.Domain.Entities;
+﻿using JamSpace.Application.Common.Persistence;
+using JamSpace.Domain.Entities;
 using JamSpace.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace JamSpace.Infrastructure.Data;
 
-public class JamSpaceDbContext : DbContext
+public sealed class JamSpaceDbContext : DbContext, IUnitOfWork
 {
     public JamSpaceDbContext(DbContextOptions<JamSpaceDbContext> options) : base(options)
     {
@@ -20,6 +21,7 @@ public class JamSpaceDbContext : DbContext
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
     public DbSet<UserFollow> UserFollows => Set<UserFollow>();
     
+    public async Task<int> SaveChangesAsync(CancellationToken ct) => await base.SaveChangesAsync(ct);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

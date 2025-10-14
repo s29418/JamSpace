@@ -11,10 +11,10 @@ public class UserRepository : IUserRepository
     public UserRepository(JamSpaceDbContext db) => _db = db;
 
     public Task<User?> GetByIdAsync(Guid id, CancellationToken ct) =>
-        _db.Users.FirstOrDefaultAsync(u => u.Id == id, ct);   // tracked → do update
+        _db.Users.FirstOrDefaultAsync(u => u.Id == id, ct);   
 
     public Task<User?> GetByEmailAsync(string email, CancellationToken ct) =>
-        _db.Users.FirstOrDefaultAsync(u => u.Email == email, ct); // tracked
+        _db.Users.FirstOrDefaultAsync(u => u.Email == email, ct); 
 
     public async Task<Guid?> GetUserIdByUsernameAsync(string username, CancellationToken ct)
     {

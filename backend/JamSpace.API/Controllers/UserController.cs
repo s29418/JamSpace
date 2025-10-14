@@ -1,4 +1,6 @@
-﻿using JamSpace.Application.Features.Users.DTOs;
+﻿using JamSpace.API.Extensions;
+using JamSpace.Application.Features.Users.DTOs;
+using JamSpace.Application.Features.Users.Queries.GetDetails;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +14,17 @@ public class UserController : ControllerBase
     private readonly IMediator _mediator;
     
     public UserController(IMediator mediator) => _mediator = mediator;
+    
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<ActionResult<UserDto>> GetMe(CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        var dto = await _mediator.Send(new GetUserByIdQuery(userId), ct);
+
+        
+        return Ok(dto);
+    }
     
     [HttpPut]
     [Authorize]

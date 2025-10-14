@@ -1,4 +1,6 @@
-﻿using JamSpace.Application.Common.Interfaces;
+﻿using FluentValidation;
+using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.Authentication.Dtos;
 using JamSpace.Domain.Entities;
 using MediatR;
@@ -10,12 +12,15 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResu
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IPasswordPolicy _passwordPolicy;
 
-    public RegisterUserHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator, IPasswordHasher passwordHasher)
+    public RegisterUserHandler(IUserRepository userRepository, IJwtTokenGenerator jwtTokenGenerator, 
+        IPasswordHasher passwordHasher, IPasswordPolicy passwordPolicy)
     {
         _userRepository = userRepository;
         _jwtTokenGenerator = jwtTokenGenerator;
         _passwordHasher = passwordHasher;
+        _passwordPolicy = passwordPolicy;       
     }
 
     public async Task<AuthResultDto> Handle(RegisterUserCommand request, CancellationToken ct)
@@ -23,7 +28,13 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResu
         var existingUser = await _userRepository.GetByEmailAsync(request.Email, ct);
         if (existingUser != null)
         {
-            throw new Exception("Email already in use.");
+            throw new ConflictException("Email already in use.");
+        }
+        
+        var (ok, error) = _passwordPolicy.Validate(request.Password);
+        if (!ok)
+        {
+            throw new ValidationException(error ?? "Password does not meet security policy.");
         }
 
         var user = new User

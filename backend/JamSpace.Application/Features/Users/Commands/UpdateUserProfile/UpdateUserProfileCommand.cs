@@ -1,11 +1,12 @@
 ﻿using JamSpace.Application.Features.Users.DTOs;
+using JamSpace.Application.Users.UpdateProfile;
 using MediatR;
 
-namespace JamSpace.Application.Features.Users.Commands.UpdateUserProfile;
-
-public record UpdateUserProfileCommand(    
+public sealed record UpdateUserProfileCommand(
     Guid UserId,
-    string? Bio,
-    LocationDto? Location,
-    string? ProfilePictureUrl
+    bool SetBio,            string? Bio,
+    bool SetProfilePicture, string? ProfilePictureUrl,
+    bool SetLocation,       LocationDto? Location,
+    bool SetEmail,          string? Email,
+    byte[] RowVersion
 ) : IRequest<UserDto>;

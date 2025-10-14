@@ -1,12 +1,8 @@
-﻿namespace JamSpace.Application.Features.Users.DTOs;
+﻿using JamSpace.Application.Users.UpdateProfile;
 
-public class UserDto
-{
-    public string Username { get; set; } = null!;
-    public string? UserPictureUrl { get; set; }
-    public string? Bio { get; set; }
-    public LocationDto? Location { get; set; }
-    
-    public string? SpotifyUrl { get; set; }
-    public string? SoundcloudUrl { get; set; }
-}
+namespace JamSpace.Application.Features.Users.DTOs;
+
+public sealed record UserDto(
+    Guid Id, string Username, string? Bio, string? ProfilePictureUrl,
+    string? Email, LocationDto? Location, byte[] RowVersion
+);

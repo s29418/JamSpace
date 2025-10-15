@@ -19,7 +19,6 @@ public class User
     public string? SoundcloudUrl { get; set; }
     
     public bool IsDeleted { get; set; }
-    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
     
     public ICollection<TeamMember> Teams { get; set; } = new List<TeamMember>();
     public ICollection<Team> CreatedTeams { get; set; } = new List<Team>();

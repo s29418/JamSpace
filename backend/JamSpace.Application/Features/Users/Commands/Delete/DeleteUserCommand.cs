@@ -3,6 +3,5 @@
 namespace JamSpace.Application.Features.Users.Commands.Delete;
 
 public sealed record DeleteUserCommand(
-    Guid UserId,
-    byte[] RowVersion 
+    Guid UserId
 ) : IRequest<Unit>;

@@ -21,9 +21,6 @@ public sealed class DeleteUserHandler : IRequestHandler<DeleteUserCommand, Unit>
         var user = await _users.GetByIdAsync(c.UserId, ct)
                    ?? throw new NotFoundException("User not found.");
 
-        if (!user.RowVersion.SequenceEqual(c.RowVersion))
-            throw new ConcurrencyException("User was modified by someone else.");
-
         if (!user.IsDeleted) 
         {
             user.IsDeleted = true;

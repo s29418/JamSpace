@@ -1,7 +1,4 @@
-﻿using MediatR;
-using JamSpace.Application.Features.Users.DTOs;
-
-namespace JamSpace.Application.Users.UpdateProfile;
+﻿namespace JamSpace.Application.Features.Users.DTOs;
 
 public sealed record LocationDto(string City, string Country);
 

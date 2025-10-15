@@ -26,19 +26,14 @@ public sealed class UpdateUserProfileHandler
         var user = await _users.GetByIdAsync(c.UserId, ct)
                    ?? throw new NotFoundException("User not found.");
 
-        // Concurrency (If-Match): proste porównanie RowVersion
-        if (!user.RowVersion.SequenceEqual(c.RowVersion))
-            throw new ConcurrencyException("User was modified by someone else.");
-
-        // BIO
+        
         if (c.SetBio)
         {
             if (c.Bio is not null && c.Bio.Length > 170)
                 throw new ValidationException("Bio must be ≤ 170 characters.");
             user.Bio = c.Bio?.Trim();
         }
-
-        // PHOTO
+        
         if (c.SetProfilePicture)
         {
             if (c.ProfilePictureUrl is not null &&
@@ -47,15 +42,13 @@ public sealed class UpdateUserProfileHandler
             user.ProfilePictureUrl = c.ProfilePictureUrl;
         }
 
-        // LOCATION
         if (c.SetLocation)
         {
             user.Location = c.Location is null
                 ? null
                 : new Location { City = c.Location.City.Trim(), CountryCode = c.Location.Country.Trim() };
         }
-
-        // EMAIL (prosto; produkcyjnie zwykle flow potwierdzenia)
+        
         if (c.SetEmail)
         {
             if (string.IsNullOrWhiteSpace(c.Email))

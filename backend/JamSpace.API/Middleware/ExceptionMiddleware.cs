@@ -56,6 +56,12 @@ public class ExceptionMiddleware
         {
             _logger.LogWarning(ex, "Unauthorized access.");
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+        }
+        catch (ConcurrencyException ex)
+        {
+            _logger.LogWarning(ex, "Concurrency conflict.");
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
             await context.Response.WriteAsJsonAsync(new { message = ex.Message });       
         }
         catch (Exception ex)

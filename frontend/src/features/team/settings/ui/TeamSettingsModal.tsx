@@ -82,7 +82,7 @@ export default function TeamSettingsModal({
     const changeTeamPicture = async (file: File) => {
         try {
             await actions.updateTeamPicture(file);
-            emitTeamUpdated(teamId);                  // <<<<<< (bez patcha)
+            emitTeamUpdated(teamId);
             showHeaderMsg('Team picture updated.', 'success');
         } catch (e: any) {
             showHeaderErr(e?.message ?? 'Failed to update team picture.');

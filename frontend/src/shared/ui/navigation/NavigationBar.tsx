@@ -42,7 +42,7 @@ const NavigationBar = () => {
                 iconSolid={UserSolid}
                 iconOutline={UserOutline}
                 path="/profile"
-                active={isActive('/profile')}
+                active={isActive('/profileHeader')}
                 navigate={navigate}
             />
             <NavButton

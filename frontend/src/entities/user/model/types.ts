@@ -1,13 +1,26 @@
 export interface UserProfile {
     id: string;
-    displayName: string;
+    username: string;
     bio?: string | null;
-    location?: string | null;
+    location?: LocationDto | null;
     profilePictureUrl?: string | null;
+
     followersCount?: number;
     followingCount?: number;
-    skills?: { id: string; name: string }[];
-    genres?: { id: string; name: string }[];
+    isFollowing?: boolean;
+
+    skills?: UserTag[];
+    genres?: UserTag[];
+}
+
+export interface LocationDto {
+    city?: string | null;
+    country?: string | null;
+}
+
+export interface UserTag {
+    id: string;
+    name: string;
 }
 
 export interface AuthContext {

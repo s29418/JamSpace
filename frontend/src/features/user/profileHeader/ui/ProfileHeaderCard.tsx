@@ -1,5 +1,5 @@
 import React from "react";
-import { UserProfile } from "../../../../../entities/user/model/types";
+import { UserProfile } from "../../../../entities/user/model/types";
 import styles from "./ProfileHeaderCard.module.css";
 import {
     CogIcon as SettingsIcon,
@@ -20,9 +20,9 @@ export const ProfileHeaderCard: React.FC<Props> = ({ profile, isOwner, onEdit })
             {/* Avatar */}
             <div className={styles.profileCardAvatar}>
                 {profile.profilePictureUrl ? (
-                    <img src={profile.profilePictureUrl} alt={`${profile.displayName} avatar`} />
+                    <img src={profile.profilePictureUrl} alt={`${profile.username} avatar`} />
                 ) : (
-                    <div className={styles.avatarFallback}>{profile.displayName?.[0] ?? "?"}</div>
+                    <div className={styles.avatarFallback}>{profile.username?.[0] ?? "?"}</div>
                 )}
             </div>
 
@@ -38,8 +38,10 @@ export const ProfileHeaderCard: React.FC<Props> = ({ profile, isOwner, onEdit })
             )}
 
             <div>
-                <h1 className={styles.profileCardName}>{profile.displayName}</h1>
-                {profile.location && <p className={styles.profileCardLocation}>{profile.location}</p>}
+                <h1 className={styles.profileCardName}>{profile.username}</h1>
+                {profile.location && <p className={styles.profileCardLocation}>
+                    {profile.location.city}, {profile.location.country}
+                </p>}
 
                 <div className={styles.profileCardMeta}>
                     <span>{profile.followersCount ?? 0} followers</span>

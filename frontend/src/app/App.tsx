@@ -15,6 +15,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/profile/:id" element={<ProfilePage />} />
                 <Route path="/teams" element={<TeamsPage />} />
                     <Route path="/teams/:id" element={<TeamDetailsPage />} />
                 {/*<Route path="/chat" element={< />} />*/}

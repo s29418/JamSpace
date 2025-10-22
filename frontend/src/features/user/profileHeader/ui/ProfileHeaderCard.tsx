@@ -4,16 +4,28 @@ import styles from "./ProfileHeaderCard.module.css";
 import {
     CogIcon as SettingsIcon,
     UserPlusIcon as FollowIcon,
-    ChatBubbleOvalLeftIcon as MessageIcon
+    UserMinusIcon as UnfollowIcon,
+    ChatBubbleOvalLeftIcon as MessageIcon,
+    ArrowRightStartOnRectangleIcon as LogoutIcon
 } from '@heroicons/react/24/outline';
 
 type Props = {
     profile: UserProfile;
     isOwner: boolean;
     onEdit: () => void;
+    onLogout?: () => void;
+    onToggleFollow?: () => void;
+    followLoading?: boolean;
 };
 
-export const ProfileHeaderCard: React.FC<Props> = ({ profile, isOwner, onEdit }) => {
+export const ProfileHeaderCard: React.FC<Props> = ({
+                                                       profile,
+                                                       isOwner,
+                                                       onEdit ,
+                                                       onLogout,
+                                                       onToggleFollow,
+                                                       followLoading
+}) => {
     return (
         <div className={styles.profileCard}>
 
@@ -26,19 +38,32 @@ export const ProfileHeaderCard: React.FC<Props> = ({ profile, isOwner, onEdit })
                 )}
             </div>
 
-            {/* EDIT */}
+            {/* EDIT & LOGOUT*/}
             {isOwner && (
-                <button
-                    className={`${styles.button} ${styles.buttonEdit} ${styles.editTopRight}`}
-                    onClick={onEdit}
-                >
-                    <SettingsIcon className={styles.icon} />
-                    Edit profile
-                </button>
+                <div className={styles.editTopRight}>
+                    <button
+                        className={`${styles.button} ${styles.buttonGhost}`}
+                        onClick={onLogout}
+                        type="button"
+                    >
+                        <LogoutIcon className={styles.icon} />
+                        Logout
+                    </button>
+
+                    <button
+                        className={`${styles.button} ${styles.buttonGhost}`}
+                        onClick={onEdit}
+                        type="button"
+                    >
+                        <SettingsIcon className={styles.icon} />
+                        Edit profile
+                    </button>
+                </div>
             )}
 
             <div>
-                <h1 className={styles.profileCardName}>{profile.username}</h1>
+                <h1 className={styles.profileCardName}>{profile.displayName}</h1>
+                <p className={styles.profileUserName}>@{profile.username}</p>
                 {profile.location && <p className={styles.profileCardLocation}>
                     {profile.location.city}, {profile.location.country}
                 </p>}
@@ -49,18 +74,34 @@ export const ProfileHeaderCard: React.FC<Props> = ({ profile, isOwner, onEdit })
                 </div>
 
                 {/* FOLLOW / MESSAGE */}
-                {/*{!isOwner && (*/}
+                {!isOwner && (
                     <div className={styles.actionsInline}>
-                        <button className={`${styles.button} ${styles.buttonGhost}`}>
-                            <FollowIcon className={styles.icon} />
-                            Follow
+                        <button
+                            className={`${styles.button} ${styles.buttonGhost}`}
+                            onClick={onToggleFollow}
+                            disabled={!!followLoading}
+                            type="button"
+                        >
+
+                            {profile.isFollowing ? (
+                                <>
+                                    <UnfollowIcon className={styles.icon} />
+                                    Unfollow
+                                </>
+                            ) : (
+                                <>
+                                    <FollowIcon className={styles.icon} />
+                                    Follow
+                                </>
+                            )}
                         </button>
-                        <button className={`${styles.button} ${styles.buttonGhost}`}>
+
+                        <button className={`${styles.button} ${styles.buttonGhost}`} type="button">
                             <MessageIcon className={styles.icon} />
                             Message
                         </button>
                     </div>
-                {/*)}*/}
+                )}
 
 
                 <div className={styles.profileCardChipsRow}>

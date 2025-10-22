@@ -55,3 +55,10 @@
 .loginForm span:hover {
     text-decoration: none;
 }
+
+.error{
+    color: #ff4d4d;
+    margin-top: 64px;
+    margin-bottom: -32px;
+    text-align: center;
+}

@@ -33,7 +33,7 @@ const ProfilePage: React.FC = () => {
 
     const targetUserId = params.id ?? myId ?? undefined;
 
-    const { profile, setProfile, loading, error, refresh } = useProfile(targetUserId);
+    const { profile, setProfile, loading, error, refresh, toggleFollow, followLoading } = useProfile(targetUserId);
 
     const [editOpen, setEditOpen] = React.useState(false);
 
@@ -65,27 +65,40 @@ const ProfilePage: React.FC = () => {
 
     const isOwner = !!profile && !!myId && profile.id === myId;
 
+
+    function handleLogout() {
+        localStorage.removeItem('token');
+        window.location.reload();
+    }
+
     return (
-        <div className={styles.wrapper}>
-            {loading && <p className={styles.info}>Loading profile…</p>}
+        <div>
             {error && <p className={styles.error}>{error}</p>}
+            {loading && <p className={styles.info}>Loading profile…</p>}
 
-            {profile && (
-                <>
-                    <ProfileHeaderCard
-                        profile={profile}
-                        isOwner={isOwner}
-                        onEdit={() => setEditOpen(true)}
-                    />
 
-                    <EditProfilePanel
-                        isOpen={editOpen}
-                        onClose={() => setEditOpen(false)}
-                        initialTab="profile"
-                        // profile={profile}
-                    />
-                </>
-            )}
+            <div className={styles.wrapper}>
+
+                {profile && (
+                    <>
+                        <ProfileHeaderCard
+                            profile={profile}
+                            isOwner={isOwner}
+                            onEdit={() => setEditOpen(true)}
+                            onLogout={isOwner ? handleLogout : undefined}
+                            onToggleFollow={!isOwner ? toggleFollow : undefined}
+                            followLoading={!isOwner ? followLoading : undefined}
+                        />
+
+                        <EditProfilePanel
+                            isOpen={editOpen}
+                            onClose={() => setEditOpen(false)}
+                            initialTab="profile"
+                            // profile={profile}
+                        />
+                    </>
+                )}
+            </div>
         </div>
     );
 };

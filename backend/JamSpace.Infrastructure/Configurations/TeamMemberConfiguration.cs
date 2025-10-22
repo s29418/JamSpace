@@ -16,6 +16,8 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
             .IsRequired()
             .HasConversion<string>()
             .HasMaxLength(25);
+        
+        builder.HasQueryFilter(tm => !tm.User.IsDeleted);
 
         builder.HasOne(tm => tm.User)
             .WithMany(u => u.Teams)

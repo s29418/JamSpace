@@ -24,7 +24,8 @@ public class UserController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<UserDto>> GetDetails([FromRoute] Guid id, CancellationToken ct)
     {
-        var dto = await _mediator.Send(new GetUserByIdQuery(id), ct);
+        var requestingUserId = User.GetUserId();
+        var dto = await _mediator.Send(new GetUserByIdQuery(id, requestingUserId), ct);
         return Ok(dto);
     }
     

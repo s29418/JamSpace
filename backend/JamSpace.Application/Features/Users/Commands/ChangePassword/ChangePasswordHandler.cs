@@ -30,7 +30,7 @@ public sealed class ChangePasswordHandler : IRequestHandler<ChangePasswordComman
         var user = await _users.GetByIdAsync(c.UserId, ct)
                    ?? throw new NotFoundException("User not found.");
 
-        if (!_hasher.Verify(user.PasswordHash, c.CurrentPassword))
+        if (!_hasher.Verify(c.CurrentPassword, user.PasswordHash))
             throw new ValidationException("Current password is incorrect.");
 
         var (ok, error) = _policy.Validate(c.NewPassword);

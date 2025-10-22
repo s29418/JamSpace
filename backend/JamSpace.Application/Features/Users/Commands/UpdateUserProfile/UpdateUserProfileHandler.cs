@@ -60,6 +60,6 @@ public sealed class UpdateUserProfileHandler
         }
 
         await _uow.SaveChangesAsync(ct);
-        return user.ToDto();
+        return user.ToDto(true, false);
     }
 }

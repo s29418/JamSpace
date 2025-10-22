@@ -12,6 +12,8 @@ public class UserGenreConfiguration : IEntityTypeConfiguration<UserGenre>
         
         builder.HasKey(ug => new { ug.UserId, ug.GenreId });
         
+        builder.HasQueryFilter(ug => !ug.User.IsDeleted);
+        
         builder.HasOne(ug => ug.User)
             .WithMany(u => u.UserGenres)
             .HasForeignKey(ug => ug.UserId)

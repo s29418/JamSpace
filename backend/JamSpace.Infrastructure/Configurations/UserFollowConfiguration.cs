@@ -18,6 +18,9 @@ public class UserFollowConfiguration : IEntityTypeConfiguration<UserFollow>
         builder.Property(uf => uf.FollowedAt)
             .HasDefaultValueSql("GETUTCDATE()")
             .IsRequired();
+        
+        builder.HasQueryFilter(uf => !uf.Follower.IsDeleted);
+        builder.HasQueryFilter(uf => !uf.Followee.IsDeleted);
 
         builder.HasOne(uf => uf.Follower)
             .WithMany(u => u.Following)

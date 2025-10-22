@@ -12,6 +12,8 @@ public class UserSkillConfiguration : IEntityTypeConfiguration<UserSkill>
         
         builder.HasKey(us => new { us.UserId, us.SkillId });
         
+        builder.HasQueryFilter(us => !us.User.IsDeleted);
+        
         builder.HasOne(us => us.User)
             .WithMany(u => u.UserSkills)
             .HasForeignKey(us => us.UserId)

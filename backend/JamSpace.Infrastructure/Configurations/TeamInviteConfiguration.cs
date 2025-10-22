@@ -18,6 +18,9 @@ public class TeamInviteConfiguration : IEntityTypeConfiguration<TeamInvite>
             .IsRequired();
 
         builder.Property(ti => ti.CreatedAt);
+        
+        builder.HasQueryFilter(ti => !ti.InvitedUser.IsDeleted);
+        builder.HasQueryFilter(ti => !ti.InvitedByUser.IsDeleted);
 
         builder.HasOne(ti => ti.Team)
             .WithMany()

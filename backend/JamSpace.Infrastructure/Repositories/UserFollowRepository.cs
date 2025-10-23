@@ -13,12 +13,14 @@ public class UserFollowRepository : IUserFollowRepository
     {
         _db = db;
     }
-    
-    
+
+
     public async Task<bool> UserFollowsAsync(Guid followerId, Guid followedId, CancellationToken ct)
     {
-        return await _db.UserFollows.AnyAsync(uf => uf.FollowerId == followerId && uf.FolloweeId == followedId, ct);
+        return await _db.UserFollows.AnyAsync(uf =>
+            uf.FollowerId == followerId && uf.FolloweeId == followedId, ct);
     }
+
 
     public async Task<List<UserFollow>> GetFollowersAsync(Guid userId, CancellationToken ct)
     {

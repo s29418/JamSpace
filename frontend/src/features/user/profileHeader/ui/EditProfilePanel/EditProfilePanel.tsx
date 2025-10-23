@@ -1,16 +1,23 @@
 import React from "react";
+import { ProfileTab } from "./profileTab/ProfileTab";
 import styles from "./EditProfilePanel.module.css";
+import {UserProfile} from "../../../../../entities/user/model/types";
+import {UpdateUserProfileRequest} from "../../../../../entities/user/api/profile.api";
 
 type Props = {
     isOpen: boolean;
     onClose: () => void;
     initialTab?: "profile" | "skills" | "genres" | "security";
+    profile: UserProfile;
+    onSaveProfile: (draft: UpdateUserProfileRequest, file?: File) => Promise<void> | void; // ← dodany file
 };
 
 export const EditProfilePanel: React.FC<Props> = ({
                                                       isOpen,
                                                       onClose,
                                                       initialTab = "profile",
+                                                      profile,
+                                                      onSaveProfile
                                                   }) => {
     const [tab, setTab] = React.useState<typeof initialTab>(initialTab);
 
@@ -62,9 +69,14 @@ export const EditProfilePanel: React.FC<Props> = ({
 
                 <div className={styles["edit-panel__content"]}>
                     {tab === "profile" && (
-                        <div className={styles.placeholder}>
-
-                        </div>
+                        <ProfileTab
+                            initial={profile}
+                            onCancel={onClose}
+                            onSave={async (draft, file) => {
+                                await onSaveProfile(draft, file);
+                                onClose();
+                            }}
+                        />
                     )}
                     {tab === "skills" && (
                         <div className={styles.placeholder}>

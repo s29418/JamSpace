@@ -67,7 +67,6 @@ export const AvatarUploader: React.FC<Props> = ({
         if (fileInput.current) fileInput.current.value = '';
     };
 
-    // Controls (Save/Cancel)
     const controls = (canEdit && file) ? (
         <div className={styles.editButtonsRow}>
             <button

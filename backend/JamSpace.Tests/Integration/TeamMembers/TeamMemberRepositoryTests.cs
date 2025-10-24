@@ -34,6 +34,7 @@ public class TeamMemberRepositoryTests
         {
             Id = Guid.NewGuid(), 
             UserName = "alice", 
+            DisplayName = "Alice",
             Email = "a@test", 
             PasswordHash = "x"
         };
@@ -74,6 +75,7 @@ public class TeamMemberRepositoryTests
         {
             Id = Guid.NewGuid(), 
             UserName = "bob", 
+            DisplayName = "bob",
             Email = "b@test", 
             PasswordHash = "y"
         };
@@ -96,6 +98,7 @@ public class TeamMemberRepositoryTests
         {
             Id = Guid.NewGuid(), 
             UserName = "admin", 
+            DisplayName = "admin",
             Email = "admin@test", 
             PasswordHash = "z"
         };
@@ -153,6 +156,7 @@ public class TeamMemberRepositoryTests
         {
             Id = Guid.NewGuid(), 
             UserName = "l1", 
+            DisplayName = "l1",
             Email = "l1@test", 
             PasswordHash = "x"
         };
@@ -160,6 +164,7 @@ public class TeamMemberRepositoryTests
         {
             Id = Guid.NewGuid(), 
             UserName = "l2", 
+            DisplayName = "l2",
             Email = "l2@test", 
             PasswordHash = "x"
         };

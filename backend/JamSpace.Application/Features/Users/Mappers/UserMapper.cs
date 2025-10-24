@@ -10,6 +10,7 @@ public static class UserMapper
     public static UserDto ToDto(this User u, bool isSelf, bool isFollowing) =>
         new(u.Id,
             u.UserName, 
+            u.DisplayName,
             u.Bio, 
             u.ProfilePictureUrl,
             isSelf ? u.Email : null,

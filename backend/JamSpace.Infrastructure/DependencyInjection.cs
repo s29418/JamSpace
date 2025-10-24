@@ -18,7 +18,8 @@ public static class DependencyInjection
             opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<JamSpaceDbContext>());
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
@@ -46,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IPasswordPolicy, PasswordPolicy>();
+        services.AddTransient<IUserModificationService, UserModificationService>();
         return services;
     }
 }

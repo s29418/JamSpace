@@ -5,11 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JamSpace.Infrastructure.Data;
 
-public sealed class JamSpaceDbContext : DbContext, IUnitOfWork
+public sealed class JamSpaceDbContext : DbContext
 {
-    public JamSpaceDbContext(DbContextOptions<JamSpaceDbContext> options) : base(options)
+    public JamSpaceDbContext(DbContextOptions<JamSpaceDbContext> options)
+        : base(options)
     {
     }
+
     
     public DbSet<User> Users => Set<User>();
     public DbSet<Team> Teams => Set<Team>();
@@ -21,7 +23,7 @@ public sealed class JamSpaceDbContext : DbContext, IUnitOfWork
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
     public DbSet<UserFollow> UserFollows => Set<UserFollow>();
     
-    public async Task<int> SaveChangesAsync(CancellationToken ct) => await base.SaveChangesAsync(ct);
+    public async Task SaveChangesAsync(CancellationToken ct) => await base.SaveChangesAsync(ct);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

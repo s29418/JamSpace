@@ -42,6 +42,7 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResu
             Id = Guid.NewGuid(),
             Email = request.Email,
             UserName = request.Username,
+            DisplayName = request.Username,
             PasswordHash = _passwordHasher.Hash(request.Password),
             CreatedAt = DateTime.UtcNow,
             IsDeleted = false

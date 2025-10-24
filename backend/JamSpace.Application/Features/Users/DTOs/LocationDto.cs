@@ -1,4 +1,13 @@
 ﻿namespace JamSpace.Application.Features.Users.DTOs;
 
-public sealed record LocationDto(string City, string Country);
-
+public class LocationDto()
+{
+    public string? City { get; set; }
+    public string? Country { get; set; }
+    
+    public LocationDto(string? locationCity, string? locationCountryCode) : this()
+    {
+        City = locationCity;
+        Country = locationCountryCode;
+    }
+}

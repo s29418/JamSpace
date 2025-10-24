@@ -24,7 +24,7 @@ public class ChangeTeamMemberFunctionalRoleHandlerTests
                 It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new TeamMember
             {
-                User = new User { UserName = "member" },
+                User = new User { UserName = "member", DisplayName = "member" },
                 Role = FunctionalRole.Admin
             });
 

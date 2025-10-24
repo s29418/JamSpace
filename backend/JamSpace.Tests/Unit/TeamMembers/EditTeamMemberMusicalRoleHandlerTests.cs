@@ -23,7 +23,7 @@ public class EditTeamMemberMusicalRoleHandlerTests
                 It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new TeamMember
             {
-                User = new User { UserName = "member" },
+                User = new User { UserName = "member", DisplayName = "member" },
                 MusicalRole = "Guitarist"
             });
 

@@ -30,6 +30,7 @@ namespace JamSpace.Tests.Integration.Teams;
             {
                 Id = Guid.NewGuid(),
                 UserName = "creator",
+                DisplayName = "Creator",
                 Email = "creator@test.com",
                 PasswordHash = "zzz"
             };
@@ -53,6 +54,7 @@ namespace JamSpace.Tests.Integration.Teams;
             {
                 Id = Guid.NewGuid(),
                 UserName = username,
+                DisplayName = username,
                 Email = $"{username}@test.com",
                 PasswordHash = "zzz"
             };

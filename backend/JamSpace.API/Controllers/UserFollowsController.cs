@@ -18,25 +18,23 @@ public class UserFollowsController : ControllerBase
     
     public UserFollowsController(IMediator mediator) => _mediator = mediator;
     
-    [HttpPost("following")]
+    [HttpPost("follow")]
     [Authorize]
-    public async Task<ActionResult<UserFollowDto>> FollowUser([FromRoute] Guid userId, [FromBody] Guid targetUserId, CancellationToken ct)
+    public async Task<ActionResult<UserFollowDto>> FollowUser([FromRoute] Guid userId, CancellationToken ct)
     {
-        var authId = User.GetUserId();
-        if (authId != userId) return Unauthorized("You can only modify your own follows.");
+        var followerId = User.GetUserId();
         
-        var result = await _mediator.Send(new FollowUserCommand(userId, targetUserId), ct);
-        return CreatedAtAction(nameof(GetUserFollowing), new { userId }, result);
+        var result = await _mediator.Send(new FollowUserCommand(followerId, userId), ct);
+        return CreatedAtAction(nameof(GetUserFollowing), new { userId = followerId }, result);
     }
 
-    [HttpDelete("following/{targetUserId:guid}")]
+    [HttpDelete("follow")]
     [Authorize]
-    public async Task<IActionResult> UnfollowUser([FromRoute] Guid userId, [FromRoute] Guid targetUserId, CancellationToken ct)
+    public async Task<IActionResult> UnfollowUser([FromRoute] Guid userId, CancellationToken ct)
     {
-        var authId = User.GetUserId();
-        if (authId != userId) return Unauthorized("You can only modify your own follows.");
+        var followerId = User.GetUserId();
 
-        await _mediator.Send(new UnfollowUserCommand(userId, targetUserId), ct);
+        await _mediator.Send(new UnfollowUserCommand(followerId, userId), ct);
         return NoContent();
     }
 

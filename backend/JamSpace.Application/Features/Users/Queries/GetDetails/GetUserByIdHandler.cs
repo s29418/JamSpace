@@ -25,6 +25,6 @@ public sealed class GetUserByIdHandler : IRequestHandler<GetUserByIdQuery, UserD
         
         var user = await _users.GetByIdAsync(q.UserId, ct)
                    ?? throw new NotFoundException("User not found.");
-        return user.ToDto(isFollowing, isSelf);
+        return user.ToDto(isSelf, isFollowing);
     }
 }

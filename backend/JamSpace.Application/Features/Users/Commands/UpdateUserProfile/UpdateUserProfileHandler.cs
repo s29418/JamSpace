@@ -26,6 +26,12 @@ public sealed class UpdateUserProfileHandler
         var user = await _users.GetByIdAsync(c.UserId, ct)
                    ?? throw new NotFoundException("User not found.");
 
+        if (c.SetDisplayName)
+        {
+            if (c.DisplayName is null || c.DisplayName.Length < 3 || c.DisplayName.Length > 50)
+                throw new ValidationException("Display name must be between 3 and 50 characters.");
+            user.DisplayName = c.DisplayName.Trim();
+        }
         
         if (c.SetBio)
         {

@@ -87,6 +87,7 @@ public class TeamInviteRepositoryTests
         {
             Id = invitedId ?? Guid.NewGuid(), 
             UserName = "invited", 
+            DisplayName = "Invited User",
             Email = "invited@test", 
             PasswordHash = "x"
         };
@@ -94,6 +95,7 @@ public class TeamInviteRepositoryTests
         {
             Id = inviterId ?? Guid.NewGuid(), 
             UserName = "inviter", 
+            DisplayName = "Inviter User",
             Email = "inviter@test", 
             PasswordHash = "y"
         };
@@ -319,6 +321,7 @@ public class TeamInviteRepositoryTests
         {
             Id = requestingUserId, 
             UserName = "requester", 
+            DisplayName = "Requester User",
             Email = "r@test", 
             PasswordHash = "z"
         });

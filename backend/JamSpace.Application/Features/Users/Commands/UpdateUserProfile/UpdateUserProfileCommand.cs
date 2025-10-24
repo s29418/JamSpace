@@ -5,6 +5,8 @@ namespace JamSpace.Application.Features.Users.Commands.UpdateUserProfile;
 
 public sealed record UpdateUserProfileCommand(
     Guid UserId,
+    bool SetDisplayName,
+    string? DisplayName,
     bool SetBio,
     string? Bio,
     bool SetProfilePicture,

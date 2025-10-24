@@ -14,7 +14,7 @@ public class CreateTeamHandlerTests
         // Arrange
         var repo = new Mock<ITeamRepository>();
         var createdTeamId = Guid.NewGuid();
-        var creator = new User { UserName = "creator" };
+        var creator = new User { UserName = "creator" , DisplayName = "creator"};
 
         repo.Setup(r => r.CreateTeamAsync(It.IsAny<Team>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdTeamId);

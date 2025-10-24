@@ -45,8 +45,8 @@ public class AcceptTeamInviteHandlerTests
             {
                 Status = InviteStatus.Accepted,
                 Team = new Team { Id = Guid.NewGuid(), Name = "Test team" },
-                InvitedByUser = new User { Id = Guid.NewGuid(), UserName = "Inviter" },
-                InvitedUser = new User { Id = Guid.NewGuid(), UserName = "Invitee" }
+                InvitedByUser = new User { Id = Guid.NewGuid(), UserName = "Inviter", DisplayName = "Inviter" },
+                InvitedUser = new User { Id = Guid.NewGuid(), UserName = "Invitee", DisplayName = "Invitee" }
             });
 
         var handler = new AcceptTeamInviteHandler(

@@ -15,7 +15,7 @@ public class ChangeTeamNameHandlerTests
         // Arrange
         var teamRepo = new Mock<ITeamRepository>();
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
-        var creator = new User { UserName = "creator" };
+        var creator = new User { UserName = "creator", DisplayName = "creator"};
 
         teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
                 It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))

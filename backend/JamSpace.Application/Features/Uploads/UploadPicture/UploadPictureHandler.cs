@@ -8,11 +8,14 @@ public class UploadPictureHandler : IRequestHandler<UploadPictureCommand, string
 {
     private readonly IFileStorageService _fileStorageService;
     private readonly ITeamRepository _teamRepository;
+    private readonly IUserModificationService _userModificationService;
 
-    public UploadPictureHandler(IFileStorageService fileStorageService, ITeamRepository teamRepository)
+    public UploadPictureHandler(IFileStorageService fileStorageService, ITeamRepository teamRepository, 
+        IUserModificationService userModificationService)
     {
         _fileStorageService = fileStorageService;
         _teamRepository = teamRepository;
+        _userModificationService = userModificationService;  
     }
 
     public async Task<string> Handle(UploadPictureCommand request, CancellationToken ct)
@@ -33,7 +36,19 @@ public class UploadPictureHandler : IRequestHandler<UploadPictureCommand, string
                 ct
             );
         }
-
+        
+        else if (request.Type == PictureType.UserPicture && request.RelatedEntityId.HasValue)
+        {
+            var userId = request.RelatedEntityId.Value;
+            
+            await _userModificationService.UpdateUserProfilePictureAsync(
+                userId,
+                url,
+                ct
+            );
+        }
+        
         return url;
     }
+
 }

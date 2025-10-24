@@ -31,7 +31,7 @@ public class KickTeamMemberHandlerTests
             .ReturnsAsync(new TeamMember
             {
                 Role = FunctionalRole.Member,
-                User = new User { UserName = "member" }
+                User = new User { UserName = "member", DisplayName = "member" }
             });
 
         var handler = new KickTeamMemberHandler(repo.Object);
@@ -63,7 +63,7 @@ public class KickTeamMemberHandlerTests
             .ReturnsAsync(new TeamMember
             {
                 Role = FunctionalRole.Leader,
-                User = new User { UserName = "leader" }
+                User = new User { UserName = "leader", DisplayName = "leader"}
             });
 
         var handler = new KickTeamMemberHandler(repo.Object);

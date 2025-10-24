@@ -23,6 +23,7 @@ public static class TestAuthHelper
         {
             Id = Guid.NewGuid(),
             UserName = userName,
+            DisplayName = userName,
             Email = $"{userName}@test.com",
             PasswordHash = "fakefakefake"
         };

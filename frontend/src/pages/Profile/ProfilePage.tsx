@@ -33,7 +33,8 @@ const ProfilePage: React.FC = () => {
 
     const targetUserId = params.id ?? myId ?? undefined;
 
-    const { profile, setProfile, loading, error, refresh, toggleFollow, followLoading, updateProfile } = useProfile(targetUserId);
+    const { profile, setProfile, loading, error, refresh, toggleFollow, followLoading, updateProfile,
+    addGenre, removeGenre, addSkill, removeSkill} = useProfile(targetUserId);
 
     const [editOpen, setEditOpen] = React.useState(false);
 
@@ -96,6 +97,10 @@ const ProfilePage: React.FC = () => {
                             initialTab="profile"
                             profile={profile}
                             onSaveProfile={updateProfile}
+                            addGenre={addGenre}
+                            removeGenre={removeGenre}
+                            addSkill={addSkill}
+                            removeSkill={removeSkill}
                         />
                     </>
                 )}

@@ -279,3 +279,70 @@
     display: none;
     /*background-color: #26cdd4;*/
 }
+
+.tagsTab {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.addRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+}
+
+.tagsList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-left: 4px;
+    margin-top: 16px;
+}
+
+.chip {
+    background: #26cdd4;
+    color: #0b1414;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.chipHollow {
+    background: transparent;
+    color: #26cdd4;
+    border: 1px solid #26cdd4;
+}
+
+.chipEditable {
+    position: relative;
+    padding-right: 28px;
+    font-size: 16px;
+}
+
+.tagRemove {
+
+
+    position: absolute;
+    top: 56%;
+    right: 4px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 0;
+    color: #0b1414;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.chip.chipHollow .tagRemove {
+    color: #26cdd4;
+}
+
+.tagRemove:hover {
+    filter: brightness(1.2);
+}

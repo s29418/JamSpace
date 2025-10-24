@@ -322,8 +322,6 @@
 }
 
 .tagRemove {
-
-
     position: absolute;
     top: 56%;
     right: 4px;
@@ -346,3 +344,28 @@
 .tagRemove:hover {
     filter: brightness(1.2);
 }
+
+/* Account tab layout */
+.accountTab { display: flex; flex-direction: column; gap: 22px; }
+.section { display: flex; flex-direction: column; gap: 10px; }
+.sectionHeader { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.inlineRow { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.alignRight { display: flex; justify-content: flex-end; }
+
+/* Danger */
+.buttonDanger { background: #b24a4a; color: #fff; }
+.buttonDanger:hover { filter: brightness(1.05); }
+
+/* Confirm dialog (jak w teamach, tylko w tym arkuszu) */
+.confirmBackdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: grid; place-items: center; z-index: 1100;
+}
+.confirmBody {
+    background: #161819; border: 1px solid #2b3c3b; border-radius: 14px;
+    max-width: 480px; width: calc(100% - 32px);
+    padding: 18px; color: #e8f7f5;
+}
+.confirmContent { margin: 0 0 14px; }
+.editButtonsRow { display: flex; gap: 10px; justify-content: flex-end; }

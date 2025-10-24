@@ -4,7 +4,7 @@ import {
     followUser,
     unfollowUser,
     updateUserProfile,
-    UpdateUserProfileRequest
+    UpdateUserProfileRequest, deleteUserAccount, changeUserPassword
 } from '../../../../entities/user/api/profile.api';
 import type {UserProfile, UserTag} from '../../../../entities/user/model/types';
 import { ApiError, isApiError } from 'shared/lib/api/base';
@@ -162,7 +162,25 @@ export function useProfile(userId?: string) {
         }
     }, [userId, profile, setProfile]);
 
-    return { profile, setProfile, loading, error, refresh, toggleFollow, followLoading, updateProfile
-        , addGenre, removeGenre, addSkill, removeSkill  };
-}
+    const updateEmail = useCallback(async (email: string) => {
+        if (!userId) return;
+        await updateUserProfile(userId, { setEmail: true, email });
+        setProfile(prev => (prev ? { ...prev, email } : prev));
+    }, [userId, setProfile]);
 
+    const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
+        if (!userId) return;
+        await changeUserPassword(userId, { currentPassword, newPassword });
+    }, [userId]);
+
+    const deleteAccount = useCallback(async () => {
+        if (!userId) return;
+        await deleteUserAccount(userId);
+        localStorage.removeItem('token');
+        window.location.href = '/'; // lub reload()
+    }, [userId]);
+
+
+    return { profile, setProfile, loading, error, refresh, toggleFollow, followLoading, updateProfile
+        , addGenre, removeGenre, addSkill, removeSkill, updateEmail, changePassword, deleteAccount };
+}

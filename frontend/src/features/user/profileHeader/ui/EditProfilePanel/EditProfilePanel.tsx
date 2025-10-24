@@ -1,23 +1,27 @@
-import React from "react";
+import React, {FC, useEffect, useState} from "react";
 import { ProfileTab } from "./profileTab/ProfileTab";
 import styles from "./EditProfilePanel.module.css";
 import {UserProfile} from "../../../../../entities/user/model/types";
 import {UpdateUserProfileRequest} from "../../../../../entities/user/api/profile.api";
 import {TagsEditorTab} from "./tagsEditorTab/TagsEditorTab";
+import {AccountTab} from "./accountTab/AccountTab";
 
 type Props = {
     isOpen: boolean;
     onClose: () => void;
-    initialTab?: "profile" | "skills" | "genres" | "security";
+    initialTab?: "profile" | "skills" | "genres" | "account";
     profile: UserProfile;
     onSaveProfile: (draft: UpdateUserProfileRequest, file?: File) => Promise<void> | void;
     addGenre?: (name: string) => Promise<void> | void;
     removeGenre?: (id: string) => Promise<void> | void;
     addSkill?: (name: string) => Promise<void> | void;
     removeSkill?: (id: string) => Promise<void> | void;
+    onUpdateEmail?: (email: string) => Promise<void> | void;
+    onChangePassword?: (current: string, next: string) => Promise<void> | void;
+    onDeleteAccount?: () => Promise<void> | void;
 };
 
-export const EditProfilePanel: React.FC<Props> = ({
+export const EditProfilePanel: FC<Props> = ({
                                                       isOpen,
                                                       onClose,
                                                       initialTab = "profile",
@@ -26,11 +30,14 @@ export const EditProfilePanel: React.FC<Props> = ({
                                                       addGenre,
                                                       removeGenre,
                                                       addSkill,
-                                                      removeSkill
+                                                      removeSkill,
+                                                      onUpdateEmail,
+                                                      onChangePassword,
+                                                      onDeleteAccount
                                                   }) => {
-    const [tab, setTab] = React.useState<typeof initialTab>(initialTab);
+    const [tab, setTab] = useState<typeof initialTab>(initialTab);
 
-    React.useEffect(() => setTab(initialTab), [initialTab]);
+    useEffect(() => setTab(initialTab), [initialTab]);
 
     return (
         <>
@@ -56,23 +63,26 @@ export const EditProfilePanel: React.FC<Props> = ({
                     >
                         Profile
                     </button>
+
                     <button
                         className={tab === "skills" ? styles.active : ""}
                         onClick={() => setTab("skills")}
                     >
                         Skills
                     </button>
+
                     <button
                         className={tab === "genres" ? styles.active : ""}
                         onClick={() => setTab("genres")}
                     >
                         Genres
                     </button>
+
                     <button
-                        className={tab === "security" ? styles.active : ""}
-                        onClick={() => setTab("security")}
+                        className={tab === "account" ? styles.active : ""}
+                        onClick={() => setTab("account")}
                     >
-                        Security
+                        Account
                     </button>
                 </nav>
 
@@ -108,10 +118,13 @@ export const EditProfilePanel: React.FC<Props> = ({
                         />
                     )}
 
-                    {tab === "security" && (
-                        <div className={styles.placeholder}>
-                            1234
-                        </div>
+                    {tab === 'account' && (
+                        <AccountTab
+                            initialEmail={profile.email}
+                            onUpdateEmail={async (email) => { await onUpdateEmail?.(email); }}
+                            onChangePassword={async (cur, nxt) => { await onChangePassword?.(cur, nxt); }}
+                            onDeleteAccount={async () => { await onDeleteAccount?.(); }}
+                        />
                     )}
                 </div>
             </aside>

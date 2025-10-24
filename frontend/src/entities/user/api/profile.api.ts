@@ -22,6 +22,12 @@ export type UpdateUserProfileRequest = {
     setBio?: boolean; bio?: string | null;
     setProfilePicture?: boolean; profilePictureUrl?: string | null;
     setLocation?: boolean; location?: { city?: string | null; country?: string | null };
+    setEmail?: boolean; email?: string | null;
+};
+
+export type ChangePasswordRequest = {
+    currentPassword: string;
+    newPassword: string;
 };
 
 
@@ -58,8 +64,8 @@ export const updateUserProfile = async (
     fd.append('Location.City', p.location?.city ?? '');
     fd.append('Location.Country', p.location?.country ?? '');
 
-    fd.append('SetEmail', 'false');
-    fd.append('Email', '');
+    fd.append('SetEmail', String(!!p.setEmail));
+    fd.append('Email', p.email ?? '');
 
     if (file) {
         fd.append('SetProfilePicture', 'true');
@@ -72,5 +78,17 @@ export const updateUserProfile = async (
     const res = await api.patch<{ message?: string }>(`/users/${userId}`, fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
     });
+    return res.data;
+};
+
+export const changeUserPassword = async (userId: string, body: ChangePasswordRequest) => {
+    const res = await api.patch<{ message?: string }>(`${ROOT}/${userId}/password`, JSON.stringify(body), {
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return res.data;
+};
+
+export const deleteUserAccount = async (userId: string) => {
+    const res = await api.delete<{ message?: string }>(`${ROOT}/${userId}`);
     return res.data;
 };

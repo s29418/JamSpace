@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { clearToken } from 'shared/lib/utils/auth';
 
-const LOGIN_ROUTE = '/profileHeader';
+const LOGIN_ROUTE = '/profile';
 
 export default function AuthEventsBridge() {
     const navigate = useNavigate();

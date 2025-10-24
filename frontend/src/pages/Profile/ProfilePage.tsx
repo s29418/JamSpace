@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import { useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
@@ -13,13 +13,13 @@ import { EditProfilePanel } from '../../features/user/profileHeader/ui/EditProfi
 
 type JwtPayload = { sub: string; username: string; email: string };
 
-const ProfilePage: React.FC = () => {
+const ProfilePage: FC = () => {
     const params = useParams<{ id?: string }>();
 
-    const [isLoginView, setIsLoginView] = React.useState(true);
-    const [myId, setMyId] = React.useState<string | null>(null);
+    const [isLoginView, setIsLoginView] = useState(true);
+    const [myId, setMyId] = useState<string | null>(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) { setMyId(null); return; }
         try {
@@ -33,16 +33,18 @@ const ProfilePage: React.FC = () => {
 
     const targetUserId = params.id ?? myId ?? undefined;
 
-    const { profile, setProfile, loading, error, refresh, toggleFollow, followLoading, updateProfile,
-    addGenre, removeGenre, addSkill, removeSkill} = useProfile(targetUserId);
+    const { profile, loading, error, toggleFollow, followLoading, updateProfile,
+    addGenre, removeGenre, addSkill, removeSkill, updateEmail, changePassword, deleteAccount
+    } = useProfile(targetUserId);
 
-    const [editOpen, setEditOpen] = React.useState(false);
+    const [editOpen, setEditOpen] = useState(false);
 
     if (!params.id && !myId) {
         return (
             <div className={styles.wrapper}>
                 <div className={styles.loginForm}>
                     {isLoginView ? (
+
                         <>
                             <LoginForm onLogin={() => window.location.reload()} />
                             <p>
@@ -51,6 +53,7 @@ const ProfilePage: React.FC = () => {
                             </p>
                         </>
                     ) : (
+
                         <>
                             <RegisterForm />
                             <p>
@@ -59,6 +62,7 @@ const ProfilePage: React.FC = () => {
                             </p>
                         </>
                     )}
+
                 </div>
             </div>
         );
@@ -101,6 +105,9 @@ const ProfilePage: React.FC = () => {
                             removeGenre={removeGenre}
                             addSkill={addSkill}
                             removeSkill={removeSkill}
+                            onUpdateEmail={updateEmail}
+                            onChangePassword={changePassword}
+                            onDeleteAccount={deleteAccount}
                         />
                     </>
                 )}

@@ -16,6 +16,8 @@ type Props = {
     onLogout?: () => void;
     onToggleFollow?: () => void;
     followLoading?: boolean;
+    onOpenFollowers?: () => void;
+    onOpenFollowing?: () => void;
 };
 
 export const ProfileHeaderCard: React.FC<Props> = ({
@@ -24,7 +26,9 @@ export const ProfileHeaderCard: React.FC<Props> = ({
                                                        onEdit ,
                                                        onLogout,
                                                        onToggleFollow,
-                                                       followLoading
+                                                       followLoading,
+                                                       onOpenFollowers,
+                                                       onOpenFollowing
 }) => {
     return (
         <div className={styles.profileCard}>
@@ -69,8 +73,13 @@ export const ProfileHeaderCard: React.FC<Props> = ({
                 </p>}
 
                 <div className={styles.profileCardMeta}>
-                    <span>{profile.followersCount ?? 0} followers</span>
-                    <span>{profile.followingCount ?? 0} following</span>
+                    <button type="button" className={styles.metaLink} onClick={onOpenFollowers}>
+                        {profile.followersCount ?? 0} followers
+                    </button>
+
+                    <button type="button" className={styles.metaLink} onClick={onOpenFollowing}>
+                        {profile.followingCount ?? 0} following
+                    </button>
                 </div>
 
                 {/* FOLLOW / MESSAGE */}
@@ -85,19 +94,19 @@ export const ProfileHeaderCard: React.FC<Props> = ({
 
                             {profile.isFollowing ? (
                                 <>
-                                    <UnfollowIcon className={styles.icon} />
+                                    <UnfollowIcon className={styles.icon}/>
                                     Unfollow
                                 </>
                             ) : (
                                 <>
-                                    <FollowIcon className={styles.icon} />
+                                    <FollowIcon className={styles.icon}/>
                                     Follow
                                 </>
                             )}
                         </button>
 
                         <button className={`${styles.button} ${styles.buttonGhost}`} type="button">
-                            <MessageIcon className={styles.icon} />
+                            <MessageIcon className={styles.icon}/>
                             Message
                         </button>
                     </div>

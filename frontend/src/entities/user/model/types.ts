@@ -25,6 +25,13 @@ export interface UserTag {
     name: string;
 }
 
+export interface UserLite {
+    id: string;
+    username: string;
+    displayName: string;
+    profilePictureUrl?: string | null;
+}
+
 export interface AuthContext {
     userId?: string | null;
 }

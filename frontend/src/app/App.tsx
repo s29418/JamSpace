@@ -6,6 +6,7 @@ import TeamsPage from "../pages/Teams/TeamsPage";
 import HomePage from "../pages/Home/HomePage";
 import TeamDetailsPage from "../pages/TeamDetails/TeamDetailsPage";
 import AuthEventsBridge from "./AuthEventsBridge";
+import FollowsListPage from "../pages/Profile/FollowsListPage/FollowsListPage";
 
 function App() {
     return (
@@ -14,8 +15,12 @@ function App() {
             <NavigationBar />
             <Routes>
                 <Route path="/" element={<HomePage />} />
+
                 <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/profile/:id" element={<ProfilePage />} />
+                <Route path="/profile/:id" element={<ProfilePage />} />
+                <Route path="/profile/:id/followers" element={<FollowsListPage mode="followers" />} />
+                <Route path="/profile/:id/following" element={<FollowsListPage mode="following" />} />
+
                 <Route path="/teams" element={<TeamsPage />} />
                     <Route path="/teams/:id" element={<TeamDetailsPage />} />
                 {/*<Route path="/chat" element={< />} />*/}

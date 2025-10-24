@@ -93,6 +93,12 @@ const ProfilePage: FC = () => {
                             onLogout={isOwner ? handleLogout : undefined}
                             onToggleFollow={!isOwner ? toggleFollow : undefined}
                             followLoading={!isOwner ? followLoading : undefined}
+                            onOpenFollowers={() => {
+                                    window.location.href = `/profile/${profile.id}/followers`;
+                            }}
+                            onOpenFollowing={() => {
+                                    window.location.href = `/profile/${profile.id}/following`;
+                            }}
                         />
 
                         <EditProfilePanel

@@ -20,7 +20,7 @@ public class UserFollowsController : ControllerBase
     
     [HttpPost("follow")]
     [Authorize]
-    public async Task<ActionResult<UserFollowDto>> FollowUser([FromRoute] Guid userId, CancellationToken ct)
+    public async Task<ActionResult<BasicUserFollowDto>> FollowUser([FromRoute] Guid userId, CancellationToken ct)
     {
         var followerId = User.GetUserId();
         
@@ -40,7 +40,7 @@ public class UserFollowsController : ControllerBase
 
     [HttpGet("followers", Name = "GetUserFollowers")]
     [AllowAnonymous]
-    public async Task<ActionResult<List<UserFollowDto>>> GetUserFollowers([FromRoute] Guid userId, CancellationToken ct)
+    public async Task<ActionResult<List<DetailedUserFollowDto>>> GetUserFollowers([FromRoute] Guid userId, CancellationToken ct)
     {
         var result = await _mediator.Send(new GetUserFollowersQuery(userId), ct);
         return Ok(result);
@@ -48,7 +48,7 @@ public class UserFollowsController : ControllerBase
 
     [HttpGet("following", Name = "GetUserFollowing")]
     [AllowAnonymous]
-    public async Task<ActionResult<List<UserFollowDto>>> GetUserFollowing([FromRoute] Guid userId, CancellationToken ct)
+    public async Task<ActionResult<List<DetailedUserFollowDto>>> GetUserFollowing([FromRoute] Guid userId, CancellationToken ct)
     {
         var result = await _mediator.Send(new GetUserFollowingQuery(userId), ct);
         return Ok(result);

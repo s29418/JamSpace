@@ -4,4 +4,4 @@ using MediatR;
 
 namespace JamSpace.Application.Features.UserFollows.Commands.FollowUser;
 
-public record FollowUserCommand(Guid FollowerId, Guid FollowedId) : IRequest<UserFollowDto>;
+public record FollowUserCommand(Guid FollowerId, Guid FollowedId) : IRequest<BasicUserFollowDto>;

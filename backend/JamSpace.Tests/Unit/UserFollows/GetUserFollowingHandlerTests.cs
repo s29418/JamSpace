@@ -29,7 +29,7 @@ public class GetUserFollowingHandlerTests
         var sut = new GetUserFollowingHandler(_repo.Object);
 
         // Act
-        List<UserFollowDto> result = await sut.Handle(new GetUserFollowingQuery(userId), CancellationToken.None);
+        List<DetailedUserFollowDto> result = await sut.Handle(new GetUserFollowingQuery(userId), CancellationToken.None);
 
         // Assert
         result.Should().HaveCount(2);

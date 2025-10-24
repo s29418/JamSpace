@@ -4,7 +4,7 @@ using MediatR;
 
 namespace JamSpace.Application.Features.UserFollows.Queries.GetUserFollowing;
 
-public class GetUserFollowingHandler : IRequestHandler<GetUserFollowingQuery, List<UserFollowDto>>
+public class GetUserFollowingHandler : IRequestHandler<GetUserFollowingQuery, List<DetailedUserFollowDto>>
 {
     private readonly IUserFollowRepository _repository;
     
@@ -13,13 +13,16 @@ public class GetUserFollowingHandler : IRequestHandler<GetUserFollowingQuery, Li
         _repository = repository;
     }
     
-    public async Task<List<UserFollowDto>> Handle(GetUserFollowingQuery request, CancellationToken cancellationToken)
+    public async Task<List<DetailedUserFollowDto>> Handle(GetUserFollowingQuery request, CancellationToken cancellationToken)
     {
         var following = await _repository.GetFollowingAsync(request.UserId, cancellationToken);
         
-        return following.Select(uf => new UserFollowDto
+        return following.Select(uf => new DetailedUserFollowDto
         {
             FollowerId = uf.FollowerId,
+            FollowerUsername = uf.Followee.UserName,
+            FollowerDisplayName = uf.Followee.DisplayName,
+            FollowerPictureUrl = uf.Followee.ProfilePictureUrl,
             FolloweeId = uf.FolloweeId
         }).ToList();
     }

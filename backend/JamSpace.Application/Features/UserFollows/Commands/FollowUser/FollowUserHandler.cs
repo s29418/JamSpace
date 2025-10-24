@@ -5,7 +5,7 @@ using MediatR;
 
 namespace JamSpace.Application.Features.UserFollows.Commands.FollowUser;
 
-public class FollowUserHandler : IRequestHandler<FollowUserCommand, UserFollowDto>
+public class FollowUserHandler : IRequestHandler<FollowUserCommand, BasicUserFollowDto>
 {
     private readonly IUserFollowRepository _userFollowRepository;
 
@@ -14,7 +14,7 @@ public class FollowUserHandler : IRequestHandler<FollowUserCommand, UserFollowDt
         _userFollowRepository = userFollowRepository;
     }
 
-    public async Task<UserFollowDto> Handle(FollowUserCommand request, CancellationToken cancellationToken)
+    public async Task<BasicUserFollowDto> Handle(FollowUserCommand request, CancellationToken cancellationToken)
     {
         bool alreadyFollowing = await _userFollowRepository.UserFollowsAsync(request.FollowerId, request.FollowedId, cancellationToken);
         if (alreadyFollowing)
@@ -23,7 +23,7 @@ public class FollowUserHandler : IRequestHandler<FollowUserCommand, UserFollowDt
         }
         
         var userFollow = await _userFollowRepository.FollowUserAsync(request.FollowerId, request.FollowedId, cancellationToken);
-        return new UserFollowDto
+        return new BasicUserFollowDto
         {
             FollowerId = userFollow.FollowerId,
             FolloweeId = userFollow.FolloweeId

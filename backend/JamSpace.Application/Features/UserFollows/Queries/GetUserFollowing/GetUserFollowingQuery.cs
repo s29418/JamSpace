@@ -3,4 +3,4 @@ using MediatR;
 
 namespace JamSpace.Application.Features.UserFollows.Queries.GetUserFollowing;
 
-public record GetUserFollowingQuery(Guid UserId) : IRequest<List<UserFollowDto>>;
+public record GetUserFollowingQuery(Guid UserId) : IRequest<List<DetailedUserFollowDto>>;

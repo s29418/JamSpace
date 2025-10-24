@@ -31,7 +31,7 @@ public class FollowUserHandlerTests
         var sut = new FollowUserHandler(_repo.Object);
 
         // Act
-        UserFollowDto dto = await sut.Handle(cmd, CancellationToken.None);
+        BasicUserFollowDto dto = await sut.Handle(cmd, CancellationToken.None);
 
         // Assert
         dto.FollowerId.Should().Be(followerId);

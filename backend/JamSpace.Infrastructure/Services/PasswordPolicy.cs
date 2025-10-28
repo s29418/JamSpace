@@ -20,34 +20,34 @@ public sealed class PasswordPolicy : IPasswordPolicy
         _opts = options.Value;
     }
 
-    public (bool IsValid, string? Error) Validate(string passwordPlain)
+    public (bool IsValid, Dictionary<string, string> Errors) Validate(string passwordPlain)
     {
+        var errors = new Dictionary<string, string>();
+
         if (string.IsNullOrEmpty(passwordPlain))
-            return (false, "Password cannot be empty.");
+            errors["Password"] = "Password cannot be empty.";
 
         if (_opts.DisallowWhitespace && HasWhitespace.IsMatch(passwordPlain))
-            return (false, "Password must not contain whitespace.");
+            errors["Password"] = "Password must not contain whitespace.";
 
         if (passwordPlain.Length < _opts.MinimumLength)
-            return (false, $"Password must be at least {_opts.MinimumLength} characters long.");
+            errors["Password"] = $"Password must be at least {_opts.MinimumLength} characters long.";
 
-        var p = passwordPlain;
         var groups = 0;
-        var upper = HasUpper.IsMatch(p); if (upper) groups++;
-        var lower = HasLower.IsMatch(p); if (lower) groups++;
-        var digit = HasDigit.IsMatch(p); if (digit) groups++;
-        var symbol = HasSymbol.IsMatch(p); if (symbol) groups++;
+        var upper = HasUpper.IsMatch(passwordPlain); if (upper) groups++;
+        var lower = HasLower.IsMatch(passwordPlain); if (lower) groups++;
+        var digit = HasDigit.IsMatch(passwordPlain); if (digit) groups++;
+        var symbol = HasSymbol.IsMatch(passwordPlain); if (symbol) groups++;
 
         if (_opts.RequireUppercase && !upper)
-            return (false, "Password must contain an uppercase letter.");
+            errors["Password"] = "Password must contain an uppercase letter.";
         if (_opts.RequireLowercase && !lower)
-            return (false, "Password must contain a lowercase letter.");
+            errors["Password"] = "Password must contain a lowercase letter.";
         if (_opts.RequireDigit && !digit)
-            return (false, "Password must contain a digit.");
+            errors["Password"] = "Password must contain a digit.";
         if (_opts.RequireNonAlphanumeric && !symbol)
-            return (false, "Password must contain a non-alphanumeric character.");
+            errors["Password"] = "Password must contain a non-alphanumeric character.";
 
-
-        return (true, null);
+        return (errors.Count == 0, errors);
     }
 }

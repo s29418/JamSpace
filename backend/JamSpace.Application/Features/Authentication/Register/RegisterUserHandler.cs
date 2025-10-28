@@ -31,10 +31,12 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResu
             throw new ConflictException("Email already in use.");
         }
         
-        var (ok, error) = _passwordPolicy.Validate(request.Password);
+        var (ok, errors) = _passwordPolicy.Validate(request.Password);
         if (!ok)
         {
-            throw new ValidationException(error ?? "Password does not meet security policy.");
+            throw new ValidationException(errors.Select(e =>
+                new FluentValidation.Results.ValidationFailure(e.Key, e.Value))
+            );
         }
 
         var user = new User

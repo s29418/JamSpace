@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using JamSpace.Application.Common.Exceptions;
+﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.Users.DTOs;
@@ -27,7 +26,7 @@ public sealed class UpdateUserProfileHandler
                    ?? throw new NotFoundException("User not found.");
 
         if (c.SetDisplayName)
-            user.DisplayName = c.DisplayName.Trim();
+            user.DisplayName = c.DisplayName!.Trim();
         
         if (c.SetBio)
             user.Bio = c.Bio?.Trim();
@@ -35,10 +34,8 @@ public sealed class UpdateUserProfileHandler
         
         if (c.SetProfilePicture)
         {
-            if (c.ProfilePictureUrl is not null &&
-                !Uri.IsWellFormedUriString(c.ProfilePictureUrl, UriKind.Absolute))
-                throw new ValidationException("Invalid profile picture URL.");
-            user.ProfilePictureUrl = c.ProfilePictureUrl;
+            if (c.ProfilePictureUrl is not null) 
+                user.ProfilePictureUrl = c.ProfilePictureUrl;
         }
 
         if (c.SetLocation)
@@ -46,14 +43,14 @@ public sealed class UpdateUserProfileHandler
             user.Location = c.Location is null ? null
                 : new Location
                 {
-                    City = c.Location.City.Trim(), 
-                    CountryCode = c.Location.Country.Trim()
+                    City = c.Location.City!.Trim(), 
+                    CountryCode = c.Location.Country!.Trim()
                 };
         }
         
         if (c.SetEmail)
         {
-            var existing = await _users.GetByEmailAsync(c.Email.Trim(), ct);
+            var existing = await _users.GetByEmailAsync(c.Email!.Trim(), ct);
             if (existing is not null && existing.Id != user.Id)
                 throw new ConflictException("Email already in use.");
             user.Email = c.Email.Trim();

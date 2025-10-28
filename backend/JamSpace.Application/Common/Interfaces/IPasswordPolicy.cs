@@ -2,5 +2,5 @@
 
 public interface IPasswordPolicy
 {
-    (bool IsValid, string? Error) Validate(string passwordPlain);
+    (bool IsValid, Dictionary<string, string> Errors) Validate(string passwordPlain);
 }

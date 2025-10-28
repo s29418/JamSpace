@@ -31,10 +31,20 @@ public sealed class ChangePasswordHandler : IRequestHandler<ChangePasswordComman
                    ?? throw new NotFoundException("User not found.");
 
         if (!_hasher.Verify(c.CurrentPassword, user.PasswordHash))
-            throw new ValidationException("Current password is incorrect.");
+        {
+            throw new ValidationException(new[]
+            {
+                new FluentValidation.Results.ValidationFailure("CurrentPassword", "Current password is incorrect.")
+            });
+        }
 
-        var (ok, error) = _policy.Validate(c.NewPassword);
-        if (!ok) throw new ValidationException(error ?? "New password doesn't meet policy.");
+        var (isValid, errors) = _policy.Validate(c.NewPassword);
+        if (!isValid)
+        {
+            throw new ValidationException(errors.Select(e =>
+                new FluentValidation.Results.ValidationFailure(e.Key, e.Value))
+            );
+        }
 
         user.PasswordHash = _hasher.Hash(c.NewPassword);
 

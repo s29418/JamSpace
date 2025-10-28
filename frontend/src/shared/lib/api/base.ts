@@ -39,13 +39,6 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-function pickMessage(pd?: ProblemDetails, fallback?: string) {
-    if (!pd) return fallback ?? 'Unknown error';
-    if (pd.detail) return pd.detail;
-    if (pd.title) return pd.title;
-    return fallback ?? 'Request failed';
-}
-
 api.interceptors.response.use(
     (res) => res,
     (error: AxiosError) => {
@@ -61,7 +54,19 @@ api.interceptors.response.use(
             if (data && typeof data === 'object') {
                 const pd = data as ProblemDetails;
                 details = pd.errors;
-                message = pickMessage(pd, data?.message ?? error.response.statusText);
+
+                const firstError =
+                    details && typeof details === 'object'
+                        ? Object.values(details).flat()[0]
+                        : undefined;
+
+                message =
+                    firstError ||
+                    pd.detail ||
+                    pd.title ||
+                    (data as any)?.message ||
+                    error.response?.statusText ||
+                    'Request failed';
             } else if (typeof data === 'string' && data.trim()) {
                 message = data;
             } else if (error.response.statusText) {

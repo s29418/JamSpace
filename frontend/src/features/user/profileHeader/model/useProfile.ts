@@ -68,82 +68,69 @@ export function useProfile(userId?: string) {
 
     const updateProfile = useCallback(async (draft: UpdateUserProfileRequest, file?: File) => {
         if (!userId) return;
-
-        await updateUserProfile(userId, draft, file);
+        try {
+            await updateUserProfile(userId, draft, file);
+        } catch (e) {
+            throw isApiError(e) ? e : new ApiError(0, 'Failed to update profile');
+        }
 
         if (file) {
             await refresh();
-        } else {
-            setProfile(prev => {
-                if (!prev) return prev;
-                const patch: Partial<UserProfile> = {};
-                if (draft.setDisplayName)    patch.displayName = draft.displayName ?? '';
-                if (draft.setBio)            patch.bio = draft.bio ?? '';
-                if (draft.setLocation)       patch.location = {
-                    city: draft.location?.city ?? '',
-                    country: draft.location?.country ?? ''
-                };
-                if (draft.setProfilePicture) patch.profilePictureUrl = draft.profilePictureUrl ?? '';
-                return { ...prev, ...patch };
-            });
+            return;
         }
+        setProfile(prev => {
+            if (!prev) return prev;
+            const patch: Partial<UserProfile> = {};
+            if (draft.setDisplayName)    patch.displayName = draft.displayName ?? '';
+            if (draft.setBio)            patch.bio = draft.bio ?? '';
+            if (draft.setLocation)       patch.location = {
+                city: draft.location?.city ?? '',
+                country: draft.location?.country ?? ''
+            };
+            if (draft.setProfilePicture) patch.profilePictureUrl = draft.profilePictureUrl ?? '';
+            return { ...prev, ...patch };
+        });
     }, [userId, setProfile, refresh]);
 
     const addGenre = useCallback(async (name: string) => {
-        if (!userId || !name.trim()) return;
-        const optimistic: UserTag = { id: `tmp-${Math.random().toString(36).slice(2)}`, name: name.trim() };
-        setProfile(prev => prev ? { ...prev, genres: [...(prev.genres ?? []), optimistic] } : prev);
+        if (!profile) throw new ApiError(400, 'Profile not loaded');
         try {
-            const created = await addUserGenre(userId, name.trim());
-            setProfile(prev => prev ? {
-                ...prev,
-                genres: (prev.genres ?? []).map(g => g.id === optimistic.id ? created : g)
-            } : prev);
+            const tag = await addUserGenre(profile.id, name);
+            setProfile(p => p ? { ...p, genres: [...(p.genres ?? []), tag] } : p);
         } catch (e) {
-            setProfile(prev => prev ? { ...prev, genres: (prev.genres ?? []).filter(g => g.id !== optimistic.id) } : prev);
-            throw e;
+            throw isApiError(e) ? e : new ApiError(0, 'Failed to add genre');
         }
-    }, [userId, setProfile]);
+    }, [profile, setProfile]);
 
-    const removeGenre = useCallback(async (genreId: string) => {
-        if (!userId) return;
-        const prevSnapshot = profile?.genres ?? [];
-        setProfile(prev => prev ? { ...prev, genres: (prev.genres ?? []).filter(g => g.id !== genreId) } : prev);
+    const removeGenre = useCallback(async (id: string) => {
+        if (!profile) throw new ApiError(400, 'Profile not loaded');
         try {
-            await deleteUserGenre(userId, genreId);
+            await deleteUserGenre(profile.id, id);
+            setProfile(p => p ? { ...p, genres: (p.genres ?? []).filter(g => g.id !== id) } : p);
         } catch (e) {
-            setProfile(prev => prev ? { ...prev, genres: prevSnapshot } : prev);
-            throw e;
+            throw isApiError(e) ? e : new ApiError(0, 'Failed to remove genre');
         }
-    }, [userId, profile, setProfile]);
+    }, [profile, setProfile]);
 
     const addSkill = useCallback(async (name: string) => {
-        if (!userId || !name.trim()) return;
-        const optimistic: UserTag = { id: `tmp-${Math.random().toString(36).slice(2)}`, name: name.trim() };
-        setProfile(prev => prev ? { ...prev, skills: [...(prev.skills ?? []), optimistic] } : prev);
+        if (!profile) throw new ApiError(400, 'Profile not loaded');
         try {
-            const created = await addUserSkill(userId, name.trim());
-            setProfile(prev => prev ? {
-                ...prev,
-                skills: (prev.skills ?? []).map(s => s.id === optimistic.id ? created : s)
-            } : prev);
+            const tag = await addUserSkill(profile.id, name);
+            setProfile(p => p ? { ...p, skills: [...(p.skills ?? []), tag] } : p);
         } catch (e) {
-            setProfile(prev => prev ? { ...prev, skills: (prev.skills ?? []).filter(s => s.id !== optimistic.id) } : prev);
-            throw e;
+            throw isApiError(e) ? e : new ApiError(0, 'Failed to add genre');
         }
-    }, [userId, setProfile]);
+    }, [profile, setProfile]);
 
     const removeSkill = useCallback(async (skillId: string) => {
-        if (!userId) return;
-        const prevSnapshot = profile?.skills ?? [];
-        setProfile(prev => prev ? { ...prev, skills: (prev.skills ?? []).filter(s => s.id !== skillId) } : prev);
+        if (!profile) throw new ApiError(400, 'Profile not loaded');
         try {
-            await deleteUserSkill(userId, skillId);
+            await deleteUserSkill(profile.id, skillId);
+            setProfile(p => p ? { ...p, skills: (p.skills ?? []).filter(g => g.id !== skillId) } : p);
         } catch (e) {
-            setProfile(prev => prev ? { ...prev, skills: prevSnapshot } : prev);
-            throw e;
+            throw isApiError(e) ? e : new ApiError(0, 'Failed to remove genre');
         }
-    }, [userId, profile, setProfile]);
+    }, [profile, setProfile]);
 
     const updateEmail = useCallback(async (email: string) => {
         if (!userId) return;

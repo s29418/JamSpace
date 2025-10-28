@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import styles from './FollowsListPage.module.css';
 import {FollowsMode, useUserFollows} from "../../../features/user/profileHeader/model/useUserFollows";
 import {jwtDecode} from "jwt-decode";
+import {FollowsListPageSkeleton} from "./FollowsListPageSkeleton";
 
 type Props = {
     mode: FollowsMode
@@ -38,6 +39,9 @@ const FollowsListPage: React.FC<Props> = ({ mode }) => {
 
     return (
         <div className={styles.wrapper}>
+
+            {loading && <FollowsListPageSkeleton />}
+
             <h2 className={styles.title}>
                 {ownerName ? `${possessive(ownerName)} ` : ''}{mode === 'followers' ? 'followers' : 'following'}
             </h2>

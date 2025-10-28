@@ -10,7 +10,7 @@ import { useProfile } from '../../features/user/profileHeader/model/useProfile';
 
 import { ProfileHeaderCard } from '../../features/user/profileHeader/ui/ProfileHeaderCard';
 import { EditProfilePanel } from '../../features/user/profileHeader/ui/EditProfilePanel/EditProfilePanel';
-
+import {ProfileHeaderCardSkeleton} from "../../features/user/profileHeader/ui/ProfileHeaderCardSkeleton";
 type JwtPayload = { sub: string; username: string; email: string };
 
 const ProfilePage: FC = () => {
@@ -79,7 +79,7 @@ const ProfilePage: FC = () => {
     return (
         <div>
             {error && <p className={styles.error}>{error}</p>}
-            {loading && <p className={styles.info}>Loading profile…</p>}
+            {loading && <ProfileHeaderCardSkeleton />}
 
 
             <div className={styles.wrapper}>

@@ -30,6 +30,7 @@ export interface UserLite {
     username: string;
     displayName: string;
     profilePictureUrl?: string | null;
+    isFollowing?: boolean;
 }
 
 export interface AuthContext {

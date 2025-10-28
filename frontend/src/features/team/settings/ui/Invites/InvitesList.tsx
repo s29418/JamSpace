@@ -7,6 +7,7 @@ import { InviteItem } from './InviteItem';
 export type InviteView = {
     id: string;
     invitedUserName: string;
+    invitedUserId: string;
     invitedUserPictureUrl?: string | null;
     invitedByUserName: string;
 };

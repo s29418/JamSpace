@@ -1,32 +1,55 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styles from './FollowsListPage.module.css';
 import {FollowsMode, useUserFollows} from "../../../features/user/profileHeader/model/useUserFollows";
+import {jwtDecode} from "jwt-decode";
 
 type Props = {
     mode: FollowsMode
 };
 
+type JwtPayload = {
+    sub: string;
+}
 
 const FollowsListPage: React.FC<Props> = ({ mode }) => {
     const { id } = useParams<{ id: string }>();
-    const { items, loading, error } = useUserFollows(id, mode);
+    const [myId, setMyId] = useState<string | null>(null);
+
+    const { items, loading, busy, ownerName, toggleFollow } = useUserFollows(id, mode);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) { setMyId(null); return; }
+        try {
+            const { sub } = jwtDecode<JwtPayload>(token);
+            setMyId(sub);
+        } catch {
+            setMyId(null);
+        }
+    }, []);
+
+    function possessive(name: string) {
+        if (!name) return '';
+        const trimmed = name.trim();
+        const lastChar = trimmed.slice(-1).toLowerCase();
+        return lastChar === 's' ? `${trimmed}'` : `${trimmed}'s`;
+    }
 
     return (
         <div className={styles.wrapper}>
-            <h2 className={styles.title}>{mode === 'followers' ? 'Followers' : 'Following'}</h2>
-            {loading && <p className={styles.info}>Loading…</p>}
-            {error && <p className={styles.error}>{error}</p>}
+            <h2 className={styles.title}>
+                {ownerName ? `${possessive(ownerName)} ` : ''}{mode === 'followers' ? 'followers' : 'following'}
+            </h2>
 
             <ul className={styles.list}>
                 {items.map(u => (
-
                     <li key={u.id} className={styles.item}>
-
                         <Link to={`/profile/${u.id}`} className={styles.avatarLink}>
                             {u.profilePictureUrl
-                                ? <img src={u.profilePictureUrl} alt={`${u.username} avatar`} />
-                                : <div className={styles.avatarFallback}>{u.displayName?.[0] ?? u.username?.[0] ?? '?'}</div>}
+                                ? <img src={u.profilePictureUrl} alt={`${u.username} avatar`}/>
+                                : <div
+                                    className={styles.avatarFallback}>{u.displayName?.[0] ?? u.username?.[0] ?? '?'}</div>}
                         </Link>
 
                         <div className={styles.meta}>
@@ -34,9 +57,20 @@ const FollowsListPage: React.FC<Props> = ({ mode }) => {
                             <div className={styles.username}>@{u.username}</div>
                         </div>
 
+                        {u.id !== myId && (
+                            <div className={styles.action}>
+                                <button
+                                    type="button"
+                                    className={`${styles.btn} ${u.isFollowing ? styles.btnPrimary : styles.btnGhost}`}
+                                    onClick={() => void toggleFollow(u.id)}
+                                    disabled={busy[u.id]}
+                                >
+                                    {u.isFollowing ? 'Following' : 'Follow'}
+                                </button>
+                            </div>
+                        )}
                     </li>
                 ))}
-
                 {!loading && !items.length && <p className={styles.info}>No users.</p>}
             </ul>
         </div>

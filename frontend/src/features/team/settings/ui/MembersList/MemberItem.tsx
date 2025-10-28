@@ -4,6 +4,7 @@ import { TeamMember, TeamRoleLabel } from '../../../../../entities/team/model/ty
 import { RoleSelect } from './RoleSelect';
 import { MusicalRoleEditor } from './MusicalRoleEditor';
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
+import {Link} from "react-router-dom";
 
 type Props = {
     member: TeamMember;
@@ -36,14 +37,18 @@ const _MemberItem: React.FC<Props> = ({
     return (
         <li className={styles.member}>
             {/* AVATAR */}
-            <div className={styles.userAvatarWrapper}>
-                <img src={avatarSrc} alt={member.username} className={styles.userAvatar} />
-            </div>
+            <Link to={`/profile/${member.userId}`}>
+                <div className={styles.userAvatarWrapper}>
+                    <img src={avatarSrc} alt={member.username} className={styles.userAvatar}/>
+                </div>
+            </Link>
 
             {/* DATA & ACTIONS */}
             <div className={styles.invitedUserDetails}>
                 <div>
-                    <p className={styles.username}>{member.username}</p>
+                    <Link to={`/profile/${member.userId}`} className={styles.userLink}>
+                        <p className={styles.username}>{member.username}</p>
+                    </Link>
 
                     {/* FUNCTIONAL ROLE */}
                     <p className={styles.role}>

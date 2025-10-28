@@ -18,8 +18,8 @@ function App() {
 
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/:id" element={<ProfilePage />} />
-                <Route path="/profile/:id/followers" element={<FollowsListPage mode="followers" />} />
-                <Route path="/profile/:id/following" element={<FollowsListPage mode="following" />} />
+                    <Route path="/profile/:id/followers" element={<FollowsListPage mode="followers" />} />
+                    <Route path="/profile/:id/following" element={<FollowsListPage mode="following" />} />
 
                 <Route path="/teams" element={<TeamsPage />} />
                     <Route path="/teams/:id" element={<TeamDetailsPage />} />

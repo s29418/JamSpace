@@ -152,6 +152,8 @@ export default function TeamSettingsModal({
                 'User',
             invitedUserPictureUrl:
                 inv.invitedUserPictureUrl ?? inv.userPictureUrl ?? null,
+            invitedUserId:
+                inv.invitedUserId ?? inv.userId ?? null,
             invitedByUserName:
                 inv.invitedByUserName ?? inv.createdByUserName ?? 'You',
         });

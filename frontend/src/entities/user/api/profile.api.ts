@@ -36,17 +36,6 @@ export const getUserById = async (userId: string) => {
     return normalizeUserProfile(res.data as any) as UserProfile;
 };
 
-export const followUser = async (userId: string) => {
-    const res = await api.post<{ message?: string }>(`${ROOT}/${userId}/follow`, null);
-    return res.data;
-};
-
-export const unfollowUser = async (userId: string) => {
-    const res = await api.delete<{ message?: string }>(`${ROOT}/${userId}/follow`);
-    return res.data;
-};
-
-
 export const updateUserProfile = async (
     userId: string,
     p: UpdateUserProfileRequest,

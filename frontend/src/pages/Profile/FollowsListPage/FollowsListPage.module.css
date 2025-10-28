@@ -26,12 +26,13 @@
 
 .item {
     display: grid;
-    grid-template-columns: 56px 1fr;
+    grid-template-columns: 56px 1fr auto;
     gap: 12px;
     padding: 10px 12px;
     border: 1px solid #2b3c3b;
     border-radius: 12px;
     background: #121415;
+    align-items: center;
 }
 
 .avatarLink {
@@ -78,4 +79,44 @@
     color: #93cbc5;
     font-size: 14px;
     margin-top: 2px;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    color: #26cdd4;
+    background: none;
+    border: none;
+    margin-right: 4px;
+    cursor: pointer;
+    justify-self: center;
+}
+
+.action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn {
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btnPrimary {
+    background: #26cdd4;
+    color: #0b1414;
+}
+
+.btnGhost {
+    background: transparent;
+    color: #26cdd4;
+    border-color: #2b3c3b;
+}
+
+.btn:disabled {
+    opacity: .6;
+    cursor: default;
 }

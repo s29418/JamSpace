@@ -2,6 +2,7 @@ import React from 'react';
 import styles from '../TeamSettingsModal.module.css';
 
 import type { InviteView } from './InvitesList';
+import {Link} from "react-router-dom";
 
 type Props = {
     invite: InviteView;
@@ -12,17 +13,21 @@ type Props = {
 const _InviteItem: React.FC<Props> = ({ invite, avatarSrc, onCancel }) => {
     return (
         <li className={styles.member}>
-            <div className={styles.userAvatarWrapper}>
+            <Link to={`/profile/${invite.invitedUserId}`} className={styles.userAvatarWrapper}>
                 <img
                     src={avatarSrc}
                     alt={invite.invitedUserName}
                     className={styles.userAvatar}
                 />
-            </div>
+            </Link>
 
             <div className={styles.invitedUserDetails}>
                 <div>
-                    <p className={styles.username}>{invite.invitedUserName}</p>
+                    <Link to={`/profile/${invite.invitedUserId}`} className={styles.userLink}>
+                        <p className={styles.username}>
+                            {invite.invitedUserName}
+                        </p>
+                    </Link>
                     <p className={styles.role}>Invited by: {invite.invitedByUserName}</p>
                 </div>
 

@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
     getUserById,
-    followUser,
-    unfollowUser,
     updateUserProfile,
     UpdateUserProfileRequest, deleteUserAccount, changeUserPassword
 } from '../../../../entities/user/api/profile.api';
@@ -10,13 +8,13 @@ import type {UserProfile, UserTag} from '../../../../entities/user/model/types';
 import { ApiError, isApiError } from 'shared/lib/api/base';
 import {addUserGenre, deleteUserGenre} from "../../../../entities/user/api/genres.api";
 import {addUserSkill, deleteUserSkill} from "../../../../entities/user/api/skills.api";
+import {useFollowActions} from "./useFollowActions";
 
 export function useProfile(userId?: string) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState<boolean>(!!userId);
     const [error, setError] = useState<string | null>(null);
-
-    const [followLoading, setFollowLoading] = useState(false);
+    const [followLoading] = useState(false);
 
     const refresh = useCallback(async () => {
         if (!userId) return;
@@ -54,33 +52,18 @@ export function useProfile(userId?: string) {
         return () => { alive = false; };
     }, [userId]);
 
-    const toggleFollow = useCallback(async () => {
-        if (!profile?.id || followLoading) return;
-        setFollowLoading(true);
-
-        const prev = profile;
-        const next: UserProfile = {
-            ...prev,
-            isFollowing: !prev.isFollowing,
-            followersCount: (prev.followersCount ?? 0) + (prev.isFollowing ? -1 : 1),
-        };
-
-        setProfile(next);
-
-        try {
-            if (prev.isFollowing) {
-                await unfollowUser(prev.id);
-            } else {
-                await followUser(prev.id);
-            }
-        } catch (e) {
-            setProfile(prev);
-            const msg = isApiError(e) ? (e as ApiError).message : 'Follow action failed';
-            setError(msg);
-        } finally {
-            setFollowLoading(false);
+    const { toggleFollow: toggleFollowShared } = useFollowActions(
+        () => (profile ? [profile] : []),
+        (upd) => {
+            const next = upd(profile ? [profile] : []);
+            setProfile(next[0] ?? null);
         }
-    }, [profile, followLoading]);
+    );
+
+    const toggleFollow = useCallback(async () => {
+        if (!profile) return;
+        await toggleFollowShared(profile.id);
+    }, [profile, toggleFollowShared]);
 
 
     const updateProfile = useCallback(async (draft: UpdateUserProfileRequest, file?: File) => {
@@ -177,7 +160,7 @@ export function useProfile(userId?: string) {
         if (!userId) return;
         await deleteUserAccount(userId);
         localStorage.removeItem('token');
-        window.location.href = '/'; // lub reload()
+        window.location.href = '/';
     }, [userId]);
 
 

@@ -14,12 +14,12 @@ export const AccountTab: FC<Props> = ({
                                                 onChangePassword,
                                                 onDeleteAccount
                                             }) => {
-    // email
+
     const [showEmail, setShowEmail] = useState(false);
     const [email, setEmail] = useState(initialEmail ?? '');
     const [emailBusy, setEmailBusy] = useState(false);
+    const [emailError, setEmailError] = useState<string | null>(null);
 
-    // password
     const [showPw, setShowPw] = useState(false);
     const [current, setCurrent] = useState('');
     const [next, setNext] = useState('');
@@ -27,7 +27,6 @@ export const AccountTab: FC<Props> = ({
     const [pwBusy, setPwBusy] = useState(false);
     const [pwError, setPwError] = useState<string | null>(null);
 
-    // delete
     const [confirmOpen, setConfirmOpen] = useState(false);
 
     async function saveEmail() {
@@ -35,19 +34,39 @@ export const AccountTab: FC<Props> = ({
         setEmailBusy(true);
         try {
             await onUpdateEmail(email.trim());
-        } finally {
-            setEmailBusy(false);
             setShowEmail(false);
+            setEmailError('');
+        } catch (e: any) {
+            setEmailError(e?.message || 'Failed to update email.');
+        }
+        finally {
+            setEmailBusy(false);
         }
     }
 
     async function savePassword() {
         setPwError(null);
-        if (!current || !next || !confirm) { setPwError('All fields are required.'); return; }
-        if (next !== confirm) { setPwError('Passwords are not the same.'); return; }
+        if (!current || !next || !confirm) {
+            setPwError('All fields are required.');
+            return;
+        }
+        if (next !== confirm) {
+            setPwError('Passwords are not the same.');
+            return;
+        }
         setPwBusy(true);
-        try { await onChangePassword(current, next); setCurrent(''); setNext(''); setConfirm(''); setShowPw(false); }
-        finally { setPwBusy(false); }
+        try {
+            await onChangePassword(current, next);
+            setCurrent('');
+            setNext('');
+            setConfirm('');
+            setShowPw(false);
+        } catch (e: any) {
+            setPwError(e?.message || 'Failed to change password.');
+        }
+        finally {
+            setPwBusy(false);
+        }
     }
 
     return (
@@ -84,6 +103,11 @@ export const AccountTab: FC<Props> = ({
                         >Save
                         </button>
 
+                        {emailError &&
+                            <p className={`${styles.help} ${styles.error}`}>
+                                {emailError}
+                            </p>
+                        }
                     </div>
                 )}
             </div>

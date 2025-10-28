@@ -17,24 +17,24 @@ public class GetUserFollowersHandlerTests
         // Arrange
         var userId = Guid.NewGuid();
 
-        var rows = new List<UserFollow>
+        var rows = new HashSet<UserFollow>
         {
             new() { FollowerId = Guid.NewGuid(), FolloweeId = userId },
             new() { FollowerId = Guid.NewGuid(), FolloweeId = userId }
         };
 
         _repo.Setup(r => r.GetFollowersAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(rows);
+            .ReturnsAsync(rows.ToHashSet());
 
         var sut = new GetUserFollowersHandler(_repo.Object);
 
         // Act
-        List<DetailedUserFollowDto> result = await sut.Handle(new GetUserFollowersQuery(userId), CancellationToken.None);
+        HashSet<DetailedUserFollowDto> result = await sut.Handle(new GetUserFollowersQuery(userId, userId), CancellationToken.None);
 
         // Assert
         result.Should().HaveCount(2);
         result.Should().OnlyContain(d => d.FolloweeId == userId);
-        result[0].FollowerId.Should().Be(rows[0].FollowerId);
+        result.ToList()[0].FollowerId.Should().Be(rows.ToList()[0].FollowerId);
     }
 
     [Fact]
@@ -42,11 +42,11 @@ public class GetUserFollowersHandlerTests
     {
         var userId = Guid.NewGuid();
         _repo.Setup(r => r.GetFollowersAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<UserFollow>());
+            .ReturnsAsync(new HashSet<UserFollow>());
 
         var sut = new GetUserFollowersHandler(_repo.Object);
 
-        var result = await sut.Handle(new GetUserFollowersQuery(userId), CancellationToken.None);
+        var result = await sut.Handle(new GetUserFollowersQuery(userId, userId), CancellationToken.None);
 
         result.Should().NotBeNull().And.BeEmpty();
     }

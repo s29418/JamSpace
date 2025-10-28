@@ -42,7 +42,15 @@ public class UserFollowsController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<List<DetailedUserFollowDto>>> GetUserFollowers([FromRoute] Guid userId, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetUserFollowersQuery(userId), ct);
+        Guid? requestingUserId = null;
+
+        try
+        {
+            requestingUserId = User.GetUserId();
+        }
+        catch (UnauthorizedAccessException) { }
+        
+        var result = await _mediator.Send(new GetUserFollowersQuery(userId, requestingUserId), ct);
         return Ok(result);
     }
 
@@ -50,7 +58,15 @@ public class UserFollowsController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<List<DetailedUserFollowDto>>> GetUserFollowing([FromRoute] Guid userId, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetUserFollowingQuery(userId), ct);
+        Guid? requestingUserId = null;
+
+        try
+        {
+            requestingUserId = User.GetUserId();
+        }
+        catch (UnauthorizedAccessException) { }
+        
+        var result = await _mediator.Send(new GetUserFollowingQuery(userId, requestingUserId), ct);
         return Ok(result);
     }
 }

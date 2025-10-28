@@ -22,22 +22,22 @@ public class UserFollowRepository : IUserFollowRepository
     }
 
 
-    public async Task<List<UserFollow>> GetFollowersAsync(Guid userId, CancellationToken ct)
+    public async Task<HashSet<UserFollow>> GetFollowersAsync(Guid? userId, CancellationToken ct)
     {
         return await _db.UserFollows
             .Where(uf => uf.FolloweeId == userId)
             .OrderByDescending(uf => uf.FollowedAt)
             .Include(uf => uf.Follower)
-            .ToListAsync(ct);
+            .ToHashSetAsync(ct);
     }
 
-    public async Task<List<UserFollow>> GetFollowingAsync(Guid userId, CancellationToken ct)
+    public async Task<HashSet<UserFollow>> GetFollowingAsync(Guid? userId, CancellationToken ct)
     {
         return await _db.UserFollows
             .Where(uf => uf.FollowerId == userId)
             .OrderByDescending(uf => uf.FollowedAt)
             .Include(uf => uf.Followee)
-            .ToListAsync(ct);
+            .ToHashSetAsync(ct);
     }
 
     public async Task<UserFollow> FollowUserAsync(Guid followerId, Guid followedId, CancellationToken ct)

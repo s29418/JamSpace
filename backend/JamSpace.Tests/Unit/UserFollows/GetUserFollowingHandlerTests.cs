@@ -24,12 +24,12 @@ public class GetUserFollowingHandlerTests
         };
 
         _repo.Setup(r => r.GetFollowingAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(rows);
+            .ReturnsAsync(rows.ToHashSet());
 
         var sut = new GetUserFollowingHandler(_repo.Object);
 
         // Act
-        List<DetailedUserFollowDto> result = await sut.Handle(new GetUserFollowingQuery(userId), CancellationToken.None);
+        List<DetailedUserFollowDto> result = await sut.Handle(new GetUserFollowingQuery(userId, userId), CancellationToken.None);
 
         // Assert
         result.Should().HaveCount(2);
@@ -43,11 +43,11 @@ public class GetUserFollowingHandlerTests
         var userId = Guid.NewGuid();
 
         _repo.Setup(r => r.GetFollowingAsync(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<UserFollow>());
+            .ReturnsAsync(new HashSet<UserFollow>());
 
         var sut = new GetUserFollowingHandler(_repo.Object);
 
-        var result = await sut.Handle(new GetUserFollowingQuery(userId), CancellationToken.None);
+        var result = await sut.Handle(new GetUserFollowingQuery(userId, userId), CancellationToken.None);
 
         result.Should().NotBeNull().And.BeEmpty();
     }

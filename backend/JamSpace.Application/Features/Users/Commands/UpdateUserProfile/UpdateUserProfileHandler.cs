@@ -27,18 +27,11 @@ public sealed class UpdateUserProfileHandler
                    ?? throw new NotFoundException("User not found.");
 
         if (c.SetDisplayName)
-        {
-            if (c.DisplayName is null || c.DisplayName.Length < 3 || c.DisplayName.Length > 50)
-                throw new ValidationException("Display name must be between 3 and 50 characters.");
             user.DisplayName = c.DisplayName.Trim();
-        }
         
         if (c.SetBio)
-        {
-            if (c.Bio is not null && c.Bio.Length > 170)
-                throw new ValidationException("Bio must be ≤ 170 characters.");
             user.Bio = c.Bio?.Trim();
-        }
+        
         
         if (c.SetProfilePicture)
         {
@@ -50,15 +43,16 @@ public sealed class UpdateUserProfileHandler
 
         if (c.SetLocation)
         {
-            user.Location = c.Location is null
-                ? null
-                : new Location { City = c.Location.City.Trim(), CountryCode = c.Location.Country.Trim() };
+            user.Location = c.Location is null ? null
+                : new Location
+                {
+                    City = c.Location.City.Trim(), 
+                    CountryCode = c.Location.Country.Trim()
+                };
         }
         
         if (c.SetEmail)
         {
-            if (string.IsNullOrWhiteSpace(c.Email))
-                throw new ValidationException("Email is required.");
             var existing = await _users.GetByEmailAsync(c.Email.Trim(), ct);
             if (existing is not null && existing.Id != user.Id)
                 throw new ConflictException("Email already in use.");

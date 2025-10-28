@@ -67,7 +67,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 .HasConversion(upperStr);
             
             loc.Property(p => p.City)
-                .HasMaxLength(128);
+                .HasMaxLength(50);
             
             loc.HasIndex(p => p.CountryCode)
                 .HasDatabaseName("IX_User_Loc_Country");

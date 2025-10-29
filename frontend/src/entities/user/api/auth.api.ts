@@ -1,19 +1,29 @@
-import axios from 'axios';
+import { api } from '../../../shared/lib/api/base';
 
-const baseURL =
-    (process.env.REACT_APP_API_URL as string | undefined) ?? 'http://localhost:5072/api';
-const AUTH = `${baseURL}/auth`;
+const ROOT = `/auth`;
 
-export type LoginRequest = { email: string; password: string };
-export type RegisterRequest = { email: string; username: string; password: string };
-export type AuthResponse = { token: string; [k: string]: any };
+export type LoginRequest = {
+    email: string;
+    password: string
+};
+
+export type RegisterRequest = {
+    email: string;
+    username: string;
+    password: string
+};
+
+export type AuthResponse = {
+    token: string;
+    [k: string]: any
+};
 
 export const login = async (email: string, password: string) => {
-    const res = await axios.post<AuthResponse>(`${AUTH}/login`, { email, password });
+    const res = await api.post<AuthResponse>(`${ROOT}/login`, { email, password });
     return res.data;
 };
 
 export const register = async (email: string, username: string, password: string) => {
-    const res = await axios.post<AuthResponse>(`${AUTH}/register`, { email, username, password });
+    const res = await api.post<AuthResponse>(`${ROOT}/register`, { email, username, password });
     return res.data;
 };

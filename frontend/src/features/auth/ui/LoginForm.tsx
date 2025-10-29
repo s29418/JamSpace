@@ -1,19 +1,28 @@
 import React, { useState } from 'react';
-import { login } from 'entities/user/api/auth.api';
+import { useAuth } from '../model/useAuth';
+import styles from '../../../pages/Profile/ProfilePage.module.css';
 
 const LoginForm = ({ onLogin }: { onLogin: () => void }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+
+    const { loginUser } = useAuth();
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const response = await login(email, password);
+            const response = await loginUser(email, password);
             localStorage.setItem('token', response.token);
             onLogin();
             window.location.reload();
         } catch (error) {
-            alert('Invalid credentials');
+            if (error instanceof Error) {
+                setError(error.message);
+            } else {
+                setError('An unknown error occurred.');
+            }
         }
     };
 
@@ -28,6 +37,7 @@ const LoginForm = ({ onLogin }: { onLogin: () => void }) => {
                 onChange={e => setEmail(e.target.value)}
                 required
             />
+
             <input
                 type="password"
                 placeholder="Password"
@@ -35,6 +45,13 @@ const LoginForm = ({ onLogin }: { onLogin: () => void }) => {
                 onChange={e => setPassword(e.target.value)}
                 required
             />
+
+            {error &&
+                <p className={styles.error}>
+                    {error}
+                </p>
+            }
+
             <button type="submit">
                 Log in
             </button>

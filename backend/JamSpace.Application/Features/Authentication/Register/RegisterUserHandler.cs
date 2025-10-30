@@ -27,9 +27,11 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResu
     {
         var existingUser = await _userRepository.GetByEmailAsync(request.Email, ct);
         if (existingUser != null)
-        {
             throw new ConflictException("Email already in use.");
-        }
+        
+        
+        if (await _userRepository.GetUserIdByUsernameAsync(request.Username, ct) is not null)
+            throw new ConflictException("Username already in use.");
         
         var (ok, errors) = _passwordPolicy.Validate(request.Password);
         if (!ok)

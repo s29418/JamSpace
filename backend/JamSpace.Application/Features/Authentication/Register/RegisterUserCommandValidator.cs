@@ -2,9 +2,9 @@
 
 namespace JamSpace.Application.Features.Authentication.Register;
 
-public class RegisterUserValidator : AbstractValidator<RegisterUserCommand>
+public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
-    public RegisterUserValidator()
+    public RegisterUserCommandValidator()
     {
         RuleFor(x => x.Username)
             .NotEmpty().WithMessage("Username cannot be empty.")

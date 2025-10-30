@@ -16,6 +16,8 @@ public static class DependencyInjection
     {
         services.AddDbContext<JamSpaceDbContext>(opt =>
             opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
+        
+        services.AddMemoryCache();
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -48,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IPasswordPolicy, PasswordPolicy>();
         services.AddTransient<IUserModificationService, UserModificationService>();
+        services.AddSingleton<ICountryService, CountryService>();
         return services;
     }
 }

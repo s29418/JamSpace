@@ -59,7 +59,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             
             loc.Property(p => p.CountryCode)
                 .HasMaxLength(2)
-                .IsRequired()
                 .HasConversion(upperStr);
             
             loc.Property(p => p.StateCode)
@@ -81,5 +80,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             loc.HasIndex(p => p.City)
                 .HasDatabaseName("IX_User_Loc_City");
         });
+        
+        builder.Navigation(u => u.Location).IsRequired(false);
     }
 }

@@ -2,6 +2,6 @@
 
 public record CountryDto
 {
-    public required string Code { get; init; }
-    public required string Name { get; init; }
+    public string? Code { get; init; }
+    public string? Name { get; init; }
 }

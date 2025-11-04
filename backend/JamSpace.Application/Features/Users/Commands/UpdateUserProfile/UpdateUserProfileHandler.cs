@@ -40,12 +40,33 @@ public sealed class UpdateUserProfileHandler
 
         if (c.SetLocation)
         {
-            user.Location = c.Location is null ? null
-                : new Location
+            if (c.Location is null)
+            {
+                user.Location = null;
+            }
+            else
+            {
+                var city = string.IsNullOrWhiteSpace(c.Location.City)
+                    ? null
+                    : c.Location.City!.Trim();
+
+                var country = string.IsNullOrWhiteSpace(c.Location.Country)
+                    ? null
+                    : c.Location.Country!.Trim().ToUpperInvariant();
+                
+                if (city is null && country is null)
                 {
-                    City = c.Location.City!.Trim(), 
-                    CountryCode = c.Location.Country!.Trim()
-                };
+                    user.Location = null;
+                }
+                else
+                {
+                    user.Location = new Location
+                    {
+                        City = city,
+                        CountryCode = country
+                    };
+                }
+            }
         }
         
         if (c.SetEmail)

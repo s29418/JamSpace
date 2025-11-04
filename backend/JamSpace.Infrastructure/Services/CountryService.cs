@@ -18,12 +18,12 @@ public class CountryService : ICountryService
         _relativePath = cfg["CountryData:Path"] ?? "Resources/countries.en.json";
     }
 
-    public IReadOnlyList<CountryDto> GetCountriesEn(bool refresh = false)
+    public IReadOnlyList<CountryDto>? GetCountriesEn(bool refresh = false)
     {
         if (refresh) 
             _cache.Remove(CacheKey);
 
-        if (_cache.TryGetValue(CacheKey, out IReadOnlyList<CountryDto> cached))
+        if (_cache.TryGetValue(CacheKey, out IReadOnlyList<CountryDto>? cached))
             return cached;
 
         var path = Path.Combine(AppContext.BaseDirectory, _relativePath);
@@ -42,14 +42,14 @@ public class CountryService : ICountryService
 
         var filtered = raw
             .Where(i => i is not null
-                        && !string.IsNullOrWhiteSpace(i!.Code)
-                        && !string.IsNullOrWhiteSpace(i!.Name))
-            .Select(i => i! with
+                        && !string.IsNullOrWhiteSpace(i.Code)
+                        && !string.IsNullOrWhiteSpace(i.Name))
+            .Select(i => new CountryDto
             {
-                Code = i.Code!.Trim().ToUpperInvariant(),
-                Name = i.Name!.Trim()
+                Code = i?.Code?.Trim().ToUpperInvariant(), 
+                Name = i?.Name?.Trim() 
+                
             })
-            .Where(i => i.Code is not ("AN" or "CS" or "AP")) 
             .GroupBy(i => i.Code)
             .Select(g => g.First())
             .OrderBy(i => i.Name, StringComparer.Ordinal)
@@ -60,5 +60,6 @@ public class CountryService : ICountryService
     }
 
     public CountryDto? GetCountryEn(string code)
-        => GetCountriesEn().FirstOrDefault(c => c.Code == code.ToUpperInvariant());
+        => (GetCountriesEn() ?? throw new InvalidOperationException("Failed to load countries."))
+            .FirstOrDefault(c => c.Code == code.ToUpperInvariant());
 }

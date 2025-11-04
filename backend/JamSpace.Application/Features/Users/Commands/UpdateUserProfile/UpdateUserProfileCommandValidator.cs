@@ -21,18 +21,18 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
             .EmailAddress().WithMessage("Email is not valid.")
             .When(x => x.SetEmail);
 
-        When(x => x.SetLocation && x.Location != null, () =>
-        {
-            RuleFor(x => x.Location!.City)
-                .MaximumLength(50)
-                .WithMessage("City cannot be longer than 50 characters.")
-                .MinimumLength(3)
-                .WithMessage("City must be at least 3 characters long.");
-            
-            // RuleFor(x => x.Location.Country)
-            //     .MaximumLength(50).WithMessage("Country cannot be longer than 50 characters.")
-            //     .NotEmpty().WithMessage("Country cannot be empty.")
-            //     .MinimumLength(3).WithMessage("Country must be at least 3 characters long.");
-        });
+        // When(x => x.SetLocation && x.Location != null, () =>
+        // {
+        //     RuleFor(x => x.Location!.City)
+        //         .MaximumLength(50)
+        //         .WithMessage("City cannot be longer than 50 characters.")
+        //         .MinimumLength(3)
+        //         .WithMessage("City must be at least 3 characters long.");
+        //     
+        //     // RuleFor(x => x.Location.Country)
+        //     //     .MaximumLength(50).WithMessage("Country cannot be longer than 50 characters.")
+        //     //     .NotEmpty().WithMessage("Country cannot be empty.")
+        //     //     .MinimumLength(3).WithMessage("Country must be at least 3 characters long.");
+        // });
     }
 }

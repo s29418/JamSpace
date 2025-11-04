@@ -64,6 +64,12 @@ public class ExceptionMiddleware
         {
             _logger.LogWarning(ex, "Concurrency conflict.");
             context.Response.StatusCode = StatusCodes.Status409Conflict;
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation.");
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await context.Response.WriteAsJsonAsync(new { message = ex.Message });       
         }
         catch (Exception ex)

@@ -1,5 +1,6 @@
 ﻿using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JamSpace.API.Controllers;
@@ -16,17 +17,18 @@ public class CountriesController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<CountryDto>), 200)]
     public IActionResult GetAll([FromQuery] bool refresh = false)
     {
         Response.Headers.CacheControl = "public, max-age=86400";
-        var items = _svc.GetCountriesEn(refresh);
-        return Ok(items);
+        return Ok(_svc.GetCountriesEn(refresh));
     }
 
     [HttpGet("{code}")]
     [ProducesResponseType(typeof(CountryDto), 200)]
     [ProducesResponseType(404)]
+    [AllowAnonymous]
     public IActionResult GetOne(string code)
     {
         var item = _svc.GetCountryEn(code);

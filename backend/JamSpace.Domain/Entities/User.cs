@@ -13,6 +13,7 @@ public class User
     public string Email { get; set; } = "";
     
     public string PasswordHash { get; set; } = "";
+    public int TokenVersion { get; set; } = 0;
 
     public Location? Location { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -20,6 +21,8 @@ public class User
     public string? SoundcloudUrl { get; set; }
     
     public bool IsDeleted { get; set; }
+    
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     
     public ICollection<TeamMember> Teams { get; set; } = new List<TeamMember>();
     public ICollection<Team> CreatedTeams { get; set; } = new List<Team>();

@@ -4,5 +4,5 @@ namespace JamSpace.Application.Common.Interfaces;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(User user);
+    string GenerateAccessToken(User user, int tokenVersion, int minutes);
 }

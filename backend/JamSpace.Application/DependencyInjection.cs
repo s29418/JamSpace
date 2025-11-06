@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using JamSpace.Application.Common.Behaviors;
+using JamSpace.Application.Common.Settings;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 

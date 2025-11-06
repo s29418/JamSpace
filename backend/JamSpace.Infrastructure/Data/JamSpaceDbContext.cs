@@ -1,5 +1,4 @@
-﻿using JamSpace.Application.Common.Persistence;
-using JamSpace.Domain.Entities;
+﻿using JamSpace.Domain.Entities;
 using JamSpace.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +13,7 @@ public sealed class JamSpaceDbContext : DbContext
 
     
     public DbSet<User> Users => Set<User>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
     public DbSet<TeamInvite> TeamInvites => Set<TeamInvite>();
@@ -23,12 +23,13 @@ public sealed class JamSpaceDbContext : DbContext
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
     public DbSet<UserFollow> UserFollows => Set<UserFollow>();
     
-    public async Task SaveChangesAsync(CancellationToken ct) => await base.SaveChangesAsync(ct);
+    public new async Task SaveChangesAsync(CancellationToken ct) => await base.SaveChangesAsync(ct);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
         modelBuilder.ApplyConfiguration(new TeamConfiguration());
         modelBuilder.ApplyConfiguration(new TeamMemberConfiguration());
         modelBuilder.ApplyConfiguration(new TeamInviteConfiguration());

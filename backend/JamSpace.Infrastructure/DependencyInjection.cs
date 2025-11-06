@@ -20,8 +20,8 @@ public static class DependencyInjection
         services.AddMemoryCache();
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-
         
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();

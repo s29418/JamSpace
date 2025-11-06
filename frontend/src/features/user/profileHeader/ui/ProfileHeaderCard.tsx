@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useMemo} from "react";
 import { UserProfile } from "../../../../entities/user/model/types";
 import styles from "./ProfileHeaderCard.module.css";
 import {
@@ -20,16 +20,31 @@ type Props = {
     onOpenFollowing?: () => void;
 };
 
-export const ProfileHeaderCard: React.FC<Props> = ({
-                                                       profile,
-                                                       isOwner,
-                                                       onEdit ,
-                                                       onLogout,
-                                                       onToggleFollow,
-                                                       followLoading,
-                                                       onOpenFollowers,
-                                                       onOpenFollowing
-}) => {
+function useRegionName(locale = "en") {
+    const dn = useMemo(() => {
+        try { return new Intl.DisplayNames([locale], { type: "region" }); }
+        catch { return null; }
+    }, [locale]);
+
+    return (code?: string | null) =>
+        !code ? undefined : (dn?.of(code.toUpperCase()) ?? code.toUpperCase());
+}
+
+export const ProfileHeaderCard: React.FC<Props> = (props) => {
+    const { profile, isOwner, onEdit, onLogout, onToggleFollow, followLoading, onOpenFollowers, onOpenFollowing } = props;
+
+    const regionName = useRegionName("en");
+
+    const city = profile.location?.city?.trim();
+    const countryCode = (profile.location as any)?.country ?? (profile.location as any)?.countryCode;
+    const country = regionName(countryCode);
+
+    const locationText =
+        city && country ? `${city}, ${country}` :
+            city ? city :
+                country ? country :
+                    null;
+
     return (
         <div className={styles.profileCard}>
 
@@ -68,9 +83,10 @@ export const ProfileHeaderCard: React.FC<Props> = ({
             <div>
                 <h1 className={styles.profileCardName}>{profile.displayName}</h1>
                 <p className={styles.profileUserName}>@{profile.username}</p>
-                {profile.location && <p className={styles.profileCardLocation}>
-                    {profile.location.city}, {profile.location.country}
-                </p>}
+
+                {locationText && (
+                    <p className={styles.profileCardLocation}>{locationText}</p>
+                )}
 
                 <div className={styles.profileCardMeta}>
                     <button type="button" className={styles.metaLink} onClick={onOpenFollowers}>

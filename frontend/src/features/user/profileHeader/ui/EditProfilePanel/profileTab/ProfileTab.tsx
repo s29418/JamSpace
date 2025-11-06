@@ -3,6 +3,7 @@ import { CameraIcon } from '@heroicons/react/24/outline';
 import type { UserProfile } from '../../../../../../entities/user/model/types';
 import styles from '../EditProfilePanel.module.css';
 import { ApiError, isApiError } from '../../../../../../shared/lib/api/base';
+import {useCountries} from "../../../model/useCountries";
 
 export type UpdateUserProfileDraft = {
     setDisplayName?: boolean;
@@ -41,7 +42,11 @@ export const ProfileTab: React.FC<Props> = ({
     const [avatarUrl, setAvatarUrl] = useState(initial.profilePictureUrl ?? '');
     const [displayName, setDisplayName] = useState(initial.displayName ?? '');
     const [city, setCity] = useState(initial.location?.city ?? '');
-    const [country, setCountry] = useState(initial.location?.country ?? '');
+    const { list: countries, loading: countriesLoading, error: countriesError } = useCountries();
+
+    const [countryCode, setCountryCode] = useState(
+        (initial.location?.country ?? '').toUpperCase()
+    );
     const [bio, setBio] = useState(initial.bio ?? '');
 
     const [err, setErr] = useState<FieldErr>({});
@@ -97,8 +102,12 @@ export const ProfileTab: React.FC<Props> = ({
         if (norm(displayName) !== (initial.displayName ?? '')) {
             draft.setDisplayName = true; draft.displayName = norm(displayName);
         }
-        if (norm(city) !== (initial.location?.city ?? '') || norm(country) !== (initial.location?.country ?? '')) {
-            draft.setLocation = true; draft.location = { city: norm(city) || '', country: norm(country) || '' };
+        if (norm(city) !== (initial.location?.city ?? '') || (countryCode.toUpperCase() !== (initial.location?.country ?? '').toUpperCase())) {
+            draft.setLocation = true;
+            draft.location = {
+                city: norm(city) || '',
+                country: countryCode || ''
+            };
         }
         if (norm(bio) !== (initial.bio ?? '')) {
             draft.setBio = true; draft.bio = norm(bio) || '';
@@ -192,26 +201,42 @@ export const ProfileTab: React.FC<Props> = ({
                 <label className={styles.label}>Location</label>
                 <div className={styles.twoCol}>
 
+                    {/* City */}
                     <input
                         className={styles.input}
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        placeholder="City (np. Warsaw)"
+                        placeholder="City (e.g. Warsaw)"
                     />
 
-                    <input
+                    {/* Country (select by code) */}
+                    <select
                         className={styles.input}
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
-                        placeholder="Country (np. Poland)"
-                    />
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        disabled={countriesLoading || !!countriesError}
+                    >
 
+                        <option value="">{countriesLoading ? 'Loading countries…' : 'Select country'}</option>
+
+                        {countries?.map(c => (
+                            <option key={c.code} value={c.code}>
+                                {c.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
-                {err.location &&
+
+                {err.location && (
                     <p className={`${styles.help} ${styles.error}`}>
                         {err.location}
                     </p>
-                }
+                )}
+                {countriesError && !err.location && (
+                    <p className={`${styles.help} ${styles.error}`}>
+                        Failed to load countries list.
+                    </p>
+                )}
             </div>
 
             {/* Bio */}

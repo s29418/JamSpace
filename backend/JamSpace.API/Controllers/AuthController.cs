@@ -1,5 +1,7 @@
-﻿using JamSpace.API.Requests;
+﻿using JamSpace.API.Extensions;
+using JamSpace.API.Requests;
 using JamSpace.API.Responses;
+using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Settings;
 using JamSpace.Application.Features.Authentication.Dtos;
 using JamSpace.Application.Features.Authentication.Login;
@@ -18,6 +20,7 @@ public class AuthController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IOptions<JwtSettings> _jwtOptions;
+    private const string RefreshTokenCookieName = "refreshToken";
 
     public AuthController(IMediator mediator, IOptions<JwtSettings> jwtOptions)
     {
@@ -34,7 +37,7 @@ public class AuthController : ControllerBase
 
         var result = await _mediator.Send(new LoginUserQuery(dto.Email, dto.Password, userAgent, ip));
         
-        Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+        Response.Cookies.Append(RefreshTokenCookieName, result.RefreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -57,10 +60,10 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> Refresh()
     {
-        Request.Cookies.TryGetValue("refreshToken", out var cookie);
+        Request.Cookies.TryGetValue(RefreshTokenCookieName, out var cookie);
         var result = await _mediator.Send(new RefreshCommand(cookie ?? string.Empty));
 
-        Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+        Response.Cookies.Append(RefreshTokenCookieName, result.RefreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -69,5 +72,39 @@ public class AuthController : ControllerBase
         });
 
         return Ok(new AuthResponse(result.UserId, result.UserName, result.Email, result.AccessToken));
+    }
+    
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(
+        [FromServices] IAuthSessionService sessions,
+        CancellationToken ct)
+    {
+        Request.Cookies.TryGetValue(RefreshTokenCookieName, out var cookie);
+        var userId = User.GetUserId();
+
+        await sessions.LogoutAsync(userId, cookie, ct);
+
+        Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions
+        {
+            HttpOnly = true, Secure = true, SameSite = SameSiteMode.None
+        });
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPost("logout-all")]
+    public async Task<IActionResult> LogoutAll(
+        [FromServices] IAuthSessionService sessions,
+        CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        await sessions.LogoutEverywhereAsync(userId, ct);
+
+        Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions
+        {
+            HttpOnly = true, Secure = true, SameSite = SameSiteMode.None
+        });
+        return NoContent();
     }
 }

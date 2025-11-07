@@ -14,8 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-        policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+    options.AddPolicy("SPA", p => p
+        .WithOrigins("http://localhost:3000")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
 });
 
 builder.Services.AddApplication();
@@ -29,16 +32,17 @@ builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var cfg = builder.Configuration;
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateIssuerSigningKey = true,
             ValidateLifetime = true,
-            ValidIssuer = cfg["Jwt:Issuer"],
-            ValidAudience = cfg["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["Jwt:Key"]!)),
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
             ClockSkew = TimeSpan.Zero
         };
 
@@ -57,13 +61,12 @@ builder.Services
                 var userRepo = ctx.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
                 var user = await userRepo.GetByIdAsync(userId, ctx.HttpContext.RequestAborted);
                 if (user == null || user.TokenVersion != ver)
-                {
                     ctx.Fail("Token version revoked.");
-                }
             }
         };
     });
 
+builder.Services.AddAuthorization();
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
     {
@@ -81,7 +84,8 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Wpisz token w formacie: Bearer {twój_token_jwt}"
+        Description = "Enter token in the format: " +
+                      "\"Authorization: Bearer {your_token_here}\""
     });
     
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -108,7 +112,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors();
+app.UseCors("SPA");
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();

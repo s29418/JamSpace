@@ -51,6 +51,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordPolicy, PasswordPolicy>();
         services.AddTransient<IUserModificationService, UserModificationService>();
         services.AddSingleton<ICountryService, CountryService>();
+        services.AddScoped<IAuthSessionService, AuthSessionService>();
         return services;
     }
 }

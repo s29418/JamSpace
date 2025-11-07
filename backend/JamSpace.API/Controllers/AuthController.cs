@@ -3,6 +3,7 @@ using JamSpace.API.Responses;
 using JamSpace.Application.Common.Settings;
 using JamSpace.Application.Features.Authentication.Dtos;
 using JamSpace.Application.Features.Authentication.Login;
+using JamSpace.Application.Features.Authentication.Refresh;
 using JamSpace.Application.Features.Authentication.Register;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -50,5 +51,23 @@ public class AuthController : ControllerBase
     {
         var result = await _mediator.Send(command);
         return Ok(result);
+    }
+    
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    public async Task<ActionResult<AuthResponse>> Refresh()
+    {
+        Request.Cookies.TryGetValue("refreshToken", out var cookie);
+        var result = await _mediator.Send(new RefreshCommand(cookie ?? string.Empty));
+
+        Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = DateTimeOffset.UtcNow.AddDays(_jwtOptions.Value.RefreshDays)
+        });
+
+        return Ok(new AuthResponse(result.UserId, result.UserName, result.Email, result.AccessToken));
     }
 }

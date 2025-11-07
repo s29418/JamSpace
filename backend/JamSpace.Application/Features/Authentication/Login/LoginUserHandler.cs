@@ -2,40 +2,58 @@
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Settings;
 using JamSpace.Application.Features.Authentication.Dtos;
+using JamSpace.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
 
 namespace JamSpace.Application.Features.Authentication.Login;
 
-public class LoginUserHandler : IRequestHandler<LoginUserQuery, AuthResultDto>
+public class LoginUserHandler : IRequestHandler<LoginUserQuery, AuthWithRefreshResult>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IRefreshTokenRepository _refreshRepo;
+    private readonly IJwtTokenGenerator _jwt;
+    private readonly JwtSettings _jwtSettings;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly JwtSettings _jwt;
 
     public LoginUserHandler(
         IUserRepository userRepository,
-        IJwtTokenGenerator jwtTokenGenerator,
-        IPasswordHasher passwordHasher,
-        IOptions<JwtSettings> jwtOptions)
+        IRefreshTokenRepository refreshRepo,
+        IJwtTokenGenerator jwt,
+        IOptions<JwtSettings> jwtOptions,
+        IPasswordHasher passwordHasher) 
     {
         _userRepository = userRepository;
-        _jwtTokenGenerator = jwtTokenGenerator;
+        _refreshRepo = refreshRepo;
+        _jwt = jwt;
+        _jwtSettings = jwtOptions.Value;
         _passwordHasher = passwordHasher;
-        _jwt = jwtOptions.Value;
     }
 
-    public async Task<AuthResultDto> Handle(LoginUserQuery request, CancellationToken ct)
+    public async Task<AuthWithRefreshResult> Handle(LoginUserQuery request, CancellationToken ct)
     {
         var user = await _userRepository.GetByEmailAsync(request.Email, ct)
                    ?? throw new ForbiddenAccessException("Invalid email or password.");
-
-        if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
+        
+        if (!_passwordHasher.Verify(request.Password, user.PasswordHash)) 
             throw new ForbiddenAccessException("Invalid email or password.");
 
-        var access = _jwtTokenGenerator.GenerateAccessToken(user, user.TokenVersion, _jwt.AccessMinutes);
 
-        return new AuthResultDto(user.Id, user.UserName, user.Email, access);
+        var access = _jwt.GenerateAccessToken(user, user.TokenVersion, _jwtSettings.AccessMinutes);
+        
+        var refreshBytes = RandomNumberGenerator.GetBytes(64);
+        var refresh = Convert.ToBase64String(refreshBytes);
+
+        await _refreshRepo.AddAsync(new RefreshToken
+        {
+            UserId = user.Id,
+            Token = refresh,
+            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshDays),
+            IpAddress = request.IpAddress,
+            UserAgent = request.UserAgent
+        }, ct);
+
+        return new AuthWithRefreshResult(user.Id, user.UserName, user.Email, access, refresh);
     }
 }

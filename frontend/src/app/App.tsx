@@ -7,12 +7,15 @@ import HomePage from "../pages/Home/HomePage";
 import TeamDetailsPage from "../pages/TeamDetails/TeamDetailsPage";
 import AuthEventsBridge from "./AuthEventsBridge";
 import FollowsListPage from "../pages/Profile/FollowsListPage/FollowsListPage";
+import AppBootstrap from "./AppBootstrap";
 
 function App() {
     return (
         <Router>
             <AuthEventsBridge />
+            <AppBootstrap />
             <NavigationBar />
+
             <Routes>
                 <Route path="/" element={<HomePage />} />
 

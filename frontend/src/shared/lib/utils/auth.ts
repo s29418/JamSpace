@@ -8,20 +8,20 @@ export type AppJwtPayload = {
     exp?: number;
 };
 
-export const TOKEN_KEY = 'token';
+let accessTokenInMemory: string | null = null;
 
 export function setToken(token: string) {
-    localStorage.setItem(TOKEN_KEY, token);
-    window.dispatchEvent(new CustomEvent('auth:login'));
+    accessTokenInMemory = token;
+    localStorage.setItem('accessToken', token);
 }
 
 export function getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return accessTokenInMemory ?? localStorage.getItem('accessToken');
 }
 
 export function clearToken() {
-    localStorage.removeItem(TOKEN_KEY);
-    window.dispatchEvent(new CustomEvent('auth:logout'));
+    accessTokenInMemory = null;
+    localStorage.removeItem('accessToken');
 }
 
 export function getDecodedToken(): AppJwtPayload | null {

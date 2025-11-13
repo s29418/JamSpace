@@ -133,6 +133,12 @@
     box-shadow: 0 0 0 2px rgba(38, 205, 212, 0.15);
 }
 
+select.input {
+    appearance: none;
+    background: #0f1112 url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='%23e9fffb' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>") no-repeat right 10px center;
+    background-size: 18px;
+}
+
 .textarea {
     resize: vertical;
     min-height: 100px;

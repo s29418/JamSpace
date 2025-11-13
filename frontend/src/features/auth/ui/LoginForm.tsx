@@ -12,17 +12,12 @@ const LoginForm = ({ onLogin }: { onLogin: () => void }) => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
         try {
-            const response = await loginUser(email, password);
-            localStorage.setItem('token', response.token);
+            const res = await loginUser(email, password);
             onLogin();
-            window.location.reload();
-        } catch (error) {
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError('An unknown error occurred.');
-            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An unknown error occurred.');
         }
     };
 

@@ -11,6 +11,7 @@ import { useProfile } from '../../features/user/profileHeader/model/useProfile';
 import { ProfileHeaderCard } from '../../features/user/profileHeader/ui/ProfileHeaderCard';
 import { EditProfilePanel } from '../../features/user/profileHeader/ui/EditProfilePanel/EditProfilePanel';
 import {ProfileHeaderCardSkeleton} from "../../features/user/profileHeader/ui/ProfileHeaderCardSkeleton";
+import { getToken, clearToken } from '../../shared/lib/utils/auth';
 type JwtPayload = { sub: string; username: string; email: string };
 
 const ProfilePage: FC = () => {
@@ -20,7 +21,7 @@ const ProfilePage: FC = () => {
     const [myId, setMyId] = useState<string | null>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (!token) { setMyId(null); return; }
         try {
             const { sub } = jwtDecode<JwtPayload>(token);
@@ -30,6 +31,14 @@ const ProfilePage: FC = () => {
         }
     }, []);
 
+    const handleLoggedIn = () => {
+        const token = getToken();
+        if (!token) return;
+        try {
+            const { sub } = jwtDecode<JwtPayload>(token);
+            setMyId(sub);
+            } catch {  }
+        };
 
     const targetUserId = params.id ?? myId ?? undefined;
 
@@ -46,7 +55,7 @@ const ProfilePage: FC = () => {
                     {isLoginView ? (
 
                         <>
-                            <LoginForm onLogin={() => window.location.reload()} />
+                            <LoginForm onLogin={handleLoggedIn} />
                             <p>
                                 Don’t have an account?{' '}
                                 <span onClick={() => setIsLoginView(false)}>Sign up!</span>
@@ -71,10 +80,13 @@ const ProfilePage: FC = () => {
     const isOwner = !!profile && !!myId && profile.id === myId;
 
 
-    function handleLogout() {
-        localStorage.removeItem('token');
-        window.location.reload();
-    }
+    async function handleLogout() {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+            } catch {  }
+        clearToken();
+        setMyId(null);
+        }
 
     return (
         <div>

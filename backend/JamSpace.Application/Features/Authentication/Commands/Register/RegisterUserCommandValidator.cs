@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace JamSpace.Application.Features.Authentication.Register;
+namespace JamSpace.Application.Features.Authentication.Commands.Register;
 
 public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {

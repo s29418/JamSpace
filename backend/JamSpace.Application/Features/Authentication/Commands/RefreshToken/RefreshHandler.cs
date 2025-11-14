@@ -1,12 +1,12 @@
-﻿using JamSpace.Application.Common.Exceptions;
+﻿using System.Security.Cryptography;
+using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Settings;
 using JamSpace.Application.Features.Authentication.Dtos;
 using MediatR;
 using Microsoft.Extensions.Options;
-using System.Security.Cryptography;
 
-namespace JamSpace.Application.Features.Authentication.Refresh;
+namespace JamSpace.Application.Features.Authentication.Commands.RefreshToken;
 
 public class RefreshHandler : IRequestHandler<RefreshCommand, AuthWithRefreshResult>
 {

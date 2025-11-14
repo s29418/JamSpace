@@ -6,7 +6,7 @@ using JamSpace.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Options;
 
-namespace JamSpace.Application.Features.Authentication.Register;
+namespace JamSpace.Application.Features.Authentication.Commands.Register;
 
 public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResultDto>
 {

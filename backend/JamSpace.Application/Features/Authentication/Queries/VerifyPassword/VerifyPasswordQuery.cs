@@ -1,6 +1,8 @@
-﻿namespace JamSpace.Application.Features.Authentication.Queries.VerifyPassword;
+﻿using MediatR;
 
-public class VerifyPasswordQuery
-{
-    
-}
+namespace JamSpace.Application.Features.Authentication.Queries.VerifyPassword;
+
+public record VerifyPasswordQuery(
+    Guid Id,
+    string Password) 
+    : IRequest<Unit>;

@@ -1,7 +1,7 @@
 ﻿using JamSpace.Application.Features.Authentication.Dtos;
 using MediatR;
 
-namespace JamSpace.Application.Features.Authentication.Login;
+namespace JamSpace.Application.Features.Authentication.Queries.Login;
 
 public record LoginUserQuery(
     string Email, 

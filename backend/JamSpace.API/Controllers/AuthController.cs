@@ -3,10 +3,11 @@ using JamSpace.API.Requests;
 using JamSpace.API.Responses;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Settings;
+using JamSpace.Application.Features.Authentication.Commands.RefreshToken;
+using JamSpace.Application.Features.Authentication.Commands.Register;
 using JamSpace.Application.Features.Authentication.Dtos;
-using JamSpace.Application.Features.Authentication.Login;
-using JamSpace.Application.Features.Authentication.Refresh;
-using JamSpace.Application.Features.Authentication.Register;
+using JamSpace.Application.Features.Authentication.Queries.Login;
+using JamSpace.Application.Features.Authentication.Queries.VerifyPassword;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,9 +41,10 @@ public class AuthController : ControllerBase
         Response.Cookies.Append(RefreshTokenCookieName, result.RefreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Expires = DateTimeOffset.UtcNow.AddDays(_jwtOptions.Value.RefreshDays)
+            Secure = false,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTimeOffset.UtcNow.AddDays(_jwtOptions.Value.RefreshDays),
+            Path = "/"
         });
         
         return Ok(new AuthResponse(result.UserId, result.UserName, result.Email, result.AccessToken));
@@ -72,6 +74,15 @@ public class AuthController : ControllerBase
         });
 
         return Ok(new AuthResponse(result.UserId, result.UserName, result.Email, result.AccessToken));
+    }
+
+    [Authorize]
+    [HttpPost("verify-password")]
+    public async Task<IActionResult> VerifyPassword([FromBody] string password)
+    {
+        var userId = User.GetUserId();
+        await _mediator.Send(new VerifyPasswordQuery(userId, password));
+        return NoContent();
     }
     
     [Authorize]

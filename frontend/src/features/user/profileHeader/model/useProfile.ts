@@ -4,11 +4,12 @@ import {
     updateUserProfile,
     UpdateUserProfileRequest, deleteUserAccount, changeUserPassword
 } from '../../../../entities/user/api/profile.api';
-import type {UserProfile, UserTag} from '../../../../entities/user/model/types';
+import type {UserProfile} from '../../../../entities/user/model/types';
 import { ApiError, isApiError } from 'shared/lib/api/base';
 import {addUserGenre, deleteUserGenre} from "../../../../entities/user/api/genres.api";
 import {addUserSkill, deleteUserSkill} from "../../../../entities/user/api/skills.api";
 import {useFollowActions} from "./useFollowActions";
+import {logoutAll as logoutAllApi} from "../../../../entities/user/api/auth.api"
 
 export function useProfile(userId?: string) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -150,7 +151,12 @@ export function useProfile(userId?: string) {
         window.location.href = '/';
     }, [userId]);
 
+    const logoutAll = useCallback(async () => {
+        await logoutAllApi();
+        localStorage.removeItem('token');
+        window.location.href = '/';
+    }, [])
 
     return { profile, setProfile, loading, error, refresh, toggleFollow, followLoading, updateProfile
-        , addGenre, removeGenre, addSkill, removeSkill, updateEmail, changePassword, deleteAccount };
+        , addGenre, removeGenre, addSkill, removeSkill, updateEmail, changePassword, deleteAccount, logoutAll };
 }

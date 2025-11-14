@@ -3,17 +3,6 @@ import {clearToken, setToken} from "../../../shared/lib/utils/auth";
 
 const ROOT = `/auth`;
 
-export type LoginRequest = {
-    email: string;
-    password: string
-};
-
-export type RegisterRequest = {
-    email: string;
-    username: string;
-    password: string
-};
-
 export type AuthResponse = {
     token: string;
     [k: string]: any
@@ -39,3 +28,8 @@ export const register = async (email: string, username: string, password: string
     const res = await api.post<AuthResponse>(`${ROOT}/register`, { email, username, password });
     return res.data;
 };
+
+export const verifyPassword = async (password: string) => {
+    const res = await api.post(`${ROOT}/verify-password`, password);
+    return res.data;
+}

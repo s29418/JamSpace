@@ -43,7 +43,7 @@ const ProfilePage: FC = () => {
     const targetUserId = params.id ?? myId ?? undefined;
 
     const { profile, loading, error, toggleFollow, followLoading, updateProfile,
-    addGenre, removeGenre, addSkill, removeSkill, updateEmail, changePassword, deleteAccount
+    addGenre, removeGenre, addSkill, removeSkill, updateEmail, changePassword, deleteAccount, logoutAll
     } = useProfile(targetUserId);
 
     const [editOpen, setEditOpen] = useState(false);
@@ -86,7 +86,15 @@ const ProfilePage: FC = () => {
             } catch {  }
         clearToken();
         setMyId(null);
-        }
+    }
+
+    async function handleLogoutAll() {
+        try{
+            await logoutAll();
+        } catch {}
+        clearToken();
+        setMyId(null);
+    }
 
     return (
         <div>
@@ -124,8 +132,12 @@ const ProfilePage: FC = () => {
                             addSkill={addSkill}
                             removeSkill={removeSkill}
                             onUpdateEmail={updateEmail}
-                            onChangePassword={changePassword}
+                            onChangePassword={async (oldPassword, newPassword) => {
+                                await changePassword(oldPassword, newPassword);
+                                await handleLogoutAll();
+                            }}
                             onDeleteAccount={deleteAccount}
+                            onLogoutAll={handleLogoutAll}
                         />
                     </>
                 )}

@@ -5,6 +5,8 @@ import {UserProfile} from "../../../../../entities/user/model/types";
 import {UpdateUserProfileRequest} from "../../../../../entities/user/api/profile.api";
 import {TagsEditorTab} from "./tagsEditorTab/TagsEditorTab";
 import {AccountTab} from "./accountTab/AccountTab";
+import {verifyPassword} from "../../../../../entities/user/api/auth.api";
+import {ApiError} from "../../../../../shared/lib/api/base";
 
 type Props = {
     isOpen: boolean;
@@ -19,6 +21,7 @@ type Props = {
     onUpdateEmail?: (email: string) => Promise<void> | void;
     onChangePassword?: (current: string, next: string) => Promise<void> | void;
     onDeleteAccount?: () => Promise<void> | void;
+    onLogoutAll?: () => Promise<void> | void;
 };
 
 export const EditProfilePanel: FC<Props> = ({
@@ -33,9 +36,14 @@ export const EditProfilePanel: FC<Props> = ({
                                                       removeSkill,
                                                       onUpdateEmail,
                                                       onChangePassword,
-                                                      onDeleteAccount
+                                                      onDeleteAccount,
+                                                      onLogoutAll,
                                                   }) => {
     const [tab, setTab] = useState<typeof initialTab>(initialTab);
+    const [isAccountUnlocked, setIsAccountUnlocked] = useState(false);
+    const [verifyLoading, setVerifyLoading] = useState(false);
+    const [verifyError, setVerifyError] = useState<string | null>(null);
+    const [verifyPasswordValue, setVerifyPasswordValue] = useState('');
 
     useEffect(() => setTab(initialTab), [initialTab]);
 
@@ -119,13 +127,67 @@ export const EditProfilePanel: FC<Props> = ({
                     )}
 
                     {tab === 'account' && (
-                        <AccountTab
-                            initialEmail={profile.email}
-                            onUpdateEmail={async (email) => { await onUpdateEmail?.(email); }}
-                            onChangePassword={async (cur, nxt) => { await onChangePassword?.(cur, nxt); }}
-                            onDeleteAccount={async () => { await onDeleteAccount?.(); }}
-                        />
+                        isAccountUnlocked ? (
+
+                            <AccountTab
+                                initialEmail={profile.email}
+                                onUpdateEmail={async (email) => { await onUpdateEmail?.(email); }}
+                                onChangePassword={async (cur, nxt) => { await onChangePassword?.(cur, nxt); }}
+                                onDeleteAccount={async () => { await onDeleteAccount?.(); }}
+                                onLogoutAll={async () => { await onLogoutAll?.(); }}
+                            />
+
+                        ) : (
+
+                            <form
+                                className={styles.verifyWrapper}
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    setVerifyError(null);
+                                    setVerifyLoading(true);
+                                    try {
+                                        await verifyPassword(verifyPasswordValue);
+                                        setIsAccountUnlocked(true);
+                                        setVerifyPasswordValue('');
+                                    } catch (err) {
+                                        setVerifyError(
+                                            err instanceof ApiError ? err.message : 'Invalid password.'
+                                        );
+                                    } finally {
+                                        setVerifyLoading(false);
+                                    }
+                                }}
+                            >
+
+                                <h3>Confirm your password</h3>
+                                <p className={styles.help}>
+                                    Please enter your password to manage account settings.
+                                </p>
+
+                                <input
+                                    className={styles.input}
+                                    style={{ marginTop: '16px', marginBottom: '16px' }}
+                                    type="password"
+                                    value={verifyPasswordValue}
+                                    onChange={(e) => setVerifyPasswordValue(e.target.value)}
+                                    placeholder="Password"
+                                    required
+                                />
+
+                                {verifyError && <p className={styles.error}>{verifyError}</p>}
+
+                                <button
+                                    type="submit"
+                                    disabled={verifyLoading}
+                                    className={`${styles.button} ${styles.buttonPrimary} ${styles.fullWidth}` }
+                                >
+                                    {verifyLoading ? 'Checking...' : 'Continue'}
+                                </button>
+
+                            </form>
+                        )
                     )}
+
                 </div>
             </aside>
         </>

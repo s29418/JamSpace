@@ -6,13 +6,15 @@ type Props = {
     onUpdateEmail: (email: string) => Promise<void> | void;
     onChangePassword: (current: string, next: string) => Promise<void> | void;
     onDeleteAccount: () => Promise<void> | void;
+    onLogoutAll: () => Promise<void> | void;
 };
 
 export const AccountTab: FC<Props> = ({
                                                 initialEmail,
                                                 onUpdateEmail,
                                                 onChangePassword,
-                                                onDeleteAccount
+                                                onDeleteAccount,
+                                                onLogoutAll
                                             }) => {
 
     const [showEmail, setShowEmail] = useState(false);
@@ -166,12 +168,31 @@ export const AccountTab: FC<Props> = ({
                 )}
             </div>
 
+            {/* Logout all */}
+            <div className={styles.section}>
+                {/*<div className={styles.sectionHeader}>*/}
+                {/*    <h3>Sessions</h3>*/}
+                {/*</div>*/}
+
+                <button
+                    className={`${styles.button} ${styles.buttonGhost}`}
+                    type="button"
+                    onClick={() => void onLogoutAll?.()}
+                >
+                    Log out from all devices
+                </button>
+
+                {/*<p className={styles.help}>*/}
+                {/*    This will sign you out on all browsers and devices.*/}
+                {/*</p>*/}
+            </div>
+
             {/* Delete account */}
             <div className={styles.section}>
 
-                <div className={styles.sectionHeader}>
-                    <h3>Delete account</h3>
-                </div>
+                {/*<div className={styles.sectionHeader}>*/}
+                {/*    <h3>Delete account</h3>*/}
+                {/*</div>*/}
 
                 <button
                     className={`${styles.button} ${styles.buttonDanger}`}
@@ -210,6 +231,10 @@ export const AccountTab: FC<Props> = ({
                         </div>
                     </div>
                 )}
+
+                {/*<p className={styles.help}>*/}
+                {/*    This will permanently delete your account and remove your data from our servers.*/}
+                {/*</p>*/}
             </div>
         </div>
     );

@@ -226,6 +226,10 @@ select.input {
     color: #0b1414;
 }
 
+.fullWidth {
+    width: 100%;
+}
+
 .buttonPrimary:hover {
     background: #33dbe1;
 }

@@ -49,14 +49,12 @@ public class TeamInviteRepository : ITeamInviteRepository
     
     public async Task<TeamInvite> GetTeamInviteByIdAsync(Guid teamInviteId, CancellationToken ct)
     {
-        var invite = await _db.TeamInvites
-                         .Include(i => i.Team)
-                         .Include(i => i.InvitedByUser)
-                         .Include(i => i.InvitedUser)
-                         .SingleOrDefaultAsync(i => i.Id == teamInviteId, ct)
-                     ?? throw new NotFoundException("Invite not found.");
-        
-        return invite;
+        return await _db.TeamInvites
+            .Include(i => i.Team)
+            .Include(i => i.InvitedByUser)
+            .Include(i => i.InvitedUser)
+            .SingleOrDefaultAsync(i => i.Id == teamInviteId, ct)
+            ?? throw new NotFoundException($"Invite with ID '{teamInviteId}' was not found.");
     }
     
     public async Task<List<TeamInvite>> GetTeamInvitesAsync(Guid teamId, Guid requestingUserId, CancellationToken ct)

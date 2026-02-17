@@ -1,0 +1,10 @@
+.wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 18px 14px;
+}
+
+.message {
+    margin: 12px 0;
+    opacity: 0.9;
+}

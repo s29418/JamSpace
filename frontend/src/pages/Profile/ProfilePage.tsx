@@ -81,9 +81,17 @@ const ProfilePage: FC = () => {
 
 
     async function handleLogout() {
+        const token = localStorage.getItem("accessToken");
         try {
-            await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-            } catch {  }
+            const res = await fetch(`http://localhost:5072/api/auth/logout`, {
+                method: "POST",
+                credentials: "include",
+                headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+            });
+        } catch (e) {
+            console.error("logout error", e);
+        }
+
         clearToken();
         setMyId(null);
     }

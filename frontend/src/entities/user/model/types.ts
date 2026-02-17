@@ -36,3 +36,26 @@ export interface UserLite {
 export interface AuthContext {
     userId?: string | null;
 }
+
+export interface PagedResult<T> {
+    items: T[];
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+}
+
+export interface UserSearchItem {
+    id: string;
+    username: string;
+    profilePictureUrl?: string | null;
+    location?: LocationDto | null;
+
+    skills: string[];
+    genres: string[];
+
+    followersCount: number;
+
+    isFollowing: boolean;
+    isMe: boolean;
+}

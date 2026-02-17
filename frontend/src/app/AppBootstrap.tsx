@@ -5,7 +5,7 @@ export default function AppBootstrap() {
     useEffect(() => {
         (async () => {
             if (getToken()) return;
-            const res = await fetch('https://localhost:7289/api/auth/refresh', { method: 'POST', credentials: 'include' });
+            const res = await fetch('http://localhost:5072/api/auth/refresh', { method: 'POST', credentials: 'include' });
             if (!res.ok) {
                 clearToken();
                 return;

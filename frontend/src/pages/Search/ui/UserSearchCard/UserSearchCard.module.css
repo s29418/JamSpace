@@ -1,0 +1,167 @@
+.card {
+    width: 100%;
+    min-height: 140px;
+    padding: 18px 18px;
+    border-radius: 22px;
+
+    background: #1c1c1c;
+    border: 1px solid rgba(255,255,255,0.14);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0 12px rgba(53, 215, 255, 0.3);
+    transform: translateY(-3px);
+}
+
+.left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex: 1;
+}
+
+.avatarWrap {
+    width: 160px;
+    height: 160px;
+    border-radius: 999px;
+    border: 2px solid rgba(255,255,255,0.14);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #141414;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatarLink {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.avatarLink:hover,
+.avatarLink:focus {
+    text-decoration: none;
+    outline: none;
+}
+
+.avatarFallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    opacity: 0.9;
+    color: inherit;
+}
+
+.meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.name {
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.location {
+    opacity: 0.75;
+    font-size: 14px;
+}
+
+.tagsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.tag {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.16);
+    font-size: 13px;
+    opacity: 0.95;
+}
+
+.tagPrimary {
+    border-color: #26cdd4;
+    color: #26cdd4;
+}
+
+.right {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-width: 100px;
+}
+
+.followBtn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.follow {
+    background: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+}
+
+.following {
+    background: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+}
+
+.followers {
+    margin-right: 4px;
+    opacity: 0.85;
+    font-weight: 700;
+    align-self: end;
+}
+
+.messageBtn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    /*cursor: not-allowed;*/
+    /*opacity: 0.6;*/
+}
+
+.messageBtn:hover, .followBtn:hover {
+    background: rgba(53, 215, 255, 0.05);
+}
+
+.icon{
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+}

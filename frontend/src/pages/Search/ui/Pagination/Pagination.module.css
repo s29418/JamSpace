@@ -1,0 +1,27 @@
+.wrap {
+    margin: 18px 0 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+.btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 14px;
+    background: transparent;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    cursor: pointer;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.info {
+    opacity: 0.85;
+    font-weight: 700;
+}

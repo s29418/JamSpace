@@ -62,4 +62,14 @@ public class CountryService : ICountryService
     public CountryDto? GetCountryEn(string code)
         => (GetCountriesEn() ?? throw new InvalidOperationException("Failed to load countries."))
             .FirstOrDefault(c => c.Code == code.ToUpperInvariant());
+    
+    public CountryDto? GetCountryByNameEn(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return null;
+
+        return (GetCountriesEn() ?? throw new InvalidOperationException("Failed to load countries."))
+            .FirstOrDefault(c =>
+                string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
+    }
 }

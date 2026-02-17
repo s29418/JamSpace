@@ -8,6 +8,7 @@ using JamSpace.Application.Features.Users.Commands.Delete;
 using JamSpace.Application.Features.Users.Commands.UpdateUserProfile;
 using JamSpace.Application.Features.Users.DTOs;
 using JamSpace.Application.Features.Users.Queries.GetDetails;
+using JamSpace.Application.Features.Users.Queries.SearchUsers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -104,5 +105,40 @@ public class UserController : ControllerBase
         
         await _mediator.Send(new DeleteUserCommand(id), ct);
         return NoContent(); 
+    }
+    
+    [AllowAnonymous]
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] SearchUsersRequest request, CancellationToken ct)
+    {
+        var skills = SplitMulti(request.Skills);
+        var genres = SplitMulti(request.Genres);
+
+        Guid? currentUserId = User.GetUserId();
+
+        var query = new SearchUsersQuery(
+            Q: request.Q,
+            Location: request.Location,
+            Skills: skills,
+            Genres: genres,
+            Page: request.Page,
+            PageSize: request.PageSize,
+            CurrentUserId: currentUserId
+        );
+
+        var result = await _mediator.Send(query, ct);
+        return Ok(result);
+    }
+    
+    private static IReadOnlyList<string> SplitMulti(string[]? raw)
+    {
+        if (raw is null || raw.Length == 0)
+            return Array.Empty<string>();
+
+        return raw
+            .SelectMany(v => (v ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .ToArray();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using JamSpace.Application.Common.Exceptions;
 using Moq;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.UserGenres.Commands.AddUserGenre;
@@ -86,7 +87,7 @@ public class AddUserGenreHandlerTests
         Func<Task> act = () => sut.Handle(cmd, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<ConflictException>()
                  .WithMessage("User already has this genre.");
         _userGenreRepo.Verify(r => r.AddUserGenreAsync(
             It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);

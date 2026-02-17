@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddMemoryCache();
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserSearchRepository, UserSearchRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
@@ -51,6 +52,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordPolicy, PasswordPolicy>();
         services.AddTransient<IUserModificationService, UserModificationService>();
         services.AddSingleton<ICountryService, CountryService>();
+        services.AddScoped<ICountryCodeResolver, CountryCodeResolver>();
         services.AddScoped<IAuthSessionService, AuthSessionService>();
         return services;
     }

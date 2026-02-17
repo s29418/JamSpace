@@ -6,4 +6,5 @@ public interface ICountryService
 {
     IReadOnlyList<CountryDto>? GetCountriesEn(bool refresh = false);
     CountryDto? GetCountryEn(string code);
+    CountryDto? GetCountryByNameEn(string name);
 }

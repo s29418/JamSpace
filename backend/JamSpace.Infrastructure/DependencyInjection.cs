@@ -50,7 +50,6 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IPasswordPolicy, PasswordPolicy>();
-        services.AddTransient<IUserModificationService, UserModificationService>();
         services.AddSingleton<ICountryService, CountryService>();
         services.AddScoped<ICountryCodeResolver, CountryCodeResolver>();
         services.AddScoped<IAuthSessionService, AuthSessionService>();

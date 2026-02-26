@@ -21,7 +21,7 @@ public class GetTeamInvitesHandlerTests
         var inviteRepo = new Mock<ITeamInviteRepository>();
         var memberRepo = new Mock<ITeamMemberRepository>();
 
-        memberRepo.Setup(r => r.IsUserInTeamAsync(teamId, userId, Ct)).ReturnsAsync(false);
+        memberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Member, Ct)).ReturnsAsync(false);
 
         var handler = new GetTeamInvitesHandler(inviteRepo.Object, memberRepo.Object);
 
@@ -40,7 +40,7 @@ public class GetTeamInvitesHandlerTests
         var inviteRepo = new Mock<ITeamInviteRepository>();
         var memberRepo = new Mock<ITeamMemberRepository>();
 
-        memberRepo.Setup(r => r.IsUserInTeamAsync(teamId, userId, Ct)).ReturnsAsync(true);
+        memberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Member, Ct)).ReturnsAsync(true);
         inviteRepo.Setup(r => r.GetTeamInvitesAsync(
                 teamId, userId, It.IsAny<CancellationToken>()))
                   .ReturnsAsync(new List<TeamInvite>

@@ -18,8 +18,8 @@ public class SendTeamInviteHandlerTests
         var memberRepo = new Mock<ITeamMemberRepository>();
         var userRepo = new Mock<IUserRepository>();
 
-        memberRepo.Setup(r => r.IsUserInTeamAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        memberRepo.Setup(r => r.HasRequiredRoleAsync(
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<FunctionalRole>(),It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         var handler = new SendTeamInviteHandler(inviteRepo.Object, memberRepo.Object, userRepo.Object);
@@ -38,8 +38,8 @@ public class SendTeamInviteHandlerTests
         var memberRepo = new Mock<ITeamMemberRepository>();
         var userRepo = new Mock<IUserRepository>();
 
-        memberRepo.Setup(r => r.IsUserInTeamAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        memberRepo.Setup(r => r.HasRequiredRoleAsync(
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
         userRepo.Setup(r => r.GetUserIdByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Guid?)null);
 
@@ -59,8 +59,8 @@ public class SendTeamInviteHandlerTests
         var memberRepo = new Mock<ITeamMemberRepository>();
         var userRepo = new Mock<IUserRepository>();
 
-        memberRepo.Setup(r => r.IsUserInTeamAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        memberRepo.Setup(r => r.HasRequiredRoleAsync(
+                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         userRepo.Setup(r => r.GetUserIdByUsernameAsync(
                 It.IsAny<string>(), It.IsAny<CancellationToken>()))

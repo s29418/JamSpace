@@ -4,6 +4,7 @@ using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.TeamMembers.Commands.EditTeamMemberMusicalRole;
 using JamSpace.Domain.Entities;
+using JamSpace.Domain.Enums;
 
 namespace JamSpace.Tests.Unit.TeamMembers;
 
@@ -15,8 +16,8 @@ public class EditTeamMemberMusicalRoleHandlerTests
         // Arrange
         var repo = new Mock<ITeamMemberRepository>();
 
-        repo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        repo.Setup(r => r.HasRequiredRoleAsync(
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         repo.Setup(r => r.EditTeamMemberMusicalRole(
                 It.IsAny<Guid>(), It.IsAny<Guid>(), 
@@ -46,10 +47,8 @@ public class EditTeamMemberMusicalRoleHandlerTests
         // Arrange
         var repo = new Mock<ITeamMemberRepository>();
 
-        repo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        repo.Setup(r => r.IsUserAnAdminAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        repo.Setup(r => r.HasRequiredRoleAsync(
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         var handler = new EditTeamMemberMusicalRoleHandler(repo.Object);
 

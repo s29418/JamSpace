@@ -29,6 +29,26 @@ public class AzureBlobStorageService : IFileStorageService
 
         return blobClient.Uri.ToString();
     }
+    
+    public async Task DeleteAsync(string fileUrl, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(fileUrl))
+            return;
+        
+        var uri = new Uri(fileUrl);
+        var absolutePath = uri.AbsolutePath.TrimStart('/');
+        
+        var prefix = _containerName.Trim('/') + "/";
+        if (!absolutePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        var blobPath = absolutePath.Substring(prefix.Length);
+
+        var container = _blobServiceClient.GetBlobContainerClient(_containerName);
+        var blobClient = container.GetBlobClient(blobPath);
+
+        await blobClient.DeleteIfExistsAsync(cancellationToken: ct);
+    }
 
     private static string BuildBlobName(PictureType type, Guid? relatedEntityId, string fileName)
     {

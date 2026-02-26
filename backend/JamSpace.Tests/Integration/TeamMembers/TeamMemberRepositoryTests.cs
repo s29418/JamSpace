@@ -61,7 +61,7 @@ public class TeamMemberRepositoryTests
         var (team, user) = SeedMember(db);
         var repo = new TeamMemberRepository(db);
 
-        var exists = await repo.IsUserInTeamAsync(team.Id, user.Id, Ct);
+        var exists = await repo.HasRequiredRoleAsync(team.Id, user.Id, FunctionalRole.Member, Ct);
 
         exists.Should().BeTrue();
     }
@@ -84,7 +84,7 @@ public class TeamMemberRepositoryTests
 
         var repo = new TeamMemberRepository(db);
 
-        var exists = await repo.IsUserInTeamAsync(team.Id, otherUser.Id, Ct);
+        var exists = await repo.HasRequiredRoleAsync(team.Id, otherUser.Id, FunctionalRole.Member, Ct);
 
         exists.Should().BeFalse();
     }
@@ -113,11 +113,11 @@ public class TeamMemberRepositoryTests
 
         var repo = new TeamMemberRepository(db);
 
-        (await repo.IsUserALeaderAsync(team.Id, userLeader.Id, Ct)).Should().BeTrue();
-        (await repo.IsUserAnAdminAsync(team.Id, userLeader.Id, Ct)).Should().BeFalse();
+        (await repo.HasRequiredRoleAsync(team.Id, userLeader.Id, FunctionalRole.Leader, Ct)).Should().BeTrue();
+        (await repo.HasRequiredRoleAsync(team.Id, userLeader.Id, FunctionalRole.Admin, Ct)).Should().BeFalse();
 
-        (await repo.IsUserAnAdminAsync(team.Id, adminUser.Id, Ct)).Should().BeTrue();
-        (await repo.IsUserALeaderAsync(team.Id, adminUser.Id, Ct)).Should().BeFalse();
+        (await repo.HasRequiredRoleAsync(team.Id, adminUser.Id, FunctionalRole.Admin, Ct)).Should().BeTrue();
+        (await repo.HasRequiredRoleAsync(team.Id, adminUser.Id, FunctionalRole.Leader, Ct)).Should().BeFalse();
     }
 
     [Fact]

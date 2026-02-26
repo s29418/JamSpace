@@ -14,7 +14,6 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
 
         builder.Property(tm => tm.Role)
             .IsRequired()
-            .HasConversion<string>()
             .HasMaxLength(25);
         
         builder.HasQueryFilter(tm => !tm.User.IsDeleted);

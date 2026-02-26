@@ -1,5 +1,6 @@
 ﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Domain.Enums;
 using MediatR;
 
 namespace JamSpace.Application.Features.TeamMembers.Commands.KickTeamMember;
@@ -15,10 +16,10 @@ public class KickTeamMemberHandler : IRequestHandler<KickTeamMemberCommand, Unit
 
     public async Task<Unit> Handle(KickTeamMemberCommand request, CancellationToken ct)
     {
-        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId, ct)) 
+        if (!await _repo.HasRequiredRoleAsync(request.TeamId, request.RequestingUserId, FunctionalRole.Leader, ct)) 
             throw new ForbiddenAccessException("Only team leader can kick members.");
 
-        if (await _repo.IsUserALeaderAsync(request.TeamId, request.UserId, ct))
+        if (await _repo.HasRequiredRoleAsync(request.TeamId, request.UserId, FunctionalRole.Leader, ct))
             throw new ConflictException("Cannot kick a team leader.");
 
         await _repo.DeleteTeamMemberAsync(request.TeamId, request.UserId, ct);

@@ -26,8 +26,7 @@ public class CancelTeamInviteHandlerTests
                   .ReturnsAsync(new TeamInvite { TeamId = teamId });
 
         var memberRepo = new Mock<ITeamMemberRepository>();
-        memberRepo.Setup(r => r.IsUserALeaderAsync(teamId, userId, Ct)).ReturnsAsync(false);
-        memberRepo.Setup(r => r.IsUserAnAdminAsync(teamId, userId, Ct)).ReturnsAsync(false);
+        memberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Admin, Ct)).ReturnsAsync(false);
         inviteRepo.Setup(r => r.WasInviteSentByUserAsync(
             teamId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
@@ -61,7 +60,7 @@ public class CancelTeamInviteHandlerTests
                   });
 
         var memberRepo = new Mock<ITeamMemberRepository>();
-        memberRepo.Setup(r => r.IsUserALeaderAsync(teamId, userId, Ct)).ReturnsAsync(true);
+        memberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Leader, Ct)).ReturnsAsync(true);
 
         var handler = new CancelTeamInviteHandler(inviteRepo.Object, memberRepo.Object);
 

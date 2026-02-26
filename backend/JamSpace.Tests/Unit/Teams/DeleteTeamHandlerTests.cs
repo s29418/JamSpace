@@ -2,6 +2,7 @@
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.Teams.Commands.DeleteTeam;
+using JamSpace.Domain.Enums;
 
 namespace JamSpace.Tests.Unit.Teams;
 
@@ -14,8 +15,8 @@ public class DeleteTeamHandlerTests
         var teamRepo = new Mock<ITeamRepository>();
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
 
-        teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        teamMemberRepo.Setup(r => r.HasRequiredRoleAsync(
+            It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Leader, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         var handler = new DeleteTeamHandler(teamRepo.Object, teamMemberRepo.Object);
@@ -36,8 +37,8 @@ public class DeleteTeamHandlerTests
         var teamRepo = new Mock<ITeamRepository>();
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
 
-        teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        teamMemberRepo.Setup(r => r.HasRequiredRoleAsync(
+            It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Leader, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         var handler = new DeleteTeamHandler(teamRepo.Object, teamMemberRepo.Object);
 

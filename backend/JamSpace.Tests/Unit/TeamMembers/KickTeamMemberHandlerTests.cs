@@ -20,10 +20,10 @@ public class KickTeamMemberHandlerTests
         var requestingUserId = Guid.NewGuid();
         var targetUserId = Guid.NewGuid();
         
-        repo.Setup(r => r.IsUserALeaderAsync(teamId, requestingUserId, CancellationToken.None))
+        repo.Setup(r => r.HasRequiredRoleAsync(teamId, requestingUserId, FunctionalRole.Leader, CancellationToken.None))
             .ReturnsAsync(true);
         
-        repo.Setup(r => r.IsUserALeaderAsync(teamId, targetUserId, CancellationToken.None))
+        repo.Setup(r => r.HasRequiredRoleAsync(teamId, targetUserId, FunctionalRole.Leader, CancellationToken.None))
             .ReturnsAsync(false);
 
         repo.Setup(r => r.GetTeamMemberAsync(
@@ -54,8 +54,8 @@ public class KickTeamMemberHandlerTests
         // Arrange
         var repo = new Mock<ITeamMemberRepository>();
         
-        repo.Setup(r => r.IsUserALeaderAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        repo.Setup(r => r.HasRequiredRoleAsync(
+                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         
         repo.Setup(r => r.GetTeamMemberAsync(
@@ -81,8 +81,8 @@ public class KickTeamMemberHandlerTests
     {
         // Arrange
         var repo = new Mock<ITeamMemberRepository>();
-        repo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        repo.Setup(r => r.HasRequiredRoleAsync(
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         var handler = new KickTeamMemberHandler(repo.Object);
 

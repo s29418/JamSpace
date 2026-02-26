@@ -166,67 +166,67 @@ namespace JamSpace.Tests.Integration.Teams;
             (await db.Teams.FindAsync(team.Id))!.Name.Should().Be(newName);
         }
 
-        [Fact]
-        public async Task UpdateTeamPictureAsync_Should_Succeed_For_Leader()
-        {
-            await using var db = CreateDbContext();
-            var repo = new TeamRepository(db);
-            var (creator, team) = SeedUserAndTeamShell(db);
-
-            await repo.CreateTeamAsync(team, creator.Id, Ct);
-
-            var url = "https://cdn.example.com/pic.png";
-            await repo.UpdateTeamPictureAsync(team.Id, creator.Id, url, CancellationToken.None);
-
-            (await db.Teams.FindAsync(team.Id))!.TeamPictureUrl.Should().Be(url);
-        }
-
-        [Fact]
-        public async Task UpdateTeamPictureAsync_Should_Succeed_For_Admin()
-        {
-            await using var db = CreateDbContext();
-            var repo = new TeamRepository(db);
-            var (creator, team) = SeedUserAndTeamShell(db);
-            await repo.CreateTeamAsync(team, creator.Id, Ct);
-
-            var admin = SeedUser(db, "adminUser");
-            db.TeamMembers.Add(new TeamMember
-            {
-                TeamId = team.Id, 
-                UserId = admin.Id, 
-                Role = FunctionalRole.Admin
-            });
-            await db.SaveChangesAsync();
-
-            var url = "https://cdn.example.com/admin.png";
-            await repo.UpdateTeamPictureAsync(team.Id, admin.Id, url, CancellationToken.None);
-
-            (await db.Teams.FindAsync(team.Id))!.TeamPictureUrl.Should().Be(url);
-        }
-
-        [Fact]
-        public async Task UpdateTeamPictureAsync_Should_Throw_Forbidden_For_Non_Admin_Or_Leader()
-        {
-            await using var db = CreateDbContext();
-            var repo = new TeamRepository(db);
-            var (creator, team) = SeedUserAndTeamShell(db);
-            await repo.CreateTeamAsync(team, creator.Id, Ct);
-
-            var plainMember = SeedUser(db, "plainMember");
-            db.TeamMembers.Add(new TeamMember
-            {
-                TeamId = team.Id, 
-                UserId = plainMember.Id, 
-                Role = FunctionalRole.Member
-            });
-            await db.SaveChangesAsync();
-
-            Func<Task> act = async () =>
-                await repo.UpdateTeamPictureAsync(team.Id, plainMember.Id, "x", CancellationToken.None);
-
-            await act.Should().ThrowAsync<ForbiddenAccessException>()
-                .WithMessage("*Only team leader or admin*");
-        }
+        // [Fact]
+        // public async Task UpdateTeamPictureAsync_Should_Succeed_For_Leader()
+        // {
+        //     await using var db = CreateDbContext();
+        //     var repo = new TeamRepository(db);
+        //     var (creator, team) = SeedUserAndTeamShell(db);
+        //
+        //     await repo.CreateTeamAsync(team, creator.Id, Ct);
+        //
+        //     var url = "https://cdn.example.com/pic.png";
+        //     await repo.UpdateTeamPictureAsync(team.Id, creator.Id, url, CancellationToken.None);
+        //
+        //     (await db.Teams.FindAsync(team.Id))!.TeamPictureUrl.Should().Be(url);
+        // }
+        //
+        // [Fact]
+        // public async Task UpdateTeamPictureAsync_Should_Succeed_For_Admin()
+        // {
+        //     await using var db = CreateDbContext();
+        //     var repo = new TeamRepository(db);
+        //     var (creator, team) = SeedUserAndTeamShell(db);
+        //     await repo.CreateTeamAsync(team, creator.Id, Ct);
+        //
+        //     var admin = SeedUser(db, "adminUser");
+        //     db.TeamMembers.Add(new TeamMember
+        //     {
+        //         TeamId = team.Id, 
+        //         UserId = admin.Id, 
+        //         Role = FunctionalRole.Admin
+        //     });
+        //     await db.SaveChangesAsync();
+        //
+        //     var url = "https://cdn.example.com/admin.png";
+        //     await repo.UpdateTeamPictureAsync(team.Id, admin.Id, url, CancellationToken.None);
+        //
+        //     (await db.Teams.FindAsync(team.Id))!.TeamPictureUrl.Should().Be(url);
+        // }
+        //
+        // [Fact]
+        // public async Task UpdateTeamPictureAsync_Should_Throw_Forbidden_For_Non_Admin_Or_Leader()
+        // {
+        //     await using var db = CreateDbContext();
+        //     var repo = new TeamRepository(db);
+        //     var (creator, team) = SeedUserAndTeamShell(db);
+        //     await repo.CreateTeamAsync(team, creator.Id, Ct);
+        //
+        //     var plainMember = SeedUser(db, "plainMember");
+        //     db.TeamMembers.Add(new TeamMember
+        //     {
+        //         TeamId = team.Id, 
+        //         UserId = plainMember.Id, 
+        //         Role = FunctionalRole.Member
+        //     });
+        //     await db.SaveChangesAsync();
+        //
+        //     Func<Task> act = async () =>
+        //         await repo.UpdateTeamPictureAsync(team.Id, plainMember.Id, "x", CancellationToken.None);
+        //
+        //     await act.Should().ThrowAsync<ForbiddenAccessException>()
+        //         .WithMessage("*Only team leader or admin*");
+        // }
 
         [Fact]
         public async Task DeleteTeamAsync_Should_Remove_Team()

@@ -2,6 +2,7 @@
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.TeamInvites.DTOs;
 using JamSpace.Application.Features.TeamInvites.Mappers;
+using JamSpace.Domain.Enums;
 using MediatR;
 
 namespace JamSpace.Application.Features.TeamInvites.Commands.SendTeamInvite;
@@ -21,7 +22,7 @@ public class SendTeamInviteHandler : IRequestHandler<SendTeamInviteCommand, Team
 
     public async Task<TeamInviteDto> Handle(SendTeamInviteCommand request, CancellationToken ct)
     {
-        var isMember = await _teamMemberRepository.IsUserInTeamAsync(request.TeamId, request.InvitingUserId, ct);
+        var isMember = await _teamMemberRepository.HasRequiredRoleAsync(request.TeamId, request.InvitingUserId, FunctionalRole.Member, ct);
         if (!isMember)
             throw new ForbiddenAccessException("You are not a member of this team.");
 

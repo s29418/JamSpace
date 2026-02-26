@@ -2,6 +2,7 @@
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.TeamInvites.DTOs;
 using JamSpace.Application.Features.TeamInvites.Mappers;
+using JamSpace.Domain.Enums;
 using MediatR;
 
 namespace JamSpace.Application.Features.TeamInvites.Commands.AcceptTeamInvite;
@@ -23,7 +24,7 @@ public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, 
         if (invited.InvitedUserId != request.UserId)
             throw new ForbiddenAccessException("Only the invited user can reject the invite.");
         
-        if (await _teamMemberRepository.IsUserInTeamAsync(invited.TeamId, request.UserId, ct))
+        if (await _teamMemberRepository.HasRequiredRoleAsync(invited.TeamId, request.UserId, FunctionalRole.Member, ct))
             throw new ConflictException("User is already in the team.");
         
         var invite = await _teamInviteRepository.AcceptInviteAsync(request.InviteId, request.UserId, ct);

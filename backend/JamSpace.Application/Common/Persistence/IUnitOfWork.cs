@@ -1,10 +1,6 @@
-﻿using JamSpace.Application.Common.Interfaces;
+﻿namespace JamSpace.Application.Common.Persistence;
 
-namespace JamSpace.Application.Common.Persistence;
-
-public interface IUnitOfWork : IDisposable
+public interface IUnitOfWork
 {
-    IUserRepository Users { get; }
-    IRefreshTokenRepository RefreshTokens { get; }
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

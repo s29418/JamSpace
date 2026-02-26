@@ -4,6 +4,7 @@ using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
 using JamSpace.Domain.Entities;
+using JamSpace.Domain.Enums;
 
 namespace JamSpace.Tests.Unit.Teams;
 
@@ -17,8 +18,8 @@ public class ChangeTeamNameHandlerTests
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
         var creator = new User { UserName = "creator", DisplayName = "creator"};
 
-        teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        teamMemberRepo.Setup(r => r.HasRequiredRoleAsync(
+                It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Leader, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         teamRepo.Setup(r => r.ChangeTeamNameAsync(
@@ -56,10 +57,8 @@ public class ChangeTeamNameHandlerTests
         var teamRepo = new Mock<ITeamRepository>();
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
 
-        teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        teamMemberRepo.Setup(r => r.IsUserAnAdminAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        teamMemberRepo.Setup(r => r.HasRequiredRoleAsync(
+            It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Admin, It.IsAny<CancellationToken>())).ReturnsAsync(false);
         
         var handler = new ChangeTeamNameHandler(teamRepo.Object, teamMemberRepo.Object);
 

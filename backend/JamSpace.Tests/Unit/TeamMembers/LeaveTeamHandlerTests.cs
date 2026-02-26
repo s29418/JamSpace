@@ -49,8 +49,8 @@ public class LeaveTeamHandlerTests
                 new TeamMember { UserId = Guid.NewGuid(), Role = FunctionalRole.Leader }
             });
 
-        repo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        repo.Setup(r => r.HasRequiredRoleAsync(
+            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         var handler = new LeaveTeamHandler(repo.Object);
 

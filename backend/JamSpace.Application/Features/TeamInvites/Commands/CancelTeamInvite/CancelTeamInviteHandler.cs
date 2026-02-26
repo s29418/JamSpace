@@ -2,6 +2,7 @@
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.TeamInvites.DTOs;
 using JamSpace.Application.Features.TeamInvites.Mappers;
+using JamSpace.Domain.Enums;
 using MediatR;
 
 namespace JamSpace.Application.Features.TeamInvites.Commands.CancelTeamInvite;
@@ -23,8 +24,7 @@ public class CancelTeamInviteHandler : IRequestHandler<CancelTeamInviteCommand, 
         var teamId = teamInvite.TeamId;
         
         var hasPermission =
-            await _teamMemberRepository.IsUserALeaderAsync(teamId, request.RequestingUserId, ct) ||
-            await _teamMemberRepository.IsUserAnAdminAsync(teamId, request.RequestingUserId, ct) ||
+            await _teamMemberRepository.HasRequiredRoleAsync(teamId, request.RequestingUserId, FunctionalRole.Admin, ct) ||
             await _teamInviteRepository.WasInviteSentByUserAsync(request.TeamInviteId, request.RequestingUserId, ct);
 
         if (!hasPermission)

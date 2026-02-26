@@ -1,6 +1,7 @@
 ﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.TeamMembers.DTOs;
+using JamSpace.Domain.Enums;
 using MediatR;
 
 namespace JamSpace.Application.Features.TeamMembers.Commands.ChangeTeamMemberFunctionalRole;
@@ -16,7 +17,7 @@ public class ChangeTeamMemberFunctionalRoleHandler : IRequestHandler<ChangeTeamM
 
     public async Task<TeamMemberDto> Handle(ChangeTeamMemberFunctionalRoleCommand request, CancellationToken ct)
     {
-        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId, ct))
+        if (!await _repo.HasRequiredRoleAsync(request.TeamId, request.RequestingUserId, FunctionalRole.Leader, ct))
             throw new ForbiddenAccessException("Only team leader can change roles.");
 
         if (request.RequestingUserId == request.UserId)

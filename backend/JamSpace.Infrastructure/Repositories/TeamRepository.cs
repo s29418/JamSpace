@@ -1,5 +1,4 @@
-﻿using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Interfaces;
 using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
 using JamSpace.Infrastructure.Data;
@@ -28,23 +27,10 @@ public class TeamRepository : ITeamRepository
 
     public async Task<Team?> GetTeamByIdAsync(Guid id, CancellationToken ct)
     {
-        var team = await _db.Teams
+        return await _db.Teams
             .Include(t => t.CreatedBy)
-            .Include(t => t.Members)
-            .ThenInclude(m => m.User)
+            .Include(t => t.Members).ThenInclude(m => m.User)
             .FirstOrDefaultAsync(t => t.Id == id, ct);
-
-        if (team is null)
-            throw new NotFoundException("Team not found.");
-        
-        team.Members = team.Members
-            .OrderBy(m => m.Role == FunctionalRole.Leader ? 0
-                : m.Role == FunctionalRole.Admin  ? 1
-                : 2)
-            .ThenBy(m => m.User.UserName)
-            .ToList();
-
-        return team;
     }
 
     public async Task<List<Team>> GetTeamsByUserIdAsync(Guid userId, CancellationToken ct)
@@ -63,18 +49,6 @@ public class TeamRepository : ITeamRepository
         team!.Name = name;
         await _db.SaveChangesAsync(ct);
         return team;
-    }
-    
-    public async Task UpdateTeamPictureAsync(
-        Guid teamId, Guid requestingUserId, string pictureUrl, CancellationToken ct)
-    {
-        var team = await GetTeamByIdAsync(teamId, ct);
-        if (!await _db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == requestingUserId && 
-                                                 (m.Role == FunctionalRole.Leader || m.Role == FunctionalRole.Admin)))
-            throw new ForbiddenAccessException("Only team leader or admin can update team picture.");
-
-        team!.TeamPictureUrl = pictureUrl;
-        await _db.SaveChangesAsync(ct);
     }
 
     public async Task DeleteTeamAsync(Guid teamId, CancellationToken ct)

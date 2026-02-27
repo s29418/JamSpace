@@ -1,63 +1,60 @@
 ﻿using FluentAssertions;
-using Moq;
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.UserGenres.Commands.DeleteUserGenre;
+using JamSpace.Domain.Entities;
+using Moq;
 
 namespace JamSpace.Tests.Unit.UserGenres;
 
 public class DeleteUserGenreHandlerTests
 {
     private readonly Mock<IUserGenreRepository> _userGenreRepo = new();
+    private readonly Mock<IUnitOfWork> _uow = new();
 
     [Fact]
     public async Task Handle_Should_Remove_Link_When_User_Has_Genre()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         var genreId = Guid.NewGuid();
         var cmd = new DeleteUserGenreCommand(userId, genreId);
 
-        _userGenreRepo.Setup(r => r.UserHasGenreAsync(
-                userId, genreId, It.IsAny<CancellationToken>()))
-                      .ReturnsAsync(true);
+        var link = new UserGenre { UserId = userId, GenreId = genreId };
 
-        _userGenreRepo.Setup(r => r.RemoveUserGenreAsync(
-                userId, genreId, It.IsAny<CancellationToken>()))
-                      .Returns(Task.CompletedTask);
+        _userGenreRepo.Setup(r => r.GetUserGenreAsync(userId, genreId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(link);
 
-        var sut = new DeleteUserGenreHandler(_userGenreRepo.Object);
+        _uow.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
-        // Act
-        MediatR.Unit result = await sut.Handle(cmd, CancellationToken.None);
+        var sut = new DeleteUserGenreHandler(_userGenreRepo.Object, _uow.Object);
 
-        // Assert
+        var result = await sut.Handle(cmd, CancellationToken.None);
+
         result.Should().Be(MediatR.Unit.Value);
-        _userGenreRepo.Verify(r => r.RemoveUserGenreAsync(
-            userId, genreId, It.IsAny<CancellationToken>()), Times.Once);
+        _userGenreRepo.Verify(r => r.Remove(link), Times.Once);
+        _uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task Handle_Should_Throw_Conflict_When_User_Does_Not_Have_Genre()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         var genreId = Guid.NewGuid();
         var cmd = new DeleteUserGenreCommand(userId, genreId);
 
-        _userGenreRepo.Setup(r => r.UserHasGenreAsync(
-                userId, genreId, It.IsAny<CancellationToken>()))
-                      .ReturnsAsync(false);
+        _userGenreRepo.Setup(r => r.GetUserGenreAsync(userId, genreId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((UserGenre?)null);
 
-        var sut = new DeleteUserGenreHandler(_userGenreRepo.Object);
+        var sut = new DeleteUserGenreHandler(_userGenreRepo.Object, _uow.Object);
 
-        // Act
         Func<Task> act = () => sut.Handle(cmd, CancellationToken.None);
 
-        // Assert
         await act.Should().ThrowAsync<ConflictException>()
-                 .WithMessage("User does not have this genre.");
-        _userGenreRepo.Verify(r => r.RemoveUserGenreAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+            .WithMessage("User does not have this genre.");
+
+        _userGenreRepo.Verify(r => r.Remove(It.IsAny<UserGenre>()), Times.Never);
+        _uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 }

@@ -8,21 +8,20 @@ namespace JamSpace.Infrastructure.Repositories;
 public class UserFollowRepository : IUserFollowRepository
 {
     private readonly JamSpaceDbContext _db;
-    
+
     public UserFollowRepository(JamSpaceDbContext db)
     {
         _db = db;
     }
 
-
     public async Task<bool> UserFollowsAsync(Guid followerId, Guid followedId, CancellationToken ct)
     {
-        return await _db.UserFollows.AnyAsync(uf =>
-            uf.FollowerId == followerId && uf.FolloweeId == followedId, ct);
+        return await _db.UserFollows.AnyAsync(
+            uf => uf.FollowerId == followerId && uf.FolloweeId == followedId,
+            ct);
     }
 
-
-    public async Task<HashSet<UserFollow>> GetFollowersAsync(Guid? userId, CancellationToken ct)
+    public async Task<HashSet<UserFollow>> GetFollowersAsync(Guid userId, CancellationToken ct)
     {
         return await _db.UserFollows
             .Where(uf => uf.FolloweeId == userId)
@@ -31,7 +30,7 @@ public class UserFollowRepository : IUserFollowRepository
             .ToHashSetAsync(ct);
     }
 
-    public async Task<HashSet<UserFollow>> GetFollowingAsync(Guid? userId, CancellationToken ct)
+    public async Task<HashSet<UserFollow>> GetFollowingAsync(Guid userId, CancellationToken ct)
     {
         return await _db.UserFollows
             .Where(uf => uf.FollowerId == userId)
@@ -40,30 +39,20 @@ public class UserFollowRepository : IUserFollowRepository
             .ToHashSetAsync(ct);
     }
 
-    public async Task<UserFollow> FollowUserAsync(Guid followerId, Guid followedId, CancellationToken ct)
+    public async Task<UserFollow?> GetAsync(Guid followerId, Guid followedId, CancellationToken ct)
     {
-        var userFollow = new UserFollow
-        {
-            FollowerId = followerId,
-            FolloweeId = followedId,
-            FollowedAt = DateTime.UtcNow
-        };
-        
-        await _db.UserFollows.AddAsync(userFollow, ct);
-        await _db.SaveChangesAsync(ct);
-        
-        return userFollow;
+        return await _db.UserFollows.FirstOrDefaultAsync(
+            uf => uf.FollowerId == followerId && uf.FolloweeId == followedId,
+            ct);
     }
 
-    public async Task UnfollowUserAsync(Guid followerId, Guid followedId, CancellationToken ct)
+    public async Task AddAsync(UserFollow userFollow, CancellationToken ct)
     {
-        var userFollow = await _db.UserFollows
-            .FirstOrDefaultAsync(uf => uf.FollowerId == followerId && uf.FolloweeId == followedId, ct);
-        
-        if (userFollow != null)
-        {
-            _db.UserFollows.Remove(userFollow);
-            await _db.SaveChangesAsync(ct);
-        }
+        await _db.UserFollows.AddAsync(userFollow, ct);
+    }
+
+    public void Remove(UserFollow userFollow)
+    {
+        _db.UserFollows.Remove(userFollow);
     }
 }

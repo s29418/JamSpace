@@ -2,6 +2,7 @@
 using Moq;
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.TeamMembers.Commands.ChangeTeamMemberFunctionalRole;
 using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
@@ -11,52 +12,96 @@ namespace JamSpace.Tests.Unit.TeamMembers;
 public class ChangeTeamMemberFunctionalRoleHandlerTests
 {
     [Fact]
-    public async Task Should_Change_Functional_Role_When_Leader()
+    public async Task Should_Change_Role_When_RequestingUser_Is_Leader()
     {
-        // Arrange
         var repo = new Mock<ITeamMemberRepository>();
+        var uow = new Mock<IUnitOfWork>();
 
-        repo.Setup(r => r.HasRequiredRoleAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>()))
+        var teamId = Guid.NewGuid();
+        var leaderId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+
+        repo.Setup(r => r.HasRequiredRoleAsync(teamId, leaderId, FunctionalRole.Leader, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        repo.Setup(r => r.ChangeTeamMemberFunctionalRoleAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>(), 
-                It.IsAny<FunctionalRole>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new TeamMember
-            {
-                User = new User { UserName = "member", DisplayName = "member" },
-                Role = FunctionalRole.Admin
-            });
 
-        var handler = new ChangeTeamMemberFunctionalRoleHandler(repo.Object);
+        var user = new User { Id = memberId, UserName = "member", DisplayName = "member" };
+        var member = new TeamMember
+        {
+            TeamId = teamId,
+            UserId = memberId,
+            Role = FunctionalRole.Member,
+            MusicalRole = "Guitar",
+            User = user
+        };
 
-        // Act
-        var result = await handler.Handle(
-            new ChangeTeamMemberFunctionalRoleCommand(
-                Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), FunctionalRole.Admin),
-            CancellationToken.None
-        );
+        repo.Setup(r => r.GetByTeamAndUserAsync(teamId, memberId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(member);
 
-        // Assert
+        var handler = new ChangeTeamMemberFunctionalRoleHandler(repo.Object, uow.Object);
+
+        var result = await handler.Handle(new ChangeTeamMemberFunctionalRoleCommand(
+            teamId, leaderId, memberId, FunctionalRole.Admin
+        ), CancellationToken.None);
+
+        member.Role.Should().Be(FunctionalRole.Admin);
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        result.UserId.Should().Be(memberId);
         result.Role.Should().Be(FunctionalRole.Admin.ToString());
     }
 
     [Fact]
-    public async Task Should_Throw_Forbidden_When_Not_Leader()
+    public async Task Should_Throw_Forbidden_When_RequestingUser_Is_Not_Leader()
     {
-        // Arrange
         var repo = new Mock<ITeamMemberRepository>();
-        repo.Setup(r => r.HasRequiredRoleAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Leader, It.IsAny<CancellationToken>()))
+        var uow = new Mock<IUnitOfWork>();
+
+        repo.Setup(r => r.HasRequiredRoleAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Leader, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        var handler = new ChangeTeamMemberFunctionalRoleHandler(repo.Object);
+        var handler = new ChangeTeamMemberFunctionalRoleHandler(repo.Object, uow.Object);
 
-        // Act & Assert
         await Assert.ThrowsAsync<ForbiddenAccessException>(() =>
-            handler.Handle(
-                new ChangeTeamMemberFunctionalRoleCommand(
-                    Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), FunctionalRole.Admin),
-                CancellationToken.None));
+            handler.Handle(new ChangeTeamMemberFunctionalRoleCommand(
+                Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), FunctionalRole.Admin
+            ), CancellationToken.None));
+
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Should_Throw_Conflict_When_Demoting_Last_Leader()
+    {
+        var repo = new Mock<ITeamMemberRepository>();
+        var uow = new Mock<IUnitOfWork>();
+
+        var teamId = Guid.NewGuid();
+        var leaderId = Guid.NewGuid();
+
+        repo.Setup(r => r.HasRequiredRoleAsync(teamId, leaderId, FunctionalRole.Leader, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var leaderUser = new User { Id = leaderId, UserName = "leader", DisplayName = "leader" };
+        var leaderMember = new TeamMember
+        {
+            TeamId = teamId,
+            UserId = leaderId,
+            Role = FunctionalRole.Leader,
+            User = leaderUser
+        };
+
+        repo.Setup(r => r.GetByTeamAndUserAsync(teamId, leaderId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(leaderMember);
+
+        repo.Setup(r => r.GetLeadersAsync(teamId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<TeamMember> { leaderMember }); // last leader
+
+        var handler = new ChangeTeamMemberFunctionalRoleHandler(repo.Object, uow.Object);
+
+        await Assert.ThrowsAsync<ConflictException>(() =>
+            handler.Handle(new ChangeTeamMemberFunctionalRoleCommand(
+                teamId, leaderId, leaderId, FunctionalRole.Admin
+            ), CancellationToken.None));
+
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 }

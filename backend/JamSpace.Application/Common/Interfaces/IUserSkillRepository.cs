@@ -4,8 +4,9 @@ namespace JamSpace.Application.Common.Interfaces;
 
 public interface IUserSkillRepository
 {
-    Task<bool> UserHasSkillAsync(Guid userId, Guid genreId, CancellationToken ct);
+    Task<bool> UserHasSkillAsync(Guid userId, Guid skillId, CancellationToken ct);
     Task<List<UserSkill>> GetAllUserSkillsAsync(Guid userId, CancellationToken ct);
-    Task<UserSkill> AddUserSkillAsync(Guid userId, Guid genreId, CancellationToken ct);
-    Task RemoveUserSkillAsync(Guid userId, Guid genreId, CancellationToken ct);
+    Task<UserSkill?> GetUserSkillAsync(Guid userId, Guid skillId, CancellationToken ct);
+    Task AddAsync(UserSkill userSkill, CancellationToken ct);
+    public void Remove(UserSkill userSkill);
 }

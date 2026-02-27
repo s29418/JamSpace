@@ -1,6 +1,6 @@
 ﻿using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Models;
-using JamSpace.Application.Features.Users.Dtos;
+using JamSpace.Application.Features.Users.DTOs;
 using JamSpace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,18 +28,20 @@ public class UserSearchRepository : IUserSearchRepository
         var query = _db.Users
             .AsNoTracking()
             .AsQueryable();
-        
+
+        // username
         if (!string.IsNullOrWhiteSpace(usernameQuery))
         {
-            var q = usernameQuery.Trim().ToLowerInvariant();
+            var q = usernameQuery.ToLowerInvariant();
             query = query.Where(u => u.UserName.ToLower().Contains(q));
         }
-        
+
+        // location
         if (location is not null)
         {
-            var city = location.City?.Trim();
-            var countryCode = location.CountryCode?.Trim().ToUpperInvariant();
-            
+            var city = location.City;
+            var countryCode = location.CountryCode;
+
             if (!string.IsNullOrWhiteSpace(city) && !string.IsNullOrWhiteSpace(countryCode))
             {
                 var cityNorm = city.ToLowerInvariant();
@@ -64,43 +66,37 @@ public class UserSearchRepository : IUserSearchRepository
                     u.Location.City.ToLower().Contains(cityNorm));
             }
         }
-        
+
+        // skills (ALL required)
         if (requiredSkills.Count > 0)
         {
             var skillsNorm = requiredSkills
-                .Select(s => s.Trim().ToLowerInvariant())
-                .Distinct()
+                .Select(s => s.ToLowerInvariant())
                 .ToArray();
 
             query = query.Where(u =>
-                u.UserSkills
-                    .Select(us => us.Skill.Name.ToLower())
-                    .Distinct()
-                    .Count(n => skillsNorm.Contains(n)) == skillsNorm.Length
-            );
+                skillsNorm.All(sn =>
+                    u.UserSkills.Any(us => us.Skill.Name.ToLower() == sn)));
         }
-        
+
+        // genres (ALL required)
         if (requiredGenres.Count > 0)
         {
             var genresNorm = requiredGenres
-                .Select(g => g.Trim().ToLowerInvariant())
-                .Distinct()
+                .Select(g => g.ToLowerInvariant())
                 .ToArray();
 
             query = query.Where(u =>
-                u.UserGenres
-                    .Select(ug => ug.Genre.Name.ToLower())
-                    .Distinct()
-                    .Count(n => genresNorm.Contains(n)) == genresNorm.Length
-            );
+                genresNorm.All(gn =>
+                    u.UserGenres.Any(ug => ug.Genre.Name.ToLower() == gn)));
         }
-        
+
         var totalItems = await query.CountAsync(ct);
-        
+
         var skip = (page - 1) * pageSize;
 
         var items = await query
-            .OrderBy(u => u.UserName) 
+            .OrderBy(u => u.UserName)
             .Skip(skip)
             .Take(pageSize)
             .Select(u => new UserCardDto
@@ -121,9 +117,8 @@ public class UserSearchRepository : IUserSearchRepository
                     .Select(ug => ug.Genre.Name)
                     .OrderBy(n => n)
                     .ToArray(),
-                
-                FollowersCount = _db.UserFollows
-                    .Count(f => f.FolloweeId == u.Id),
+
+                FollowersCount = _db.UserFollows.Count(f => f.FolloweeId == u.Id),
 
                 IsFollowedByMe =
                     currentUserId != null &&
@@ -131,7 +126,7 @@ public class UserSearchRepository : IUserSearchRepository
                     _db.UserFollows.Any(f =>
                         f.FollowerId == currentUserId &&
                         f.FolloweeId == u.Id),
-                
+
                 IsMe = currentUserId != null && u.Id == currentUserId
             })
             .ToListAsync(ct);

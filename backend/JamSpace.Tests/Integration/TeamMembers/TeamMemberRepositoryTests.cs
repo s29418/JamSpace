@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using JamSpace.Application.Common.Exceptions;
 using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
 using JamSpace.Infrastructure.Data;
@@ -17,7 +16,10 @@ public class TeamMemberRepositoryTests
         var opts = new DbContextOptionsBuilder<JamSpaceDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        return new JamSpaceDbContext(opts);
+
+        var db = new JamSpaceDbContext(opts);
+        db.Database.EnsureCreated();
+        return db;
     }
 
     private static (Team team, User user) SeedMember(
@@ -25,211 +27,128 @@ public class TeamMemberRepositoryTests
         FunctionalRole role = FunctionalRole.Member,
         string musicalRole = "guitar")
     {
-        var team = new Team
-        {
-            Id = Guid.NewGuid(), 
-            Name = "Team A"
-        };
+        var team = new Team { Id = Guid.NewGuid(), Name = "Team A" };
         var user = new User
         {
-            Id = Guid.NewGuid(), 
-            UserName = "alice", 
+            Id = Guid.NewGuid(),
+            UserName = "alice",
             DisplayName = "Alice",
-            Email = "a@test", 
+            Email = "a@test",
             PasswordHash = "x"
         };
-        var member = new TeamMember
+
+        db.Teams.Add(team);
+        db.Users.Add(user);
+        db.TeamMembers.Add(new TeamMember
         {
             TeamId = team.Id,
             UserId = user.Id,
             Role = role,
             MusicalRole = musicalRole
-        };
+        });
 
-        db.Teams.Add(team);
-        db.Users.Add(user);
-        db.TeamMembers.Add(member);
         db.SaveChanges();
-
         return (team, user);
     }
 
     [Fact]
-    public async Task IsUserInTeam_Returns_True_If_Member_Exists()
+    public async Task HasRequiredRoleAsync_Returns_True_When_User_Is_In_Team_And_Meets_MinimumRole()
     {
         await using var db = CreateDb();
-        var (team, user) = SeedMember(db);
+        var (team, user) = SeedMember(db, FunctionalRole.Admin);
         var repo = new TeamMemberRepository(db);
 
-        var exists = await repo.HasRequiredRoleAsync(team.Id, user.Id, FunctionalRole.Member, Ct);
-
-        exists.Should().BeTrue();
+        (await repo.HasRequiredRoleAsync(team.Id, user.Id, FunctionalRole.Member, Ct)).Should().BeTrue();
+        (await repo.HasRequiredRoleAsync(team.Id, user.Id, FunctionalRole.Admin, Ct)).Should().BeTrue();
+        (await repo.HasRequiredRoleAsync(team.Id, user.Id, FunctionalRole.Leader, Ct)).Should().BeFalse();
     }
 
     [Fact]
-    public async Task IsUserInTeam_Returns_False_If_Not_In_Team()
+    public async Task HasRequiredRoleAsync_Returns_False_When_User_Is_Not_In_Team()
     {
         await using var db = CreateDb();
         var (team, _) = SeedMember(db);
-        var otherUser = new User
-        {
-            Id = Guid.NewGuid(), 
-            UserName = "bob", 
-            DisplayName = "bob",
-            Email = "b@test", 
-            PasswordHash = "y"
-        };
-        db.Users.Add(otherUser);
+        var other = new User { Id = Guid.NewGuid(), UserName = "bob", DisplayName = "bob", Email = "b@test", PasswordHash = "y" };
+        db.Users.Add(other);
         db.SaveChanges();
 
         var repo = new TeamMemberRepository(db);
 
-        var exists = await repo.HasRequiredRoleAsync(team.Id, otherUser.Id, FunctionalRole.Member, Ct);
-
-        exists.Should().BeFalse();
+        var ok = await repo.HasRequiredRoleAsync(team.Id, other.Id, FunctionalRole.Member, Ct);
+        ok.Should().BeFalse();
     }
 
     [Fact]
-    public async Task IsUserALeader_And_IsUserAnAdmin_Work_For_Roles()
-    {
-        await using var db = CreateDb();
-        var (team, userLeader) = SeedMember(db, FunctionalRole.Leader);
-        var adminUser = new User
-        {
-            Id = Guid.NewGuid(), 
-            UserName = "admin", 
-            DisplayName = "admin",
-            Email = "admin@test", 
-            PasswordHash = "z"
-        };
-        db.Users.Add(adminUser);
-        db.TeamMembers.Add(new TeamMember
-        {
-            TeamId = team.Id, 
-            UserId = adminUser.Id, 
-            Role = FunctionalRole.Admin
-        });
-        db.SaveChanges();
-
-        var repo = new TeamMemberRepository(db);
-
-        (await repo.HasRequiredRoleAsync(team.Id, userLeader.Id, FunctionalRole.Leader, Ct)).Should().BeTrue();
-        (await repo.HasRequiredRoleAsync(team.Id, userLeader.Id, FunctionalRole.Admin, Ct)).Should().BeFalse();
-
-        (await repo.HasRequiredRoleAsync(team.Id, adminUser.Id, FunctionalRole.Admin, Ct)).Should().BeTrue();
-        (await repo.HasRequiredRoleAsync(team.Id, adminUser.Id, FunctionalRole.Leader, Ct)).Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task GetTeamMember_Returns_Entity_With_Included_User()
+    public async Task GetByTeamAndUserAsync_Returns_Member_With_Included_User()
     {
         await using var db = CreateDb();
         var (team, user) = SeedMember(db);
         var repo = new TeamMemberRepository(db);
 
-        var member = await repo.GetTeamMemberAsync(team.Id, user.Id, CancellationToken.None);
+        var member = await repo.GetByTeamAndUserAsync(team.Id, user.Id, Ct);
 
         member.Should().NotBeNull();
+        member!.User.Should().NotBeNull();
         member.TeamId.Should().Be(team.Id);
         member.UserId.Should().Be(user.Id);
-        member.User.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task GetTeamMember_Throws_NotFound_If_Missing()
+    public async Task GetByTeamAndUserAsync_Returns_Null_When_Missing()
     {
         await using var db = CreateDb();
         var repo = new TeamMemberRepository(db);
 
-        Func<Task> act = () => repo.GetTeamMemberAsync(Guid.NewGuid(), Guid.NewGuid(), CancellationToken.None);
+        var member = await repo.GetByTeamAndUserAsync(Guid.NewGuid(), Guid.NewGuid(), Ct);
 
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*Team member not found*");
+        member.Should().BeNull();
     }
 
     [Fact]
-    public async Task GetLeaders_Returns_Only_Leaders_For_Team()
+    public async Task GetLeadersAsync_Returns_Only_Leaders()
     {
         await using var db = CreateDb();
-        var (team, _) = SeedMember(db);
-        var leader1 = new User
-        {
-            Id = Guid.NewGuid(), 
-            UserName = "l1", 
-            DisplayName = "l1",
-            Email = "l1@test", 
-            PasswordHash = "x"
-        };
-        var leader2 = new User
-        {
-            Id = Guid.NewGuid(), 
-            UserName = "l2", 
-            DisplayName = "l2",
-            Email = "l2@test", 
-            PasswordHash = "x"
-        };
-        db.Users.AddRange(leader1, leader2);
+        var (team, _) = SeedMember(db, FunctionalRole.Member);
+
+        var l1 = new User { Id = Guid.NewGuid(), UserName = "l1", DisplayName = "l1", Email = "l1@test", PasswordHash = "x" };
+        var l2 = new User { Id = Guid.NewGuid(), UserName = "l2", DisplayName = "l2", Email = "l2@test", PasswordHash = "x" };
+
+        db.Users.AddRange(l1, l2);
         db.TeamMembers.AddRange(
-            new TeamMember
-            {
-                TeamId = team.Id, 
-                UserId = leader1.Id, 
-                Role = FunctionalRole.Leader
-            },
-            new TeamMember
-            {
-                TeamId = team.Id, 
-                UserId = leader2.Id, 
-                Role = FunctionalRole.Leader
-            });
+            new TeamMember { TeamId = team.Id, UserId = l1.Id, Role = FunctionalRole.Leader },
+            new TeamMember { TeamId = team.Id, UserId = l2.Id, Role = FunctionalRole.Leader }
+        );
         db.SaveChanges();
 
         var repo = new TeamMemberRepository(db);
 
-        var leaders = await repo.GetLeadersAsync(team.Id, CancellationToken.None);
+        var leaders = await repo.GetLeadersAsync(team.Id, Ct);
 
         leaders.Should().HaveCount(2);
-        leaders.All(m => m.Role == FunctionalRole.Leader && m.TeamId == team.Id).Should().BeTrue();
+        leaders.All(m => m.TeamId == team.Id && m.Role == FunctionalRole.Leader).Should().BeTrue();
     }
 
     [Fact]
-    public async Task ChangeFunctionalRole_Updates_Role_And_Saves()
+    public async Task Add_And_Remove_Work_After_SaveChanges()
     {
         await using var db = CreateDb();
-        var (team, user) = SeedMember(db);
         var repo = new TeamMemberRepository(db);
 
-        var updated = await repo.ChangeTeamMemberFunctionalRoleAsync(
-            team.Id, user.Id, FunctionalRole.Admin, CancellationToken.None);
+        var team = new Team { Id = Guid.NewGuid(), Name = "T" };
+        var user = new User { Id = Guid.NewGuid(), UserName = "u", DisplayName = "u", Email = "u@test", PasswordHash = "x" };
+        db.Teams.Add(team);
+        db.Users.Add(user);
+        db.SaveChanges();
 
-        updated.Role.Should().Be(FunctionalRole.Admin);
-        var reloaded = db.TeamMembers.Single(m => m.TeamId == team.Id && m.UserId == user.Id);
-        reloaded.Role.Should().Be(FunctionalRole.Admin);
-    }
+        var member = new TeamMember { TeamId = team.Id, UserId = user.Id, Role = FunctionalRole.Member };
 
-    [Fact]
-    public async Task EditMusicalRole_Updates_Field_And_Saves()
-    {
-        await using var db = CreateDb();
-        var (team, user) = SeedMember(db, musicalRole: "guitar");
-        var repo = new TeamMemberRepository(db);
+        await repo.AddAsync(member, Ct);
+        await db.SaveChangesAsync(Ct);
 
-        var updated = await repo.EditTeamMemberMusicalRole(
-            team.Id, user.Id, "drums", CancellationToken.None);
+        db.TeamMembers.Any(m => m.TeamId == team.Id && m.UserId == user.Id).Should().BeTrue();
 
-        updated.MusicalRole.Should().Be("drums");
-        db.TeamMembers.Single(m => m.TeamId == team.Id && m.UserId == user.Id)
-            .MusicalRole.Should().Be("drums");
-    }
-
-    [Fact]
-    public async Task Delete_Removes_Member()
-    {
-        await using var db = CreateDb();
-        var (team, user) = SeedMember(db);
-        var repo = new TeamMemberRepository(db);
-
-        await repo.DeleteTeamMemberAsync(team.Id, user.Id, CancellationToken.None);
+        repo.Remove(member);
+        await db.SaveChangesAsync(Ct);
 
         db.TeamMembers.Any(m => m.TeamId == team.Id && m.UserId == user.Id).Should().BeFalse();
     }

@@ -21,7 +21,7 @@ public sealed class UpdateTeamPictureHandler : IRequestHandler<UpdateTeamPicture
 
     public async Task Handle(UpdateTeamPictureCommand c, CancellationToken ct)
     {
-        var team = await _teams.GetTeamByIdAsync(c.TeamId, ct)
+        var team = await _teams.GetByIdAsync(c.TeamId, ct)
                    ?? throw new NotFoundException("Team not found.");
 
         var canEdit = await _members.HasRequiredRoleAsync(c.TeamId, c.RequestingUserId, FunctionalRole.Admin, ct);

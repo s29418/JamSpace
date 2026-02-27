@@ -52,9 +52,7 @@ public sealed class UploadPictureHandler : IRequestHandler<UploadPictureCommand,
                 {
                     if (!request.RelatedEntityId.HasValue)
                         throw new InvalidOperationException("UserPicture requires RelatedEntityId (userId).");
-
-                    // U Ciebie UpdateUserProfileCommand zwraca UserDto, ale my
-                    // potrzebujemy tylko aby to się wykonało – wynik ignorujemy.
+                    
                     _ = await _mediator.Send(new UpdateUserProfileCommand(
                         UserId: request.RelatedEntityId.Value,
 
@@ -85,9 +83,14 @@ public sealed class UploadPictureHandler : IRequestHandler<UploadPictureCommand,
         }
         catch
         {
-            // kompensacja: DB update padł -> kasujemy blob
-            try { await _fileStorageService.DeleteAsync(url, ct); }
-            catch { /* nie przykrywamy oryginalnego wyjątku */ }
+            try
+            {
+                await _fileStorageService.DeleteAsync(url, ct);
+            }
+            catch
+            {
+                
+            }
 
             throw;
         }

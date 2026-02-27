@@ -1,5 +1,6 @@
 ﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using MediatR;
 
 namespace JamSpace.Application.Features.UserSkills.Commands.DeleteUserSkill;
@@ -7,18 +8,24 @@ namespace JamSpace.Application.Features.UserSkills.Commands.DeleteUserSkill;
 public class DeleteUserSkillHandler : IRequestHandler<DeleteUserSkillCommand, Unit>
 {
     private readonly IUserSkillRepository _repo;
-    
-    public DeleteUserSkillHandler(IUserSkillRepository repo)
+    private readonly IUnitOfWork _uow;
+
+    public DeleteUserSkillHandler(IUserSkillRepository repo, IUnitOfWork uow)
     {
         _repo = repo;
+        _uow = uow;
     }
-    
+
     public async Task<Unit> Handle(DeleteUserSkillCommand request, CancellationToken ct)
     {
-        if (!await _repo.UserHasSkillAsync(request.UserId, request.SkillId, ct))
+        var userSkill = await _repo.GetUserSkillAsync(request.UserId, request.SkillId, ct);
+
+        if (userSkill is null)
             throw new ConflictException("User does not have this skill.");
-        
-        await _repo.RemoveUserSkillAsync(request.UserId, request.SkillId, ct);
+
+        _repo.Remove(userSkill);
+        await _uow.SaveChangesAsync(ct);
+
         return Unit.Value;
     }
 }

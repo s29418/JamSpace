@@ -7,6 +7,7 @@ using JamSpace.Application.Features.Authentication.Dtos;
 using JamSpace.Domain.Entities;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using JamSpace.Application.Common.Persistence;
 
 namespace JamSpace.Tests.Unit.Authentication;
 
@@ -21,11 +22,9 @@ public class RegisterUserHandlerTests
         var userRepo = new Mock<IUserRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
         var hasher = new Mock<IPasswordHasher>();
+        var uow = new Mock<IUnitOfWork>();
 
-        var jwtSettings = new JwtSettings
-        {
-            AccessMinutes = 60
-        };
+        var jwtSettings = new JwtSettings { AccessMinutes = 60 };
         var jwtOptions = Options.Create(jwtSettings);
 
         var existing = new User
@@ -40,8 +39,7 @@ public class RegisterUserHandlerTests
             .Setup(r => r.GetByEmailAsync("taken@example.com", Ct))
             .ReturnsAsync(existing);
 
-        var handler = new RegisterUserHandler(userRepo.Object, jwt.Object, hasher.Object, jwtOptions);
-
+        var handler = new RegisterUserHandler(userRepo.Object, jwt.Object, hasher.Object, uow.Object, jwtOptions);
         var cmd = new RegisterUserCommand("taken@example.com", "user", "Password123!");
 
         // Act
@@ -50,6 +48,9 @@ public class RegisterUserHandlerTests
         // Assert
         await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("Email is already taken.");
+
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        userRepo.Verify(r => r.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -59,11 +60,9 @@ public class RegisterUserHandlerTests
         var userRepo = new Mock<IUserRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
         var hasher = new Mock<IPasswordHasher>();
+        var uow = new Mock<IUnitOfWork>();
 
-        var jwtSettings = new JwtSettings
-        {
-            AccessMinutes = 60
-        };
+        var jwtSettings = new JwtSettings { AccessMinutes = 60 };
         var jwtOptions = Options.Create(jwtSettings);
 
         userRepo
@@ -78,15 +77,17 @@ public class RegisterUserHandlerTests
             .Setup(j => j.GenerateAccessToken(It.IsAny<User>(), It.IsAny<int>(), jwtSettings.AccessMinutes))
             .Returns("access-token");
 
-        var handler = new RegisterUserHandler(userRepo.Object, jwt.Object, hasher.Object, jwtOptions);
-
-        var cmd = new RegisterUserCommand("new@example.com", "user", "Password123!");
+        uow.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         User? addedUser = null;
         userRepo
             .Setup(r => r.AddAsync(It.IsAny<User>(), Ct))
             .Callback<User, CancellationToken>((u, _) => addedUser = u)
             .Returns(Task.CompletedTask);
+
+        var handler = new RegisterUserHandler(userRepo.Object, jwt.Object, hasher.Object, uow.Object, jwtOptions);
+        var cmd = new RegisterUserCommand("new@example.com", "user", "Password123!");
 
         // Act
         var result = await handler.Handle(cmd, Ct);
@@ -104,5 +105,8 @@ public class RegisterUserHandlerTests
         addedUser.DisplayName.Should().Be("user");
         addedUser.PasswordHash.Should().Be("hashed-password");
         addedUser.IsDeleted.Should().BeFalse();
+
+        userRepo.Verify(r => r.AddAsync(It.IsAny<User>(), Ct), Times.Once);
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

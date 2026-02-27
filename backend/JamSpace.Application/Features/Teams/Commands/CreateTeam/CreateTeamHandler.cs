@@ -1,18 +1,25 @@
-﻿using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.Teams.DTOs;
 using JamSpace.Application.Features.Teams.Mappers;
 using JamSpace.Domain.Entities;
+using JamSpace.Domain.Enums;
 using MediatR;
 
 namespace JamSpace.Application.Features.Teams.Commands.CreateTeam;
 
-public class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, TeamDto>
+public sealed class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, TeamDto>
 {
-    private readonly ITeamRepository _repo;
+    private readonly ITeamRepository _teams;
+    private readonly ITeamMemberRepository _members;
+    private readonly IUnitOfWork _uow;
 
-    public CreateTeamHandler(ITeamRepository repo)
+    public CreateTeamHandler(ITeamRepository teams, ITeamMemberRepository members, IUnitOfWork uow)
     {
-        _repo = repo;
+        _teams = teams;
+        _members = members;
+        _uow = uow;
     }
 
     public async Task<TeamDto> Handle(CreateTeamWithUserCommand request, CancellationToken ct)
@@ -21,15 +28,27 @@ public class CreateTeamHandler : IRequestHandler<CreateTeamWithUserCommand, Team
         {
             Id = Guid.NewGuid(),
             Name = request.Command.Name,
-            CreatedAt = DateTime.UtcNow,
+            TeamPictureUrl = request.Command.TeamPictureUrl,
             CreatedById = request.CreatorUserId,
-            TeamPictureUrl = request.Command.TeamPictureUrl
+            CreatedAt = DateTime.UtcNow
         };
 
-        var teamId = await _repo.CreateTeamAsync(team, request.CreatorUserId, ct);
+        await _teams.AddAsync(team, ct);
 
-        var createdTeam = await _repo.GetTeamByIdAsync(teamId, ct);
-        return TeamMapper.ToDto(createdTeam!, request.CreatorUserId);
+        var leader = new TeamMember
+        {
+            TeamId = team.Id,
+            UserId = request.CreatorUserId,
+            Role = FunctionalRole.Leader
+        };
+
+        await _members.AddAsync(leader, ct);
+
+        await _uow.SaveChangesAsync(ct);
+        
+        var created = await _teams.GetByIdAsync(team.Id, ct)
+                      ?? throw new NotFoundException("Team not found after creation.");
+
+        return TeamMapper.ToDto(created, request.CreatorUserId);
     }
 }
-

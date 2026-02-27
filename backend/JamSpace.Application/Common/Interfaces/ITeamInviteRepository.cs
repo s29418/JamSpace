@@ -4,12 +4,16 @@ namespace JamSpace.Application.Common.Interfaces;
 
 public interface ITeamInviteRepository
 {
-    Task<TeamInvite> SendTeamInviteAsync(Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct);
-    Task<TeamInvite> GetTeamInviteByIdAsync(Guid teamInviteId, CancellationToken ct);
-    Task<List<TeamInvite>> GetTeamInvitesAsync(Guid teamId, Guid requestingUserId, CancellationToken ct);
-    Task<List<TeamInvite>> GetMyPendingInvitesAsync(Guid userId, CancellationToken ct);
+    Task<TeamInvite?> GetByIdAsync(Guid inviteId, CancellationToken ct);
+    Task<TeamInvite?> GetByIdWithDetailsAsync(Guid inviteId, CancellationToken ct);
+
+    Task<bool> ExistsPendingInviteAsync(Guid teamId, Guid invitedUserId, CancellationToken ct);
     Task<bool> WasInviteSentByUserAsync(Guid inviteId, Guid userId, CancellationToken ct);
-    Task<TeamInvite> AcceptInviteAsync(Guid inviteId, Guid userId, CancellationToken ct);
-    Task<TeamInvite> RejectInviteAsync(Guid inviteId, Guid userId, CancellationToken ct);
-    Task<TeamInvite> CancelTeamInviteAsync(Guid inviteId, Guid requestingUserId, CancellationToken ct);
+
+    Task<List<TeamInvite>> GetPendingInvitesForTeamAsync(Guid teamId, CancellationToken ct);
+    Task<List<TeamInvite>> GetPendingInvitesForTeamSentByUserAsync(Guid teamId, Guid invitedByUserId, CancellationToken ct);
+    Task<List<TeamInvite>> GetMyPendingInvitesAsync(Guid userId, CancellationToken ct);
+
+    Task AddAsync(TeamInvite invite, CancellationToken ct);
+    void Remove(TeamInvite invite);
 }

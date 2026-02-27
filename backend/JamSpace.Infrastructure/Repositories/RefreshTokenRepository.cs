@@ -12,12 +12,11 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public RefreshTokenRepository(JamSpaceDbContext db)
     {
         _db = db;
-    } 
+    }
 
     public async Task AddAsync(RefreshToken token, CancellationToken ct)
     {
-        _db.RefreshTokens.Add(token);
-        await _db.SaveChangesAsync(ct);
+        await _db.RefreshTokens.AddAsync(token, ct);
     }
 
     public Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken ct) =>
@@ -36,20 +35,15 @@ public class RefreshTokenRepository : IRefreshTokenRepository
             IpAddress = oldToken.IpAddress,
             UserAgent = oldToken.UserAgent
         };
-        _db.RefreshTokens.Add(rt);
-        await _db.SaveChangesAsync(ct);
+
+        await _db.RefreshTokens.AddAsync(rt, ct);
     }
 
     public async Task RevokeAsync(string token, CancellationToken ct)
     {
-        var rt = await _db.RefreshTokens
-            .FirstOrDefaultAsync(x => x.Token == token, ct);
-        
+        var rt = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, ct);
         if (rt != null)
-        {
             rt.RevokedAt = DateTime.UtcNow;
-            await _db.SaveChangesAsync(ct);
-        }
     }
 
     public async Task RevokeAllForUserAsync(Guid userId, CancellationToken ct)
@@ -57,8 +51,8 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         var tokens = await _db.RefreshTokens
             .Where(x => x.UserId == userId && x.RevokedAt == null)
             .ToListAsync(ct);
-        
-        foreach (var t in tokens) t.RevokedAt = DateTime.UtcNow;
-        await _db.SaveChangesAsync(ct);
+
+        foreach (var t in tokens)
+            t.RevokedAt = DateTime.UtcNow;
     }
 }

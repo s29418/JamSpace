@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Common.Settings;
 using JamSpace.Application.Features.Authentication.Dtos;
 using JamSpace.Domain.Entities;
@@ -13,17 +14,20 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResu
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IUnitOfWork _uow;
     private readonly JwtSettings _jwt;
 
     public RegisterUserHandler(
         IUserRepository userRepository,
         IJwtTokenGenerator jwtTokenGenerator,
         IPasswordHasher passwordHasher,
+        IUnitOfWork uow,
         IOptions<JwtSettings> jwtOptions)
     {
         _userRepository = userRepository;
         _jwtTokenGenerator = jwtTokenGenerator;
         _passwordHasher = passwordHasher;
+        _uow = uow;
         _jwt = jwtOptions.Value;
     }
 
@@ -46,6 +50,7 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserCommand, AuthResu
         };
 
         await _userRepository.AddAsync(user, ct);
+        await _uow.SaveChangesAsync(ct);
 
         var access = _jwtTokenGenerator.GenerateAccessToken(user, user.TokenVersion, _jwt.AccessMinutes);
 

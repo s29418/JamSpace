@@ -1,6 +1,8 @@
 ﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.UserFollows.DTOs;
+using JamSpace.Domain.Entities;
 using MediatR;
 
 namespace JamSpace.Application.Features.UserFollows.Commands.FollowUser;
@@ -8,21 +10,30 @@ namespace JamSpace.Application.Features.UserFollows.Commands.FollowUser;
 public class FollowUserHandler : IRequestHandler<FollowUserCommand, BasicUserFollowDto>
 {
     private readonly IUserFollowRepository _userFollowRepository;
+    private readonly IUnitOfWork _uow;
 
-    public FollowUserHandler(IUserFollowRepository userFollowRepository)
+    public FollowUserHandler(IUserFollowRepository userFollowRepository, IUnitOfWork uow)
     {
         _userFollowRepository = userFollowRepository;
+        _uow = uow;
     }
 
-    public async Task<BasicUserFollowDto> Handle(FollowUserCommand request, CancellationToken cancellationToken)
+    public async Task<BasicUserFollowDto> Handle(FollowUserCommand request, CancellationToken ct)
     {
-        bool alreadyFollowing = await _userFollowRepository.UserFollowsAsync(request.FollowerId, request.FollowedId, cancellationToken);
+        var alreadyFollowing = await _userFollowRepository.UserFollowsAsync(request.FollowerId, request.FollowedId, ct);
         if (alreadyFollowing)
-        {
             throw new ConflictException("You are already following this user.");
-        }
-        
-        var userFollow = await _userFollowRepository.FollowUserAsync(request.FollowerId, request.FollowedId, cancellationToken);
+
+        var userFollow = new UserFollow
+        {
+            FollowerId = request.FollowerId,
+            FolloweeId = request.FollowedId,
+            FollowedAt = DateTime.UtcNow
+        };
+
+        await _userFollowRepository.AddAsync(userFollow, ct);
+        await _uow.SaveChangesAsync(ct);
+
         return new BasicUserFollowDto
         {
             FollowerId = userFollow.FollowerId,

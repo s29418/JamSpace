@@ -1,4 +1,4 @@
-﻿namespace JamSpace.Application.Features.Users.Dtos;
+﻿namespace JamSpace.Application.Features.Users.DTOs;
 
 public class UserCardDto
 {

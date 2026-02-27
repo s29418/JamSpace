@@ -24,7 +24,7 @@ public class GetTeamByIdHandler : IRequestHandler<GetTeamByIdQuery, TeamDto>
         if (!isMember)
             throw new ForbiddenAccessException("You are not a member of this team.");
 
-        var team = await _teamRepository.GetTeamByIdAsync(request.TeamId, ct);
+        var team = await _teamRepository.GetByIdAsync(request.TeamId, ct);
 
         return TeamMapper.ToDto(team!, request.RequestingUserId);
     }

@@ -2,6 +2,7 @@
 using Moq;
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.TeamInvites.Commands.CancelTeamInvite;
 using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
@@ -11,64 +12,64 @@ namespace JamSpace.Tests.Unit.TeamInvites;
 public class CancelTeamInviteHandlerTests
 {
     private static readonly CancellationToken Ct = CancellationToken.None;
+
     [Fact]
     public async Task Should_Throw_Forbidden_When_User_Has_No_Permission()
     {
-        // Arrange
         var inviteId = Guid.NewGuid();
         var teamId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        
 
         var inviteRepo = new Mock<ITeamInviteRepository>();
-        inviteRepo.Setup(r => r.GetTeamInviteByIdAsync(
-                inviteId, It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new TeamInvite { TeamId = teamId });
-
         var memberRepo = new Mock<ITeamMemberRepository>();
+        var uow = new Mock<IUnitOfWork>();
+
+        inviteRepo.Setup(r => r.GetByIdWithDetailsAsync(inviteId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TeamInvite { Id = inviteId, TeamId = teamId, Status = InviteStatus.Pending });
+
         memberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Admin, Ct)).ReturnsAsync(false);
-        inviteRepo.Setup(r => r.WasInviteSentByUserAsync(
-            teamId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        inviteRepo.Setup(r => r.WasInviteSentByUserAsync(inviteId, userId, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
-        var handler = new CancelTeamInviteHandler(inviteRepo.Object, memberRepo.Object);
+        var handler = new CancelTeamInviteHandler(inviteRepo.Object, memberRepo.Object, uow.Object);
 
-        // Act & Assert
         await Assert.ThrowsAsync<ForbiddenAccessException>(() =>
             handler.Handle(new CancelTeamInviteCommand(inviteId, userId), CancellationToken.None));
     }
 
     [Fact]
-    public async Task Should_Cancel_Invite_When_User_Has_Permission()
+    public async Task Should_Cancel_Invite_When_User_Is_Admin()
     {
-        // Arrange
         var inviteId = Guid.NewGuid();
         var teamId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
         var inviteRepo = new Mock<ITeamInviteRepository>();
-        inviteRepo.Setup(r => r.GetTeamInviteByIdAsync(
-                inviteId, It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new TeamInvite { TeamId = teamId });
-        inviteRepo.Setup(r => r.CancelTeamInviteAsync(
-                inviteId, userId, It.IsAny<CancellationToken>()))
-                  .ReturnsAsync(new TeamInvite
-                  {
-                      Status = InviteStatus.Cancelled,
-                      Team = new Team { Id = Guid.NewGuid(), Name = "Test team" },
-                      InvitedByUser = new User { Id = Guid.NewGuid(), UserName = "Inviter", DisplayName = "Inviter" },
-                      InvitedUser = new User { Id = Guid.NewGuid(), UserName = "Invitee", DisplayName = "Invitee" }
-                  });
-
         var memberRepo = new Mock<ITeamMemberRepository>();
-        memberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Leader, Ct)).ReturnsAsync(true);
+        var uow = new Mock<IUnitOfWork>();
 
-        var handler = new CancelTeamInviteHandler(inviteRepo.Object, memberRepo.Object);
+        inviteRepo.Setup(r => r.GetByIdWithDetailsAsync(inviteId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TeamInvite
+            {
+                Id = inviteId,
+                TeamId = teamId,
+                Status = InviteStatus.Pending,
 
-        // Act
-        var result = await handler.Handle(
-            new CancelTeamInviteCommand(inviteId, userId), CancellationToken.None);
+                Team = new Team { Id = teamId, Name = "Test team" },
+                InvitedByUser = new User { Id = Guid.NewGuid(), UserName = "Inviter", DisplayName = "Inviter" },
+                InvitedUser = new User { Id = Guid.NewGuid(), UserName = "Invitee", DisplayName = "Invitee" }
+            });
 
-        // Assert
+        memberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Admin, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        uow.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var handler = new CancelTeamInviteHandler(inviteRepo.Object, memberRepo.Object, uow.Object);
+
+        var result = await handler.Handle(new CancelTeamInviteCommand(inviteId, userId), CancellationToken.None);
+
         result.Status.Should().Be(InviteStatus.Cancelled.ToString());
+        uow.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

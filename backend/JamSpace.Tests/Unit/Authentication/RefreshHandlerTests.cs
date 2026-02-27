@@ -2,6 +2,7 @@
 using Moq;
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Common.Settings;
 using JamSpace.Application.Features.Authentication.Commands.RefreshToken;
 using JamSpace.Domain.Entities;
@@ -20,6 +21,7 @@ public class RefreshHandlerTests
         var refreshRepo = new Mock<IRefreshTokenRepository>();
         var userRepo = new Mock<IUserRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
+        var uow = new Mock<IUnitOfWork>();
 
         var jwtOptions = Options.Create(new JwtSettings
         {
@@ -27,8 +29,7 @@ public class RefreshHandlerTests
             RefreshDays = 7
         });
 
-        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, jwtOptions);
-
+        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, uow.Object, jwtOptions);
         var cmd = new RefreshCommand(null!);
 
         // Act
@@ -36,6 +37,7 @@ public class RefreshHandlerTests
 
         // Assert
         await act.Should().ThrowAsync<ForbiddenAccessException>();
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -45,6 +47,7 @@ public class RefreshHandlerTests
         var refreshRepo = new Mock<IRefreshTokenRepository>();
         var userRepo = new Mock<IUserRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
+        var uow = new Mock<IUnitOfWork>();
 
         var jwtOptions = Options.Create(new JwtSettings
         {
@@ -56,8 +59,7 @@ public class RefreshHandlerTests
             .Setup(r => r.GetByTokenAsync("token", Ct))
             .ReturnsAsync((RefreshToken?)null);
 
-        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, jwtOptions);
-
+        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, uow.Object, jwtOptions);
         var cmd = new RefreshCommand("token");
 
         // Act
@@ -65,6 +67,7 @@ public class RefreshHandlerTests
 
         // Assert
         await act.Should().ThrowAsync<ForbiddenAccessException>();
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -82,6 +85,7 @@ public class RefreshHandlerTests
         var refreshRepo = new Mock<IRefreshTokenRepository>();
         var userRepo = new Mock<IUserRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
+        var uow = new Mock<IUnitOfWork>();
 
         var jwtOptions = Options.Create(new JwtSettings
         {
@@ -93,8 +97,7 @@ public class RefreshHandlerTests
             .Setup(r => r.GetByTokenAsync("token", Ct))
             .ReturnsAsync(existing);
 
-        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, jwtOptions);
-
+        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, uow.Object, jwtOptions);
         var cmd = new RefreshCommand("token");
 
         // Act
@@ -103,6 +106,8 @@ public class RefreshHandlerTests
         // Assert
         await act.Should().ThrowAsync<ForbiddenAccessException>()
             .WithMessage("Refresh token inactive.");
+
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -121,6 +126,7 @@ public class RefreshHandlerTests
         var refreshRepo = new Mock<IRefreshTokenRepository>();
         var userRepo = new Mock<IUserRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
+        var uow = new Mock<IUnitOfWork>();
 
         var jwtOptions = Options.Create(new JwtSettings
         {
@@ -136,8 +142,7 @@ public class RefreshHandlerTests
             .Setup(r => r.GetByIdAsync(userId, Ct))
             .ReturnsAsync((User?)null);
 
-        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, jwtOptions);
-
+        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, uow.Object, jwtOptions);
         var cmd = new RefreshCommand("token");
 
         // Act
@@ -146,6 +151,8 @@ public class RefreshHandlerTests
         // Assert
         await act.Should().ThrowAsync<ForbiddenAccessException>()
             .WithMessage("User not found.");
+
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -171,6 +178,7 @@ public class RefreshHandlerTests
         var refreshRepo = new Mock<IRefreshTokenRepository>();
         var userRepo = new Mock<IUserRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
+        var uow = new Mock<IUnitOfWork>();
 
         var jwtSettings = new JwtSettings
         {
@@ -191,8 +199,10 @@ public class RefreshHandlerTests
             .Setup(j => j.GenerateAccessToken(user, user.TokenVersion, jwtSettings.AccessMinutes))
             .Returns("new-access");
 
-        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, jwtOptions);
+        uow.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
+        var handler = new RefreshHandler(refreshRepo.Object, userRepo.Object, jwt.Object, uow.Object, jwtOptions);
         var cmd = new RefreshCommand("token");
 
         // Act
@@ -212,5 +222,7 @@ public class RefreshHandlerTests
                 It.IsAny<DateTime>(),
                 Ct),
             Times.Once);
+
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

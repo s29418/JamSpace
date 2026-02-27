@@ -23,7 +23,7 @@ public class GetTeamByIdHandlerTests
                 It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Member, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
         
-        teamRepo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        teamRepo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Team
             {
                 Id = Guid.NewGuid(),
@@ -57,7 +57,7 @@ public class GetTeamByIdHandlerTests
                 It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Member, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
     
-        teamRepo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        teamRepo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Team
             {
                 Id = Guid.NewGuid(),

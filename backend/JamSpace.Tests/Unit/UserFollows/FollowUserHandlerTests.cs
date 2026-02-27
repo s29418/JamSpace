@@ -2,16 +2,17 @@
 using Moq;
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.UserFollows.Commands.FollowUser;
 using JamSpace.Application.Features.UserFollows.DTOs;
 using JamSpace.Domain.Entities;
-
 
 namespace JamSpace.Tests.Unit.UserFollows;
 
 public class FollowUserHandlerTests
 {
     private readonly Mock<IUserFollowRepository> _repo = new();
+    private readonly Mock<IUnitOfWork> _uow = new();
 
     [Fact]
     public async Task Handle_Should_Create_Follow_And_Map_Dto_When_Not_Already_Following()
@@ -22,13 +23,17 @@ public class FollowUserHandlerTests
         var cmd = new FollowUserCommand(followerId, followeeId);
 
         _repo.Setup(r => r.UserFollowsAsync(followerId, followeeId, It.IsAny<CancellationToken>()))
-             .ReturnsAsync(false);
-        
-        var returned = new UserFollow { FollowerId = followerId, FolloweeId = followeeId };
-        _repo.Setup(r => r.FollowUserAsync(followerId, followeeId, It.IsAny<CancellationToken>()))
-             .ReturnsAsync(returned);
+            .ReturnsAsync(false);
 
-        var sut = new FollowUserHandler(_repo.Object);
+        UserFollow? added = null;
+        _repo.Setup(r => r.AddAsync(It.IsAny<UserFollow>(), It.IsAny<CancellationToken>()))
+            .Callback<UserFollow, CancellationToken>((uf, _) => added = uf)
+            .Returns(Task.CompletedTask);
+
+        _uow.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var sut = new FollowUserHandler(_repo.Object, _uow.Object);
 
         // Act
         BasicUserFollowDto dto = await sut.Handle(cmd, CancellationToken.None);
@@ -36,8 +41,13 @@ public class FollowUserHandlerTests
         // Assert
         dto.FollowerId.Should().Be(followerId);
         dto.FolloweeId.Should().Be(followeeId);
-        _repo.Verify(r => r.FollowUserAsync(
-            followerId, followeeId, It.IsAny<CancellationToken>()), Times.Once);
+
+        added.Should().NotBeNull();
+        added!.FollowerId.Should().Be(followerId);
+        added.FolloweeId.Should().Be(followeeId);
+
+        _repo.Verify(r => r.AddAsync(It.IsAny<UserFollow>(), It.IsAny<CancellationToken>()), Times.Once);
+        _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -49,17 +59,18 @@ public class FollowUserHandlerTests
         var cmd = new FollowUserCommand(followerId, followeeId);
 
         _repo.Setup(r => r.UserFollowsAsync(followerId, followeeId, It.IsAny<CancellationToken>()))
-             .ReturnsAsync(true);
+            .ReturnsAsync(true);
 
-        var sut = new FollowUserHandler(_repo.Object);
+        var sut = new FollowUserHandler(_repo.Object, _uow.Object);
 
         // Act
         var act = () => sut.Handle(cmd, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<ConflictException>()
-                 .WithMessage("You are already following this user.");
-        _repo.Verify(r => r.FollowUserAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+            .WithMessage("You are already following this user.");
+
+        _repo.Verify(r => r.AddAsync(It.IsAny<UserFollow>(), It.IsAny<CancellationToken>()), Times.Never);
+        _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 }

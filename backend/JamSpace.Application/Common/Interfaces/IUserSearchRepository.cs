@@ -1,5 +1,5 @@
 ﻿using JamSpace.Application.Common.Models;
-using JamSpace.Application.Features.Users.Dtos;
+using JamSpace.Application.Features.Users.DTOs;
 
 namespace JamSpace.Application.Common.Interfaces;
 

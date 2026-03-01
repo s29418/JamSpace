@@ -15,6 +15,10 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
         builder.Property(tm => tm.Role)
             .IsRequired()
             .HasMaxLength(25);
+
+        builder.Property(tm => tm.MusicalRole)
+            .IsRequired(false)
+            .HasMaxLength(25);
         
         builder.HasQueryFilter(tm => !tm.User.IsDeleted);
 

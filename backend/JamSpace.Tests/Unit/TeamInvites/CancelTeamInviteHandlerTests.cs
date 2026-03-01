@@ -54,9 +54,23 @@ public class CancelTeamInviteHandlerTests
                 TeamId = teamId,
                 Status = InviteStatus.Pending,
 
-                Team = new Team { Id = teamId, Name = "Test team" },
-                InvitedByUser = new User { Id = Guid.NewGuid(), UserName = "Inviter", DisplayName = "Inviter" },
-                InvitedUser = new User { Id = Guid.NewGuid(), UserName = "Invitee", DisplayName = "Invitee" }
+                Team = new Team
+                {
+                    Id = teamId,
+                    Name = "Test team"
+                },
+                InvitedByUser = new User
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = "Inviter", 
+                    DisplayName = "Inviter"
+                },
+                InvitedUser = new User
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = "Invitee",
+                    DisplayName = "Invitee"
+                }
             });
 
         memberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Admin, It.IsAny<CancellationToken>()))

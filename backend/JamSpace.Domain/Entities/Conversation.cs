@@ -8,9 +8,12 @@ public class Conversation
     public required ChatType Type { get; set; }
     
     public Guid? TeamId { get; set; }
+    public Team? Team { get; set; }
     public string? DirectKey { get; set; }
     
     public DateTimeOffset? LastMessageAt { get; set; }
     public string? LastMessagePreview { get; set; }
     public Guid? LastMessageId { get; set; }
+    
+    public ICollection<ConversationParticipant> Participants { get; private set; } = new List<ConversationParticipant>();
 }

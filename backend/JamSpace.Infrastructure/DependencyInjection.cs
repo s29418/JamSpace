@@ -34,6 +34,10 @@ public static class DependencyInjection
         services.AddScoped<IUserSkillRepository, UserSkillRepository>();
         services.AddScoped<IUserFollowRepository, UserFollowRepository>();
 
+        services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IConversationParticipantRepository, ConversationParticipantRepository>();
+        services.AddScoped<IConversationRepository, ConversationRepository>();
+
         services.AddSingleton(sp =>
         {
             var conn = config["AzureBlobStorage:ConnectionString"];

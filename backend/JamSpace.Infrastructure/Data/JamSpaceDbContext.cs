@@ -14,14 +14,22 @@ public sealed class JamSpaceDbContext : DbContext
     
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
-    public DbSet<Team> Teams => Set<Team>();
-    public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
-    public DbSet<TeamInvite> TeamInvites => Set<TeamInvite>();
+    
+    public DbSet<UserFollow> UserFollows => Set<UserFollow>();
+    
     public DbSet<Genre> Genres => Set<Genre>();
     public DbSet<UserGenre> UserGenres => Set<UserGenre>();
     public DbSet<Skill> Skills => Set<Skill>();
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
-    public DbSet<UserFollow> UserFollows => Set<UserFollow>();
+
+    public DbSet<Message> Messages => Set<Message>();
+    public DbSet<ConversationParticipant> ConversationParticipants => Set<ConversationParticipant>();
+    public DbSet<Conversation> Conversations => Set<Conversation>();
+    
+    public DbSet<Team> Teams => Set<Team>();
+    public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
+    public DbSet<TeamInvite> TeamInvites => Set<TeamInvite>();
+    
     
     public new async Task SaveChangesAsync(CancellationToken ct) => await base.SaveChangesAsync(ct);
 

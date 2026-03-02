@@ -40,5 +40,14 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
 
         builder.Property(x => x.LastMessageId)
             .IsRequired(false);
+        
+        builder.HasMany(c => c.Participants)
+            .WithOne(cp => cp.Conversation)
+            .HasForeignKey(cp => cp.ConversationId);
+        
+        builder.HasOne(c => c.Team)
+            .WithMany()
+            .HasForeignKey(c => c.TeamId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -12,25 +12,25 @@ public class TeamMemberRepository : ITeamMemberRepository
 
     public TeamMemberRepository(JamSpaceDbContext db) => _db = db;
 
-    public Task<bool> HasRequiredRoleAsync(Guid teamId, Guid userId, FunctionalRole minimumRole, CancellationToken ct)
+    public async Task<bool> HasRequiredRoleAsync(Guid teamId, Guid userId, FunctionalRole minimumRole, CancellationToken ct)
     {
-        return _db.TeamMembers.AnyAsync(m =>
+        return await _db.TeamMembers.AnyAsync(m =>
                 m.TeamId == teamId &&
                 m.UserId == userId &&
                 m.Role >= minimumRole,
             ct);
     }
 
-    public Task<TeamMember?> GetByTeamAndUserAsync(Guid teamId, Guid userId, CancellationToken ct)
+    public async Task<TeamMember?> GetByTeamAndUserAsync(Guid teamId, Guid userId, CancellationToken ct)
     {
-        return _db.TeamMembers
+        return await _db.TeamMembers
             .Include(m => m.User)
             .FirstOrDefaultAsync(m => m.TeamId == teamId && m.UserId == userId, ct);
     }
 
-    public Task<List<TeamMember>> GetLeadersAsync(Guid teamId, CancellationToken ct)
+    public async Task<List<TeamMember>> GetLeadersAsync(Guid teamId, CancellationToken ct)
     {
-        return _db.TeamMembers
+        return await _db.TeamMembers
             .Where(m => m.TeamId == teamId && m.Role == FunctionalRole.Leader)
             .ToListAsync(ct);
     }

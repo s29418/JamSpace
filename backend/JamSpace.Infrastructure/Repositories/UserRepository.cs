@@ -20,11 +20,10 @@ public class UserRepository : IUserRepository
             .Include(u => u.UserGenres)
             .ThenInclude(ug => ug.Genre) 
             .FirstOrDefaultAsync(u => u.Id == id, ct);
-
     }
         
-    public Task<User?> GetByEmailAsync(string email, CancellationToken ct) =>
-        _db.Users.FirstOrDefaultAsync(u => u.Email == email, ct); 
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken ct) =>
+        await _db.Users.FirstOrDefaultAsync(u => u.Email == email, ct); 
 
     public async Task<Guid?> GetUserIdByUsernameAsync(string username, CancellationToken ct)
     {

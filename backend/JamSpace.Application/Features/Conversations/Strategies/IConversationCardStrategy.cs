@@ -10,5 +10,6 @@ public interface IConversationCardStrategy
 
     ConversationCardDto Map(
         Conversation conversation,
-        Guid currentUserId);
+        Guid currentUserId,
+        int unreadCount);
 }

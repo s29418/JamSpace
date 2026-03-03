@@ -32,7 +32,7 @@ public sealed class KickTeamMemberHandler : IRequestHandler<KickTeamMemberComman
         
         _repo.Remove(member);
 
-        var conversationParticipant = await _conversationParticipant.GetByUserAndTeamAsync(
+        var conversationParticipant = await _conversationParticipant.GetAsync(
             request.TeamId, request.UserId, ct);
 
         if (conversationParticipant is null)

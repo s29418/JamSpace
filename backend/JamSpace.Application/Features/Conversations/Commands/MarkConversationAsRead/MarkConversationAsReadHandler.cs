@@ -30,6 +30,7 @@ public class MarkConversationAsReadHandler : IRequestHandler<MarkConversationAsR
             throw new NotFoundException("You are not part of this conversation");
 
         participant.LastReadMessageId = conversation.LastMessageId;
+        participant.LastReadAt = conversation.LastMessageAt;
 
         await _uow.SaveChangesAsync(ct);
         return Unit.Value;

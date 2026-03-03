@@ -33,7 +33,7 @@ public sealed class EditTeamMemberMusicalRoleHandler
         member.MusicalRole = request.MusicalRole;
 
         var conversationParticipant = 
-            await _conversationParticipant.GetByUserAndTeamAsync(request.TeamId, request.UserId, ct);
+            await _conversationParticipant.GetAsync(request.TeamId, request.UserId, ct);
 
         if (conversationParticipant is null)
             throw new ForbiddenAccessException("You're not part of this conversation.");

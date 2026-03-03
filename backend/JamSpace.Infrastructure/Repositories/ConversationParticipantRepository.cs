@@ -11,7 +11,7 @@ public class ConversationParticipantRepository : IConversationParticipantReposit
     
     public ConversationParticipantRepository(JamSpaceDbContext db) => _db = db;
 
-    public async Task<ConversationParticipant?> GetByUserAndTeamAsync(Guid teamId, Guid userId, CancellationToken ct)
+    public async Task<ConversationParticipant?> GetAsync(Guid teamId, Guid userId, CancellationToken ct)
     {
         return await _db.ConversationParticipants
             .Where(cp => cp.UserId == userId)

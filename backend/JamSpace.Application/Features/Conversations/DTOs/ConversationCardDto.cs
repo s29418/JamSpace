@@ -12,5 +12,5 @@ public class ConversationCardDto
 
     public string? LastMessagePreview { get; init; }
     public DateTimeOffset? LastMessageAt { get; init; }
-    //int UnreadCount (maybe later)
+    public int UnreadCount { get; init; }
 }

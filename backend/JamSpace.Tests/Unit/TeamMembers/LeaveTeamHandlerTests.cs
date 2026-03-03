@@ -47,7 +47,7 @@ public class LeaveTeamHandlerTests
         };
 
         conversationParticipantRepo
-            .Setup(r => r.GetByUserAndTeamAsync(teamId, userId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetAsync(teamId, userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(participant);
 
         var handler = new LeaveTeamHandler(repo.Object, uow.Object, conversationParticipantRepo.Object);

@@ -3,4 +3,4 @@ using MediatR;
 
 namespace JamSpace.Application.Features.Conversations.Queries.GetMyConversations;
 
-public record GetMyConversationsQuery(Guid UserId) : IRequest<IEnumerable<ConversationCardDto>>;
+public record GetMyConversationsQuery(Guid UserId) : IRequest<IReadOnlyList<ConversationCardDto>>;

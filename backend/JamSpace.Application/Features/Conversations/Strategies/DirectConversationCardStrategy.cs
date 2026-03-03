@@ -9,7 +9,7 @@ public sealed class DirectConversationCardStrategy : IConversationCardStrategy
     public ChatType SupportedType => ChatType.Direct;
     
 
-    public ConversationCardDto Map(Conversation conversation, Guid currentUserId)
+    public ConversationCardDto Map(Conversation conversation, Guid currentUserId, int unreadCount)
     {
         var other = conversation.Participants
             .FirstOrDefault(p => p.UserId != currentUserId);
@@ -21,10 +21,11 @@ public sealed class DirectConversationCardStrategy : IConversationCardStrategy
         {
             Id = conversation.Id,
             Type = ChatType.Direct,
-            DisplayName = other.User.DisplayName,
+            DisplayName = other.User!.DisplayName,
             DisplayPictureUrl = other.User.ProfilePictureUrl,
             LastMessagePreview = conversation.LastMessagePreview,
-            LastMessageAt = conversation.LastMessageAt
+            LastMessageAt = conversation.LastMessageAt,
+            UnreadCount = unreadCount
         };
     }
 }

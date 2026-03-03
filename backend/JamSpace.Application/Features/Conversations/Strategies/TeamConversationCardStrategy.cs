@@ -8,7 +8,7 @@ public sealed class TeamConversationCardStrategy : IConversationCardStrategy
 {
     public ChatType SupportedType => ChatType.Team;
     
-    public ConversationCardDto Map(Conversation conversation, Guid currentUserId)
+    public ConversationCardDto Map(Conversation conversation, Guid currentUserId, int unreadCount)
     {
         if (conversation.Team is null)
             throw new InvalidOperationException("Team conversations must have Team loaded.");
@@ -20,7 +20,8 @@ public sealed class TeamConversationCardStrategy : IConversationCardStrategy
             DisplayName = conversation.Team.Name,
             DisplayPictureUrl = conversation.Team.TeamPictureUrl,
             LastMessagePreview = conversation.LastMessagePreview,
-            LastMessageAt = conversation.LastMessageAt
+            LastMessageAt = conversation.LastMessageAt,
+            UnreadCount = unreadCount
         };
     }
 }

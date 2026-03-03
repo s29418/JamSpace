@@ -10,4 +10,5 @@ public class ConversationParticipant
     
     public string? Role { get; set; }
     public Guid? LastReadMessageId { get; set; }
+    public DateTimeOffset? LastReadAt { get; set; }
 }

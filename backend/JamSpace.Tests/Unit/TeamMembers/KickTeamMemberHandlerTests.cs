@@ -40,7 +40,7 @@ public class KickTeamMemberHandlerTests
 
         var participant = new ConversationParticipant { ConversationId = Guid.NewGuid(), UserId = memberId };
         conversationParticipantRepo
-            .Setup(r => r.GetByUserAndTeamAsync(teamId, memberId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetAsync(teamId, memberId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(participant);
 
         var handler = new KickTeamMemberHandler(repo.Object, uow.Object, conversationParticipantRepo.Object);

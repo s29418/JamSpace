@@ -21,7 +21,15 @@ public class ConversationRepository : IConversationRepository
             .OrderByDescending(c => c.LastMessageAt)
             .ToListAsync(ct);
     }
-    
+
+    public async Task<Guid?> GetIdForDirect(string directKey, CancellationToken ct)
+    {
+        return await _db.Conversations
+            .Where(c => c.DirectKey == directKey)
+            .Select(c => c.Id)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task AddAsync(Conversation conversation, CancellationToken ct) 
         => await _db.Conversations.AddAsync(conversation, ct);
 }

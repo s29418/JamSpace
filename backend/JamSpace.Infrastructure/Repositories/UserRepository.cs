@@ -10,6 +10,11 @@ public class UserRepository : IUserRepository
     private readonly JamSpaceDbContext _db;
     public UserRepository(JamSpaceDbContext db) => _db = db;
 
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken ct)
+    {
+        return await _db.Users.AnyAsync(u => u.Id == id);
+    }
+
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
     {
         return await _db.Users

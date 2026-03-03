@@ -55,14 +55,14 @@ public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, 
             UserId = request.UserId
         }, ct);
 
-        var conversationId = await _conversation.GetIdForTeam(invite.TeamId, ct);
+        var conversation = await _conversation.GetForTeam(invite.TeamId, ct);
 
-        if (conversationId is null)
-            throw new NotFoundException($"Conversation with ID: {conversationId} not found");
+        if (conversation is null)
+            throw new NotFoundException($"Conversation with ID: {conversation} not found");
 
         var conversationParticipant = new ConversationParticipant
         {
-            ConversationId = (Guid)conversationId,
+            ConversationId = conversation.Id,
             UserId = request.UserId
         };
 

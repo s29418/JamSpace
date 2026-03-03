@@ -15,6 +15,7 @@ public class EditTeamMemberMusicalRoleHandlerTests
     public async Task Should_Edit_MusicalRole_When_RequestingUser_Is_AdminOrLeader()
     {
         var repo = new Mock<ITeamMemberRepository>();
+        var conversationParticipantRepo = new Mock<IConversationParticipantRepository>();
         var uow = new Mock<IUnitOfWork>();
 
         var teamId = Guid.NewGuid();
@@ -37,13 +38,25 @@ public class EditTeamMemberMusicalRoleHandlerTests
         repo.Setup(r => r.GetByTeamAndUserAsync(teamId, userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(member);
 
-        var handler = new EditTeamMemberMusicalRoleHandler(repo.Object, uow.Object);
+        var participant = new ConversationParticipant
+        {
+            ConversationId  = Guid.NewGuid(),
+            UserId = userId,
+            Role = "Old"
+        };
 
-        var result = await handler.Handle(new EditTeamMemberMusicalRoleCommand(
-            teamId, adminId, userId, "New"
-        ), CancellationToken.None);
+        conversationParticipantRepo
+            .Setup(r => r.GetByUserAndTeamAsync(teamId, userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(participant);
+
+        var handler = new EditTeamMemberMusicalRoleHandler(repo.Object, uow.Object, conversationParticipantRepo.Object);
+
+        var result = await handler.Handle(
+            new EditTeamMemberMusicalRoleCommand(teamId, adminId, userId, "New"),
+            CancellationToken.None);
 
         member.MusicalRole.Should().Be("New");
+        participant.Role.Should().Be("New");
         uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         result.MusicalRole.Should().Be("New");
     }
@@ -52,12 +65,13 @@ public class EditTeamMemberMusicalRoleHandlerTests
     public async Task Should_Throw_Forbidden_When_RequestingUser_Is_Not_AdminOrLeader()
     {
         var repo = new Mock<ITeamMemberRepository>();
+        var conversationParticipantRepo = new Mock<IConversationParticipantRepository>();
         var uow = new Mock<IUnitOfWork>();
 
         repo.Setup(r => r.HasRequiredRoleAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Admin, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        var handler = new EditTeamMemberMusicalRoleHandler(repo.Object, uow.Object);
+        var handler = new EditTeamMemberMusicalRoleHandler(repo.Object, uow.Object, conversationParticipantRepo.Object);
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() =>
             handler.Handle(new EditTeamMemberMusicalRoleCommand(

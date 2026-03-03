@@ -16,12 +16,20 @@ public class AcceptTeamInviteHandlerTests
     {
         var inviteRepo = new Mock<ITeamInviteRepository>();
         var memberRepo = new Mock<ITeamMemberRepository>();
+        var conversationRepo = new Mock<IConversationRepository>();
+        var conversationParticipantRepo = new Mock<IConversationParticipantRepository>();
         var uow = new Mock<IUnitOfWork>();
 
         inviteRepo.Setup(r => r.GetByIdWithDetailsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new TeamInvite { InvitedUserId = Guid.NewGuid(), Status = InviteStatus.Pending });
 
-        var handler = new AcceptTeamInviteHandler(inviteRepo.Object, memberRepo.Object, uow.Object);
+        var handler = new AcceptTeamInviteHandler(
+            inviteRepo.Object,
+            memberRepo.Object,
+            uow.Object,
+            conversationParticipantRepo.Object,
+            conversationRepo.Object);
+
         var command = new AcceptTeamInviteCommand(Guid.NewGuid(), Guid.NewGuid());
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() => handler.Handle(command, CancellationToken.None));
@@ -33,9 +41,12 @@ public class AcceptTeamInviteHandlerTests
         var inviteId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var teamId = Guid.NewGuid();
+        var conversationId = Guid.NewGuid();
 
         var inviteRepo = new Mock<ITeamInviteRepository>();
         var memberRepo = new Mock<ITeamMemberRepository>();
+        var conversationRepo = new Mock<IConversationRepository>();
+        var conversationParticipantRepo = new Mock<IConversationParticipantRepository>();
         var uow = new Mock<IUnitOfWork>();
 
         inviteRepo.Setup(r => r.GetByIdWithDetailsAsync(inviteId, It.IsAny<CancellationToken>()))
@@ -50,23 +61,42 @@ public class AcceptTeamInviteHandlerTests
                 InvitedUser = new User { Id = userId, UserName = "Invitee", DisplayName = "Invitee" }
             });
 
-        // user jeszcze nie jest w teamie
         memberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Member, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        // handler ustawia status + dodaje TeamMember (repo AddAsync) i zapisuje przez UoW
         memberRepo.Setup(r => r.AddAsync(It.IsAny<TeamMember>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var conversation = new Conversation { Id = conversationId, TeamId = teamId, Type = ChatType.Team};
+        conversationRepo.Setup(r => r.GetForTeam(teamId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(conversation);
+
+        conversationParticipantRepo
+            .Setup(r => r.AddAsync(It.IsAny<ConversationParticipant>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         uow.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        var handler = new AcceptTeamInviteHandler(inviteRepo.Object, memberRepo.Object, uow.Object);
+        var handler = new AcceptTeamInviteHandler(
+            inviteRepo.Object,
+            memberRepo.Object,
+            uow.Object,
+            conversationParticipantRepo.Object,
+            conversationRepo.Object);
 
         var result = await handler.Handle(new AcceptTeamInviteCommand(inviteId, userId), CancellationToken.None);
 
         result.Status.Should().Be(InviteStatus.Accepted.ToString());
-        memberRepo.Verify(r => r.AddAsync(It.IsAny<TeamMember>(), It.IsAny<CancellationToken>()), Times.Once);
+
+        memberRepo.Verify(r => r.AddAsync(
+            It.Is<TeamMember>(tm => tm.TeamId == teamId && tm.UserId == userId),
+            It.IsAny<CancellationToken>()), Times.Once);
+
+        conversationParticipantRepo.Verify(r => r.AddAsync(
+            It.Is<ConversationParticipant>(cp => cp.ConversationId == conversationId && cp.UserId == userId),
+            It.IsAny<CancellationToken>()), Times.Once);
+
         uow.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -40,10 +40,11 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
 
         builder.Property(x => x.LastMessageId)
             .IsRequired(false);
-        
+
         builder.HasMany(c => c.Participants)
             .WithOne(cp => cp.Conversation)
-            .HasForeignKey(cp => cp.ConversationId);
+            .HasForeignKey(cp => cp.ConversationId)
+            .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasOne(c => c.Team)
             .WithMany()

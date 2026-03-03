@@ -37,14 +37,14 @@ public class ConversationRepository : IConversationRepository
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<Guid?> GetIdForTeam(Guid teamId, CancellationToken ct)
+    public async Task<Conversation?> GetForTeam(Guid teamId, CancellationToken ct)
     {
         return await _db.Conversations
-            .Where(c => c.TeamId == teamId)
-            .Select(c => c.Id)
-            .FirstOrDefaultAsync(ct);
+            .FirstOrDefaultAsync(c => c.TeamId == teamId, ct);
     }
 
     public async Task AddAsync(Conversation conversation, CancellationToken ct) 
         => await _db.Conversations.AddAsync(conversation, ct);
+
+    public void Remove(Conversation conversation) => _db.Remove(conversation);
 }

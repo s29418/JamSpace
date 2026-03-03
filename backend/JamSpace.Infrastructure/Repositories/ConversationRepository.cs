@@ -11,6 +11,13 @@ public class ConversationRepository : IConversationRepository
     
     public ConversationRepository(JamSpaceDbContext db) => _db = db;
 
+    public async Task<Conversation?> GetByIdAsync(Guid conversationId, CancellationToken ct)
+    {
+        return await _db.Conversations
+            .Include(c => c.Participants)
+            .FirstOrDefaultAsync(c => c.Id == conversationId, ct);
+    }
+
     public async Task<IReadOnlyList<Conversation>> GetForUserAsync(Guid userId, CancellationToken ct)
     {
         return await _db.Conversations

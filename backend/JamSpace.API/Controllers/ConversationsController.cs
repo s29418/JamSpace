@@ -1,5 +1,6 @@
 ﻿using JamSpace.API.Extensions;
 using JamSpace.Application.Features.Conversations.Commands.GetOrCreateDirectConversation;
+using JamSpace.Application.Features.Conversations.Commands.MarkConversationAsRead;
 using JamSpace.Application.Features.Conversations.DTOs;
 using JamSpace.Application.Features.Conversations.Queries.GetMyConversations;
 using MediatR;
@@ -33,5 +34,14 @@ public class ConversationsController : ControllerBase
         var requestingUserId = User.GetUserId();
         var result = await _mediator.Send(new GetOrCreateDirectConversationCommand(requestingUserId, otherUserId), ct);
         return Ok(new { conversationId = result});
+    }
+
+    [HttpPost("{id}/read")]
+    [Authorize]
+    public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        await _mediator.Send(new MarkConversationAsReadCommand(userId, id), ct);
+        return NoContent();
     }
 }

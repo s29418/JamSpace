@@ -13,16 +13,20 @@ public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, 
 {
     private readonly ITeamInviteRepository _teamInviteRepository;
     private readonly ITeamMemberRepository _teamMemberRepository;
+    private readonly IConversationRepository _conversation;
+    private readonly IConversationParticipantRepository _conversationParticipant;
     private readonly IUnitOfWork _uow;
 
     public AcceptTeamInviteHandler(
         ITeamInviteRepository teamInviteRepository,
         ITeamMemberRepository teamMemberRepository,
-        IUnitOfWork uow)
+        IUnitOfWork uow, IConversationParticipantRepository conversationParticipant, IConversationRepository conversation)
     {
         _teamInviteRepository = teamInviteRepository;
         _teamMemberRepository = teamMemberRepository;
         _uow = uow;
+        _conversationParticipant = conversationParticipant;
+        _conversation = conversation;
     }
 
     public async Task<TeamInviteDto> Handle(AcceptTeamInviteCommand request, CancellationToken ct)
@@ -50,6 +54,19 @@ public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, 
             TeamId = invite.TeamId,
             UserId = request.UserId
         }, ct);
+
+        var conversationId = await _conversation.GetIdForTeam(invite.TeamId, ct);
+
+        if (conversationId is null)
+            throw new NotFoundException($"Conversation with ID: {conversationId} not found");
+
+        var conversationParticipant = new ConversationParticipant
+        {
+            ConversationId = (Guid)conversationId,
+            UserId = request.UserId
+        };
+
+        await _conversationParticipant.AddAsync(conversationParticipant, ct);
 
         await _uow.SaveChangesAsync(ct);
 

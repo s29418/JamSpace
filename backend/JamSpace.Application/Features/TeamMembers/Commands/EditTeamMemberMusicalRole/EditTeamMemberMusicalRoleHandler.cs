@@ -12,11 +12,14 @@ public sealed class EditTeamMemberMusicalRoleHandler
 {
     private readonly ITeamMemberRepository _repo;
     private readonly IUnitOfWork _uow;
+    private readonly IConversationParticipantRepository _conversationParticipant;
 
-    public EditTeamMemberMusicalRoleHandler(ITeamMemberRepository repo, IUnitOfWork uow)
+    public EditTeamMemberMusicalRoleHandler(ITeamMemberRepository repo, IUnitOfWork uow,
+        IConversationParticipantRepository conversationParticipant)
     {
         _repo = repo;
         _uow = uow;
+        _conversationParticipant = conversationParticipant;
     }
 
     public async Task<TeamMemberDto> Handle(EditTeamMemberMusicalRoleCommand request, CancellationToken ct)
@@ -28,6 +31,14 @@ public sealed class EditTeamMemberMusicalRoleHandler
                      ?? throw new NotFoundException("Team member not found.");
 
         member.MusicalRole = request.MusicalRole;
+
+        var conversationParticipant = 
+            await _conversationParticipant.GetByUserAndTeamAsync(request.TeamId, request.UserId, ct);
+
+        if (conversationParticipant is null)
+            throw new ForbiddenAccessException("You're not part of this conversation.");
+        
+        conversationParticipant.Role = request.MusicalRole;
 
         await _uow.SaveChangesAsync(ct);
 

@@ -10,11 +10,13 @@ public sealed class LeaveTeamHandler : IRequestHandler<LeaveTeamCommand, Unit>
 {
     private readonly ITeamMemberRepository _repo;
     private readonly IUnitOfWork _uow;
+    private readonly IConversationParticipantRepository _conversationParticipant;
 
-    public LeaveTeamHandler(ITeamMemberRepository repo, IUnitOfWork uow)
+    public LeaveTeamHandler(ITeamMemberRepository repo, IUnitOfWork uow, IConversationParticipantRepository conversationParticipant)
     {
         _repo = repo;
         _uow = uow;
+        _conversationParticipant = conversationParticipant;
     }
 
     public async Task<Unit> Handle(LeaveTeamCommand request, CancellationToken ct)
@@ -28,6 +30,15 @@ public sealed class LeaveTeamHandler : IRequestHandler<LeaveTeamCommand, Unit>
                      ?? throw new NotFoundException("Team member not found.");
 
         _repo.Remove(member);
+        
+        var conversationParticipant = await _conversationParticipant.GetByUserAndTeamAsync(
+            request.TeamId, request.UserId, ct);
+
+        if (conversationParticipant is null)
+            throw new NotFoundException("Conversation Participant not found.");
+        
+        _conversationParticipant.Remove(conversationParticipant);
+        
         await _uow.SaveChangesAsync(ct);
 
         return Unit.Value;

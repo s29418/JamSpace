@@ -13,13 +13,18 @@ public sealed class CreateTeamHandler : IRequestHandler<CreateTeamWithUserComman
 {
     private readonly ITeamRepository _teams;
     private readonly ITeamMemberRepository _members;
+    private readonly IConversationRepository _conversation;
+    private readonly IConversationParticipantRepository _conversationParticipant;
     private readonly IUnitOfWork _uow;
 
-    public CreateTeamHandler(ITeamRepository teams, ITeamMemberRepository members, IUnitOfWork uow)
+    public CreateTeamHandler(ITeamRepository teams, ITeamMemberRepository members, IUnitOfWork uow, 
+        IConversationParticipantRepository conversationParticipant, IConversationRepository conversation)
     {
         _teams = teams;
         _members = members;
         _uow = uow;
+        _conversationParticipant = conversationParticipant;
+        _conversation = conversation;
     }
 
     public async Task<TeamDto> Handle(CreateTeamWithUserCommand request, CancellationToken ct)
@@ -32,7 +37,6 @@ public sealed class CreateTeamHandler : IRequestHandler<CreateTeamWithUserComman
             CreatedById = request.CreatorUserId,
             CreatedAt = DateTime.UtcNow
         };
-
         await _teams.AddAsync(team, ct);
 
         var leader = new TeamMember
@@ -41,8 +45,22 @@ public sealed class CreateTeamHandler : IRequestHandler<CreateTeamWithUserComman
             UserId = request.CreatorUserId,
             Role = FunctionalRole.Leader
         };
-
         await _members.AddAsync(leader, ct);
+        
+        var conversation = new Conversation
+        {
+            Id = Guid.NewGuid(),
+            Type = ChatType.Team,
+            TeamId = team.Id
+        };
+        await _conversation.AddAsync(conversation, ct);
+
+        var conversationParticipant = new ConversationParticipant
+        {
+            ConversationId = conversation.Id,
+            UserId = request.CreatorUserId,
+        };
+        await _conversationParticipant.AddAsync(conversationParticipant, ct);
 
         await _uow.SaveChangesAsync(ct);
         

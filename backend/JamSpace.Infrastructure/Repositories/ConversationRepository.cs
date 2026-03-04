@@ -29,7 +29,7 @@ public class ConversationRepository : IConversationRepository
             .ToListAsync(ct);
     }
 
-    public async Task<Guid?> GetIdForDirect(string directKey, CancellationToken ct)
+    public async Task<Guid?> GetIdForDirectAsync(string directKey, CancellationToken ct)
     {
         return await _db.Conversations
             .Where(c => c.DirectKey == directKey)
@@ -37,7 +37,7 @@ public class ConversationRepository : IConversationRepository
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<Conversation?> GetForTeam(Guid teamId, CancellationToken ct)
+    public async Task<Conversation?> GetForTeamAsync(Guid teamId, CancellationToken ct)
     {
         return await _db.Conversations
             .FirstOrDefaultAsync(c => c.TeamId == teamId, ct);

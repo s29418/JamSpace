@@ -32,7 +32,7 @@ public class GetOrCreateDirectConversationHandler : IRequestHandler<GetOrCreateD
         
         var directKey = DirectKeyBuilder.Build(request.RequestingUserId, request.OtherUserId);
         
-        var existingId = await _conversation.GetIdForDirect(directKey, ct);
+        var existingId = await _conversation.GetIdForDirectAsync(directKey, ct);
 
         if (existingId is not null)
             return existingId.Value;
@@ -68,7 +68,7 @@ public class GetOrCreateDirectConversationHandler : IRequestHandler<GetOrCreateD
         }
         catch (UniqueConstraintViolationException)
         {
-            var idAfterRace = await _conversation.GetIdForDirect(directKey, ct);
+            var idAfterRace = await _conversation.GetIdForDirectAsync(directKey, ct);
             if (idAfterRace is null)
                 throw;
 

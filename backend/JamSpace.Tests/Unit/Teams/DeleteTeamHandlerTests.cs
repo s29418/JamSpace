@@ -32,7 +32,7 @@ public class DeleteTeamHandlerTests
 
         var conversation = new Conversation { Id = Guid.NewGuid(), Type = ChatType.Team, TeamId = teamId };
         conversationRepo
-            .Setup(r => r.GetForTeam(teamId, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetForTeamAsync(teamId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(conversation);
 
         var handler = new DeleteTeamHandler(teamRepo.Object, teamMemberRepo.Object, uow.Object, conversationRepo.Object);

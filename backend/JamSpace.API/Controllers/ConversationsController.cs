@@ -1,7 +1,9 @@
 ﻿using JamSpace.API.Extensions;
+using JamSpace.Application.Common.Models;
 using JamSpace.Application.Features.Conversations.Commands.GetOrCreateDirectConversation;
 using JamSpace.Application.Features.Conversations.Commands.MarkConversationAsRead;
 using JamSpace.Application.Features.Conversations.DTOs;
+using JamSpace.Application.Features.Conversations.Queries.GetConversationMessages;
 using JamSpace.Application.Features.Conversations.Queries.GetMyConversations;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -26,6 +28,16 @@ public class ConversationsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id:guid}")]
+    [Authorize]
+    public async Task<ActionResult<CursorResult<MessageDto>>> GetConversationMessages(Guid id,
+        [FromQuery] DateTimeOffset? before, [FromQuery] int take = 50, CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(new GetConversationMessagesQuery(id, userId, before, take), ct);
+        return Ok(result);
+    }
+
     [HttpPost("/direct")]
     [Authorize]
     public async Task<ActionResult<Guid>> GetOrCreateDirectConversation([FromBody] Guid otherUserId,
@@ -36,7 +48,7 @@ public class ConversationsController : ControllerBase
         return Ok(new { conversationId = result});
     }
 
-    [HttpPost("{id}/read")]
+    [HttpPost("{id:guid}/read")]
     [Authorize]
     public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken ct)
     {

@@ -55,7 +55,7 @@ public class AcceptTeamInviteHandler : IRequestHandler<AcceptTeamInviteCommand, 
             UserId = request.UserId
         }, ct);
 
-        var conversation = await _conversation.GetForTeam(invite.TeamId, ct);
+        var conversation = await _conversation.GetForTeamAsync(invite.TeamId, ct);
 
         if (conversation is null)
             throw new NotFoundException($"Conversation with ID: {conversation} not found");

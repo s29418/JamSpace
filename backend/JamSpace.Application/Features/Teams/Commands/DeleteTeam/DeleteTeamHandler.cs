@@ -32,7 +32,7 @@ public class DeleteTeamHandler : IRequestHandler<DeleteTeamCommand, Unit>
 
         _teams.Remove(team);
 
-        var conversation = await _conversation.GetForTeam(request.TeamId, ct);
+        var conversation = await _conversation.GetForTeamAsync(request.TeamId, ct);
         if (conversation is null)
             throw new NotFoundException($"Conversation for team with ID: {request.TeamId} was not found.");
         

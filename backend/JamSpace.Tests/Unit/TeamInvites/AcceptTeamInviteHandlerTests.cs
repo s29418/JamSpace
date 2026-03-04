@@ -68,7 +68,7 @@ public class AcceptTeamInviteHandlerTests
             .Returns(Task.CompletedTask);
 
         var conversation = new Conversation { Id = conversationId, TeamId = teamId, Type = ChatType.Team};
-        conversationRepo.Setup(r => r.GetForTeam(teamId, It.IsAny<CancellationToken>()))
+        conversationRepo.Setup(r => r.GetForTeamAsync(teamId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(conversation);
 
         conversationParticipantRepo

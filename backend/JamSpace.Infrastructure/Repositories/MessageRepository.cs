@@ -42,6 +42,7 @@ public class MessageRepository : IMessageRepository
         return await query
             .OrderByDescending(m => m.CreatedAt)
             .Take(take)
+            .Include(m => m.SenderUser)
             .ToListAsync(ct);
     }
 

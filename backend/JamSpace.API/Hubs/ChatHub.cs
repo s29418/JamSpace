@@ -2,6 +2,8 @@
 using JamSpace.API.Hubs.Contracts;
 using JamSpace.Application.Features.Conversations.Commands.SendMessage;
 using JamSpace.Application.Features.Conversations.Queries.GetConversationAccess;
+using JamSpace.Application.Features.Conversations.Queries.GetConversationParticipantUserIds;
+using JamSpace.Application.Features.Conversations.Queries.GetConversationUpdateForUser;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -18,12 +20,11 @@ public sealed class ChatHub : Hub
         _mediator = mediator;
     }
 
-    public override Task OnConnectedAsync()
+    public override async Task OnConnectedAsync()
     {
         var userId = Context.User!.GetUserId();
-        Console.WriteLine($"[SignalR] Connected userId={userId}");
-
-        return base.OnConnectedAsync();
+        await Groups.AddToGroupAsync(Context.ConnectionId, UserGroup(userId));
+        await base.OnConnectedAsync();
     }
     
     public Task<string> Ping()
@@ -77,17 +78,33 @@ public sealed class ChatHub : Hub
 
     public async Task SendMessage(SendMessageRequest request)
     {
-        var userId = Context.User!.GetUserId();
-
+        var senderUserId = Context.User!.GetUserId();
         var ct = Context.ConnectionAborted;
         
-        var dto = await _mediator.Send(
-            new SendMessageCommand(ConversationId: request.ConversationId, SenderUserId: userId,
-                Content: request.Content, ReplyToMessageId: request.ReplyToMessageId), ct);
+        var messageDto = await _mediator.Send(new SendMessageCommand(
+            ConversationId: request.ConversationId,
+            SenderUserId: senderUserId,
+            Content: request.Content,
+            ReplyToMessageId: request.ReplyToMessageId
+        ), ct);
 
-        await Clients.Group(ConversationGroup(request.ConversationId)).SendAsync("message:new", dto, ct);
+        await Clients.Group(ConversationGroup(request.ConversationId)).SendAsync("message:new", messageDto, ct);
+
+        var userIds = await _mediator
+            .Send(new GetConversationParticipantUserIdsQuery(request.ConversationId), ct);
+
+        var tasks = userIds.Select(async userId =>
+        {
+            var updateDto =
+                await _mediator.Send(new GetConversationUpdateForUserQuery(request.ConversationId, userId), ct);
+
+            await Clients.Group(UserGroup(userId)).SendAsync("conversation:updated", updateDto, ct);
+        });
+
+        await Task.WhenAll(tasks);
     }
     
-    private static string ConversationGroup(Guid conversationId)
-        => $"conversation:{conversationId}";
+    private static string ConversationGroup(Guid conversationId) => $"conversation:{conversationId}";
+    
+    private static string UserGroup(Guid userId) => $"user:{userId}";
 }

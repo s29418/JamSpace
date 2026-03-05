@@ -26,6 +26,23 @@ public class ConversationParticipantRepository : IConversationParticipantReposit
             .FirstOrDefaultAsync(ct);
     }
 
+    public async Task<IReadOnlyList<Guid>> GetUserIdsAsync(Guid conversationId, CancellationToken ct)
+    {
+        return await _db.ConversationParticipants
+            .Where(cp => cp.ConversationId == conversationId)
+            .Select(cp => cp.UserId)
+            .ToListAsync(ct);
+    }
+
+    public async Task<DateTimeOffset?> GetLastReadAt(Guid conversationId, Guid userId, CancellationToken ct)
+    {
+        return await _db.ConversationParticipants
+            .Where(cp => cp.ConversationId == conversationId)
+            .Where(cp => cp.UserId == userId)
+            .Select(cp => cp.LastReadAt)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task AddAsync(ConversationParticipant conversationParticipant, CancellationToken ct) 
         =>  await _db.ConversationParticipants.AddAsync(conversationParticipant, ct);
 

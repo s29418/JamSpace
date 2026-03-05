@@ -46,5 +46,17 @@ public class MessageRepository : IMessageRepository
             .ToListAsync(ct);
     }
 
+    public async Task<int> CountUnreadAsync(Guid conversationId, Guid userId, DateTimeOffset? lastReadAt, CancellationToken ct)
+    {
+        var query = _db.Messages
+            .Where(m => m.ConversationId == conversationId)
+            .Where(m => m.SenderUserId != userId);
+
+        if (lastReadAt is not null)
+            query = query.Where(m => m.CreatedAt > lastReadAt.Value);
+
+        return await query.CountAsync(ct);
+    }
+
     public async Task AddAsync(Message message, CancellationToken ct) => await _db.Messages.AddAsync(message, ct);
 }

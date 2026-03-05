@@ -3,6 +3,7 @@ using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.Conversations.DTOs;
+using JamSpace.Application.Features.Conversations.Helpers;
 using JamSpace.Domain.Entities;
 using MediatR;
 
@@ -53,7 +54,7 @@ public class SendMessageHandler : IRequestHandler<SendMessageCommand, MessageDto
 
         conversation.LastMessageId = message.Id;
         conversation.LastMessageAt = message.CreatedAt;
-        conversation.LastMessagePreview = BuildPreview(message.Content);
+        conversation.LastMessagePreview = MessagePreviewBuilder.Build(message.Content);
 
         await _uow.SaveChangesAsync(ct);
 
@@ -67,7 +68,4 @@ public class SendMessageHandler : IRequestHandler<SendMessageCommand, MessageDto
             ReplyToMessageId = message.ReplyToMessageId
         };
     }
-    
-    private static string BuildPreview(string content)
-        => content.Length <= 120 ? content : content[..120];
 }

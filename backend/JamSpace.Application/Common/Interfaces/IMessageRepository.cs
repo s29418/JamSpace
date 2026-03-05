@@ -8,5 +8,6 @@ public interface IMessageRepository
         CancellationToken ct);
     Task<IReadOnlyList<Message>> GetMessagesAsync(Guid conversationId, DateTimeOffset? before, 
         int take, CancellationToken ct);
+    Task<int> CountUnreadAsync(Guid conversationId, Guid userId, DateTimeOffset? lastReadAt, CancellationToken ct);
     Task AddAsync(Message message, CancellationToken ct);
 }

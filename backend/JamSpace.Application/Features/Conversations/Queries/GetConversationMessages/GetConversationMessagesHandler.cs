@@ -39,7 +39,7 @@ public class GetConversationMessagesHandler : IRequestHandler<GetConversationMes
         var pageMessages = hasMore ? messages.Take(take).ToList() : messages.ToList();
         pageMessages.Reverse();
         
-        var nextBefore = messages.First().CreatedAt;
+        var nextBefore = pageMessages.First().CreatedAt;
 
         var dtoItems = pageMessages.Select(m => new MessageDto
         {

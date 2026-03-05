@@ -33,7 +33,7 @@ public class ConversationRepository : IConversationRepository
     {
         return await _db.Conversations
             .Where(c => c.DirectKey == directKey)
-            .Select(c => c.Id)
+            .Select(c => (Guid?)c.Id)
             .FirstOrDefaultAsync(ct);
     }
 

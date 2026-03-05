@@ -21,12 +21,13 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
             .IsRequired();
 
         builder.Property(m => m.CreatedAt)
-            .IsRequired();
+            .IsRequired()
+            .HasDefaultValueSql("SYSUTCDATETIME()");
 
         builder.HasOne<Message>()
             .WithMany()
             .HasForeignKey(m => m.ReplyToMessageId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.HasOne(m => m.Conversation)
             .WithMany()
@@ -37,7 +38,6 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.HasOne(m => m.SenderUser)
             .WithMany()
             .HasForeignKey(m => m.SenderUserId)
-            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -27,7 +27,6 @@ public class ConversationParticipantConfiguration : IEntityTypeConfiguration<Con
         builder.HasOne(cp => cp.User)
             .WithMany()
             .HasForeignKey(cp => cp.UserId)
-            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(cp => cp.Conversation)

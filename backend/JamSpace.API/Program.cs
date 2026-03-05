@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using JamSpace.API.Hubs;
 using JamSpace.API.Middleware;
 using JamSpace.Application;
 using JamSpace.Application.Common.Interfaces;
@@ -62,11 +63,28 @@ builder.Services
                 var user = await userRepo.GetByIdAsync(userId, ctx.HttpContext.RequestAborted);
                 if (user == null || user.TokenVersion != ver)
                     ctx.Fail("Token version revoked.");
+            },
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs/chat"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
             }
         };
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddSignalR(o =>
+{
+    o.EnableDetailedErrors = true;
+});
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
     {
@@ -118,10 +136,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
-
-namespace JamSpace.API
-{
-    public partial class Program { }
-}

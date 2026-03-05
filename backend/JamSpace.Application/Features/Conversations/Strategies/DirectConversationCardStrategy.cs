@@ -11,11 +11,11 @@ public sealed class DirectConversationCardStrategy : IConversationCardStrategy
 
     public ConversationCardDto Map(Conversation conversation, Guid currentUserId, int unreadCount)
     {
-        var other = conversation.Participants
-            .FirstOrDefault(p => p.UserId != currentUserId);
-
-        if (other is null)
+        if (conversation.Participants.Count != 2)
             throw new InvalidOperationException("Direct conversation must have exactly two participants.");
+        
+        var other = conversation.Participants
+            .FirstOrDefault(p => p.UserId != currentUserId)!;
 
         return new ConversationCardDto
         {

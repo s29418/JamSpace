@@ -35,7 +35,7 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
             .IsRequired(false);
 
         builder.Property(x => x.LastMessagePreview)
-            .HasMaxLength(250)
+            .HasMaxLength(120)
             .IsRequired(false);
 
         builder.Property(x => x.LastMessageId)

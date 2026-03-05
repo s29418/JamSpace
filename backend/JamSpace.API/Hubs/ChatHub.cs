@@ -1,4 +1,6 @@
 ﻿using JamSpace.API.Extensions;
+using JamSpace.API.Hubs.Contracts;
+using JamSpace.Application.Features.Conversations.Commands.SendMessage;
 using JamSpace.Application.Features.Conversations.Queries.GetConversationAccess;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +20,6 @@ public sealed class ChatHub : Hub
 
     public override Task OnConnectedAsync()
     {
-
         var userId = Context.User!.GetUserId();
         Console.WriteLine($"[SignalR] Connected userId={userId}");
 
@@ -59,9 +60,6 @@ public sealed class ChatHub : Hub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConversationGroup(conversationId));
     }
-
-    private static string ConversationGroup(Guid conversationId)
-        => $"conversation:{conversationId}";
     
     public async Task PingConversation(Guid conversationId, string text)
     {
@@ -76,4 +74,20 @@ public sealed class ChatHub : Hub
                 at = DateTimeOffset.UtcNow
             });
     }
+
+    public async Task SendMessage(SendMessageRequest request)
+    {
+        var userId = Context.User!.GetUserId();
+
+        var ct = Context.ConnectionAborted;
+        
+        var dto = await _mediator.Send(
+            new SendMessageCommand(ConversationId: request.ConversationId, SenderUserId: userId,
+                Content: request.Content, ReplyToMessageId: request.ReplyToMessageId), ct);
+
+        await Clients.Group(ConversationGroup(request.ConversationId)).SendAsync("message:new", dto, ct);
+    }
+    
+    private static string ConversationGroup(Guid conversationId)
+        => $"conversation:{conversationId}";
 }

@@ -5,7 +5,7 @@ public class Message
     public required Guid Id { get; set; }
     
     public required Guid ConversationId { get; set; }
-    public required Conversation Conversation { get; set; }
+    public Conversation? Conversation { get; set; }
     
     public Guid SenderUserId { get; set; }
     public User? SenderUser { get; set; }

@@ -44,6 +44,7 @@ public class GetConversationMessagesHandler : IRequestHandler<GetConversationMes
         var dtoItems = pageMessages.Select(m => new MessageDto
         {
             Id = m.Id,
+            ConversationId = request.ConversationId,
             SenderUserId = m.SenderUserId,
             SenderUsername = m.SenderUser.DisplayName,
             SenderPictureUrl = m.SenderUser.ProfilePictureUrl,

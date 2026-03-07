@@ -23,8 +23,6 @@ export class ApiError extends Error {
 export const isApiError = (e: unknown): e is ApiError =>
     e instanceof Error && (e as any).name === 'ApiError';
 
-const API_URL = (import.meta as any)?.env?.VITE_API_URL ?? 'http://localhost:5072/api';
-
 
 export const api = axios.create({
     baseURL: '/api',

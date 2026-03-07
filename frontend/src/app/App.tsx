@@ -8,6 +8,7 @@ import SearchPage from "../pages/Search/SearchPage";
 import TeamDetailsPage from "../pages/TeamDetails/TeamDetailsPage";
 import AuthEventsBridge from "./AuthEventsBridge";
 import FollowsListPage from "../pages/Profile/FollowsListPage/FollowsListPage";
+import ChatPage from "../pages/Chat/ChatPage";
 import AppBootstrap from "./AppBootstrap";
 
 function App() {
@@ -27,8 +28,10 @@ function App() {
 
                 <Route path="/teams" element={<TeamsPage />} />
                     <Route path="/teams/:id" element={<TeamDetailsPage />} />
+
                 <Route path="/search" element={<SearchPage />} />
-                {/*<Route path="/search" element={< />} />*/}
+
+                <Route path="/chat" element={<ChatPage />} />
                 {/*<Route path="/notifications" element={< />} />*/}
             </Routes>
         </Router>

@@ -1,5 +1,6 @@
 ﻿using JamSpace.API.Extensions;
 using JamSpace.API.Hubs.Contracts;
+using JamSpace.Application.Features.Conversations.Commands.MarkConversationAsRead;
 using JamSpace.Application.Features.Conversations.Commands.SendMessage;
 using JamSpace.Application.Features.Conversations.Queries.GetConversationAccess;
 using JamSpace.Application.Features.Conversations.Queries.GetConversationParticipantUserIds;
@@ -26,13 +27,13 @@ public sealed class ChatHub : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, UserGroup(userId));
         await base.OnConnectedAsync();
     }
-    
+
     public Task<string> Ping()
     {
         var userId = Context.User!.GetUserId();
         return Task.FromResult($"pong userId={userId}");
     }
-    
+
     public async Task JoinConversation(Guid conversationId)
     {
         try
@@ -61,7 +62,7 @@ public sealed class ChatHub : Hub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConversationGroup(conversationId));
     }
-    
+
     public async Task PingConversation(Guid conversationId, string text)
     {
         var userId = Context.User!.GetUserId();
@@ -80,7 +81,7 @@ public sealed class ChatHub : Hub
     {
         var senderUserId = Context.User!.GetUserId();
         var ct = Context.ConnectionAborted;
-        
+
         var messageDto = await _mediator.Send(new SendMessageCommand(
             ConversationId: request.ConversationId,
             SenderUserId: senderUserId,
@@ -102,6 +103,22 @@ public sealed class ChatHub : Hub
         });
 
         await Task.WhenAll(tasks);
+    }
+
+    public async Task MarkRead(MarkReadRequest request)
+    {
+        var userId = Context.User!.GetUserId();
+        var ct = Context.ConnectionAborted;
+
+        var readDto =
+            await _mediator.Send(
+                new MarkConversationAsReadCommand(request.ConversationId, userId, request.LastReadMessageId), ct);
+
+        var updateDto = await _mediator.Send(new GetConversationUpdateForUserQuery(request.ConversationId, userId), ct);
+
+        await Clients.Group(UserGroup(userId)).SendAsync("conversation:updated", updateDto, ct);
+
+        await Clients.Group(ConversationGroup(request.ConversationId)).SendAsync("conversation:read", readDto, ct);
     }
     
     private static string ConversationGroup(Guid conversationId) => $"conversation:{conversationId}";

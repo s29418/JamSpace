@@ -11,6 +11,9 @@ public class MessageRepository : IMessageRepository
 
     public MessageRepository(JamSpaceDbContext db) => _db = db;
 
+    public async Task<Message?> GetByIdAsync(Guid id, CancellationToken ct) => await _db.Messages
+        .FirstOrDefaultAsync(m => m.Id == id, ct);
+
     public async Task<Dictionary<Guid, int>> GetUnreadCountsAsync(Guid userId, IReadOnlyList<Guid> conversationIds, CancellationToken ct)
     {
         if (conversationIds.Count == 0)

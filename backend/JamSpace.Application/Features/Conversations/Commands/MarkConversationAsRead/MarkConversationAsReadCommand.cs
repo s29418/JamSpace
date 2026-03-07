@@ -1,5 +1,7 @@
-﻿using MediatR;
+﻿using JamSpace.Application.Features.Conversations.DTOs;
+using MediatR;
 
 namespace JamSpace.Application.Features.Conversations.Commands.MarkConversationAsRead;
 
-public record MarkConversationAsReadCommand(Guid RequestingUserId, Guid ConversationId) : IRequest<Unit>;
+public sealed record MarkConversationAsReadCommand(Guid ConversationId, Guid RequestingUserId, Guid? LastReadMessageId) 
+    : IRequest<ConversationReadDto>;

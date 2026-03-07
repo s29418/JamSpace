@@ -55,7 +55,7 @@ public class ConversationsController : ControllerBase
     public async Task<IActionResult> MarkAsRead(Guid id, CancellationToken ct)
     {
         var userId = User.GetUserId();
-        await _mediator.Send(new MarkConversationAsReadCommand(userId, id), ct);
+        await _mediator.Send(new MarkConversationAsReadCommand(id, userId, null), ct);
         return NoContent();
     }
 }

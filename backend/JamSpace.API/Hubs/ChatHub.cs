@@ -28,12 +28,6 @@ public sealed class ChatHub : Hub
         await base.OnConnectedAsync();
     }
 
-    public Task<string> Ping()
-    {
-        var userId = Context.User!.GetUserId();
-        return Task.FromResult($"pong userId={userId}");
-    }
-
     public async Task JoinConversation(Guid conversationId)
     {
         try
@@ -51,9 +45,8 @@ public sealed class ChatHub : Hub
         {
             throw;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Console.WriteLine($"[SignalR] JoinConversation failed: {ex}");
             throw new HubException("JOIN_FAILED");
         }
     }
@@ -61,20 +54,6 @@ public sealed class ChatHub : Hub
     public async Task LeaveConversation(Guid conversationId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, ConversationGroup(conversationId));
-    }
-
-    public async Task PingConversation(Guid conversationId, string text)
-    {
-        var userId = Context.User!.GetUserId();
-
-        await Clients.Group(ConversationGroup(conversationId))
-            .SendAsync("conversation:ping", new
-            {
-                conversationId,
-                fromUserId = userId,
-                text,
-                at = DateTimeOffset.UtcNow
-            });
     }
 
     public async Task SendMessage(SendMessageRequest request)
@@ -119,6 +98,26 @@ public sealed class ChatHub : Hub
         await Clients.Group(UserGroup(userId)).SendAsync("conversation:updated", updateDto, ct);
 
         await Clients.Group(ConversationGroup(request.ConversationId)).SendAsync("conversation:read", readDto, ct);
+    }
+
+    public async Task Typing(Guid conversationId, bool isTyping)
+    {
+        var userId = Context.User!.GetUserId();
+        var ct = Context.ConnectionAborted;
+        
+        var allowed = await _mediator.Send(new GetConversationAccessQuery(conversationId, userId), ct);
+
+        if (!allowed)
+            throw new HubException("FORBIDDEN");
+        
+        var payload = new ConversationTypingDto(
+            ConversationId: conversationId,
+            UserId: userId,
+            IsTyping: isTyping
+        );
+
+        await Clients.Group(ConversationGroup(conversationId))
+            .SendAsync("conversation:typing", payload, ct);
     }
     
     private static string ConversationGroup(Guid conversationId) => $"conversation:{conversationId}";

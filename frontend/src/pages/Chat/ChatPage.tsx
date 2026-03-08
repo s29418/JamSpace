@@ -1,21 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useChatHub } from "features/chat/model/useChatHub";
 import { useInbox } from "features/chat/model/useInbox";
-import { Navigate } from "react-router-dom";
-import { getToken } from "shared/lib/utils/auth";
 import ConversationList from "./ConversationList/ConversationList";
 import ConversationPlaceholder from "./ConversationPlaceholder/ConversationPlaceholder";
+import ConversationView from "./ConversationView/ConversationView";
 import styles from "./ChatPage.module.css";
 
 const ChatPage = () => {
-    const token = getToken();
-
     useChatHub();
 
     const {
         conversations,
         loading,
         error,
+        markConversationLocallyAsRead,
     } = useInbox();
 
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -31,11 +29,6 @@ const ChatPage = () => {
         [conversations, activeConversationId]
     );
 
-    if (!token) {
-        return <Navigate to="/profile" replace />;
-    }
-
-    // @ts-ignore
     return (
         <div className={styles.page}>
             <div className={styles.layout}>
@@ -48,28 +41,10 @@ const ChatPage = () => {
                 />
 
                 {activeConversation ? (
-                    <section className={styles.previewPanel}>
-                        <div className={styles.previewHeader}>
-                            <div className={styles.avatarWrapper}>
-                                {activeConversation.displayPictureUrl ? (
-                                    <img
-                                        src={activeConversation.displayPictureUrl}
-                                        alt={activeConversation.displayName}
-                                        className={styles.avatar}
-                                    />
-                                ) : (
-                                    <div className={styles.avatarFallback}>
-                                        {activeConversation.displayName.charAt(0).toUpperCase()}
-                                    </div>
-                                )}
-                            </div>
-                            {activeConversation.displayName}
-                        </div>
-
-                        <div className={styles.previewBody}>
-                            ...
-                        </div>
-                    </section>
+                    <ConversationView
+                        conversation={activeConversation}
+                        onMarkedAsRead={markConversationLocallyAsRead}
+                    />
                 ) : (
                     <ConversationPlaceholder />
                 )}

@@ -26,7 +26,7 @@ class ChatHubClient {
         if (this.connection) return this.connection;
 
         this.connection = new HubConnectionBuilder()
-            .withUrl("/hubs/chat", {
+            .withUrl("http://localhost:5072/hubs/chat", {
                 accessTokenFactory: () => getToken() ?? "",
                 transport: HttpTransportType.WebSockets
             })

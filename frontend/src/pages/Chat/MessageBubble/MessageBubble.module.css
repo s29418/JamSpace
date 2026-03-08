@@ -1,0 +1,47 @@
+.row {
+    display: flex;
+    width: 100%;
+    margin-bottom: 14px;
+}
+
+.ownRow {
+    justify-content: flex-end;
+}
+
+.otherRow {
+    justify-content: flex-start;
+}
+
+.bubble {
+    max-width: min(70%, 520px);
+    padding: 14px 16px 10px;
+    border-radius: 22px;
+    word-break: break-word;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+}
+
+.ownBubble {
+    background: #26cdd4;
+    color: #0f1718;
+    border-bottom-right-radius: 8px;
+}
+
+.otherBubble {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f3f6f8;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom-left-radius: 8px;
+}
+
+.content {
+    font-size: 16px;
+    line-height: 1.45;
+    margin-bottom: 8px;
+    white-space: pre-wrap;
+}
+
+.time {
+    font-size: 12px;
+    opacity: 0.72;
+    text-align: right;
+}

@@ -1,6 +1,8 @@
 import axios, { AxiosError } from 'axios';
 import { getToken, setToken, clearToken } from  '../utils/auth'
 
+export const API_BASE_URL = "http://localhost:5072";
+
 type ProblemDetails = {
     type?: string;
     title?: string;
@@ -25,7 +27,7 @@ export const isApiError = (e: unknown): e is ApiError =>
 
 
 export const api = axios.create({
-    baseURL: '/api',
+    baseURL: `${API_BASE_URL}/api`,
     timeout: 15000,
     withCredentials: true,
     headers: { 'Content-Type': 'application/json' },

@@ -26,7 +26,7 @@ export const getConversationMessages = async ({
     searchParams.set("take", String(take));
 
     const res = await api.get<CursorResult<MessageDto>>(
-        `${ROOT}/${conversationId}/messages?${searchParams.toString()}`
+        `${ROOT}/${conversationId}?${searchParams.toString()}`
     );
 
     return {

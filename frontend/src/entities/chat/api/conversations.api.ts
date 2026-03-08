@@ -20,13 +20,13 @@ export const getConversationMessages = async ({
                                                   before,
                                                   take = 50,
                                               }: GetMessagesParams): Promise<CursorResult<MessageDto>> => {
-    const sp = new URLSearchParams();
+    const searchParams = new URLSearchParams();
 
-    if (before) sp.set("before", before);
-    sp.set("take", String(take));
+    if (before) searchParams.set("before", before);
+    searchParams.set("take", String(take));
 
     const res = await api.get<CursorResult<MessageDto>>(
-        `${ROOT}/${conversationId}/messages?${sp.toString()}`
+        `${ROOT}/${conversationId}/messages?${searchParams.toString()}`
     );
 
     return {

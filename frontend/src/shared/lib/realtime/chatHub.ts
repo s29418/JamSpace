@@ -3,6 +3,7 @@ import {
     HubConnectionBuilder,
     HubConnectionState,
     LogLevel,
+    HttpTransportType,
 } from "@microsoft/signalr";
 import { getToken } from "shared/lib/utils/auth";
 import type {
@@ -27,18 +28,19 @@ class ChatHubClient {
         this.connection = new HubConnectionBuilder()
             .withUrl("/hubs/chat", {
                 accessTokenFactory: () => getToken() ?? "",
+                transport: HttpTransportType.WebSockets
             })
             .withAutomaticReconnect()
             .configureLogging(LogLevel.Information)
             .build();
 
         this.connection.onreconnected(async () => {
-            if (this.activeConversationId) {
-                try {
-                    await this.joinConversation(this.activeConversationId);
-                } catch (error) {
-                    console.error("Failed to rejoin conversation after reconnect", error);
-                }
+            if (!this.activeConversationId) return;
+
+            try {
+                await this.joinConversation(this.activeConversationId);
+            } catch (error) {
+                console.error("Failed to rejoin conversation after reconnect", error);
             }
         });
 
@@ -48,13 +50,16 @@ class ChatHubClient {
     async start() {
         const connection = this.ensureConnection();
 
-        if (connection.state === HubConnectionState.Connected) return;
+        if (connection.state === HubConnectionState.Connected ||
+            connection.state === HubConnectionState.Connecting) {
+            return;
+        }
         if (this.startPromise) return this.startPromise;
 
         this.startPromise = connection
             .start()
             .catch((error) => {
-                console.error("Failed to start chat hub connection", error);
+                console.error("Failed to start chat hub", error);
                 throw error;
             })
             .finally(() => {
@@ -62,13 +67,6 @@ class ChatHubClient {
             });
 
         return this.startPromise;
-    }
-
-    async stop() {
-        if (!this.connection) return;
-        if (this.connection.state === HubConnectionState.Disconnected) return;
-
-        await this.connection.stop();
     }
 
     async joinConversation(conversationId: string) {
@@ -106,36 +104,28 @@ class ChatHubClient {
         const connection = this.ensureConnection();
         connection.on("message:new", handler);
 
-        return () => {
-            connection.off("message:new", handler);
-        };
+        return () => connection.off("message:new", handler);
     }
 
     onConversationUpdated(handler: (payload: ConversationUpdatedEvent) => void): Unsubscribe {
         const connection = this.ensureConnection();
         connection.on("conversation:updated", handler);
 
-        return () => {
-            connection.off("conversation:updated", handler);
-        };
+        return () => connection.off("conversation:updated", handler);
     }
 
     onConversationRead(handler: (payload: ConversationReadEvent) => void): Unsubscribe {
         const connection = this.ensureConnection();
         connection.on("conversation:read", handler);
 
-        return () => {
-            connection.off("conversation:read", handler);
-        };
+        return () => connection.off("conversation:read", handler);
     }
 
     onConversationTyping(handler: (payload: ConversationTypingEvent) => void): Unsubscribe {
         const connection = this.ensureConnection();
         connection.on("conversation:typing", handler);
 
-        return () => {
-            connection.off("conversation:typing", handler);
-        };
+        return () => connection.off("conversation:typing", handler);
     }
 }
 

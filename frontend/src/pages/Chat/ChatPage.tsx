@@ -14,6 +14,7 @@ const ChatPage = () => {
         loading,
         error,
         markConversationLocallyAsRead,
+        updateConversationPreview,
     } = useInbox();
 
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -44,6 +45,7 @@ const ChatPage = () => {
                     <ConversationView
                         conversation={activeConversation}
                         onMarkedAsRead={markConversationLocallyAsRead}
+                        updateConversationPreview={updateConversationPreview}
                     />
                 ) : (
                     <ConversationPlaceholder />

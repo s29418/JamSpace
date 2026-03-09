@@ -3,6 +3,8 @@ export type ConversationType = "Direct" | "Team";
 export type ConversationListItemDto = {
     id: string;
     type: ConversationType;
+    targetUserId?: string;
+    teamId?: string;
     displayName: string;
     displayPictureUrl: string | null;
     lastMessagePreview: string | null;
@@ -14,6 +16,7 @@ export type MessageDto = {
     id: string;
     conversationId: string;
     senderUserId: string;
+    senderPictureUrl: string;
     content: string;
     createdAt: string;
     replyToMessageId: string | null;

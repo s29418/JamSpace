@@ -40,24 +40,35 @@ export function useInbox() {
     }, [refresh]);
 
     useEffect(() => {
-        const unsubscribe = chatHub.onConversationUpdated((event: ConversationUpdatedEvent) => {
-            setConversations((prev) => {
-                const existing = prev.find((x) => x.id === event.conversationId);
-                if (!existing) return prev;
+        let unsubscribe: (() => void) | undefined;
 
-                const updated: ConversationListItemDto = {
-                    ...existing,
-                    lastMessageAt: event.lastMessageAt,
-                    lastMessagePreview: event.lastMessagePreview,
-                    unreadCount: event.unreadCount,
-                };
+        const init = async () => {
+            await chatHub.start();
 
-                const filtered = prev.filter((x) => x.id !== event.conversationId);
-                return [updated, ...filtered];
+            unsubscribe = chatHub.onConversationUpdated((event) => {
+                setConversations((prev) => {
+                    const existing = prev.find((x) => x.id === event.conversationId);
+                    if (!existing) return prev;
+
+                    const updated = {
+                        ...existing,
+                        lastMessageAt: event.lastMessageAt,
+                        lastMessagePreview: event.lastMessagePreview,
+                        unreadCount: event.unreadCount,
+                    };
+
+                    const filtered = prev.filter((x) => x.id !== event.conversationId);
+
+                    return [updated, ...filtered];
+                });
             });
-        });
+        };
 
-        return unsubscribe;
+        void init();
+
+        return () => {
+            unsubscribe?.();
+        };
     }, []);
 
     const markConversationLocallyAsRead = useCallback((conversationId: string) => {
@@ -70,6 +81,26 @@ export function useInbox() {
         );
     }, []);
 
+    const updateConversationPreview = useCallback(
+        (conversationId: string, content: string) => {
+            setConversations((prev) => {
+                const existing = prev.find((x) => x.id === conversationId);
+                if (!existing) return prev;
+
+                const updated = {
+                    ...existing,
+                    lastMessagePreview: content,
+                    lastMessageAt: new Date().toISOString(),
+                };
+
+                const filtered = prev.filter((x) => x.id !== conversationId);
+
+                return [updated, ...filtered];
+            });
+        },
+        []
+    );
+
     return {
         conversations,
         setConversations,
@@ -77,5 +108,6 @@ export function useInbox() {
         error,
         refresh,
         markConversationLocallyAsRead,
+        updateConversationPreview,
     };
 }

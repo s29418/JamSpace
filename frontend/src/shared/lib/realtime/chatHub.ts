@@ -107,11 +107,17 @@ class ChatHubClient {
         return () => connection.off("message:new", handler);
     }
 
-    onConversationUpdated(handler: (payload: ConversationUpdatedEvent) => void): Unsubscribe {
+    onConversationUpdated(handler: (payload: ConversationUpdatedEvent) => void) {
         const connection = this.ensureConnection();
-        connection.on("conversation:updated", handler);
 
-        return () => connection.off("conversation:updated", handler);
+        connection.on("conversation:updated", (payload) => {
+            console.log("conversation:updated EVENT", payload);
+            handler(payload);
+        });
+
+        return () => {
+            connection.off("conversation:updated", handler);
+        };
     }
 
     onConversationRead(handler: (payload: ConversationReadEvent) => void): Unsubscribe {

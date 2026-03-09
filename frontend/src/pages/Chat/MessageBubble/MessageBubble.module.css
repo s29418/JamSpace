@@ -1,15 +1,35 @@
 .row {
     display: flex;
+    align-items: flex-end;
     width: 100%;
     margin-bottom: 14px;
+}
+
+.otherRow {
+    justify-content: flex-start;
 }
 
 .ownRow {
     justify-content: flex-end;
 }
 
-.otherRow {
-    justify-content: flex-start;
+.avatarContainer {
+    width: 40px;
+    display: flex;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatarSpacer {
+    width: 34px;
+    height: 34px;
 }
 
 .bubble {
@@ -17,7 +37,16 @@
     padding: 14px 16px 10px;
     border-radius: 22px;
     word-break: break-word;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+
+    display: flex;
+    flex-direction: column;
+}
+
+.time {
+    font-size: 12px;
+    opacity: 0.72;
+    margin-top: 6px;
+    align-self: flex-end;
 }
 
 .ownBubble {
@@ -27,21 +56,7 @@
 }
 
 .otherBubble {
-    background: rgba(255, 255, 255, 0.08);
-    color: #f3f6f8;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
     border-bottom-left-radius: 8px;
-}
-
-.content {
-    font-size: 16px;
-    line-height: 1.45;
-    margin-bottom: 8px;
-    white-space: pre-wrap;
-}
-
-.time {
-    font-size: 12px;
-    opacity: 0.72;
-    text-align: right;
 }

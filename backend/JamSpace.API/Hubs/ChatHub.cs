@@ -73,15 +73,15 @@ public sealed class ChatHub : Hub
         var userIds = await _mediator
             .Send(new GetConversationParticipantUserIdsQuery(request.ConversationId), ct);
 
-        var tasks = userIds.Select(async userId =>
+        foreach (var userId in userIds)
         {
-            var updateDto =
-                await _mediator.Send(new GetConversationUpdateForUserQuery(request.ConversationId, userId), ct);
+            var updateDto = await _mediator.Send(
+                new GetConversationUpdateForUserQuery(request.ConversationId, userId),
+                ct);
 
-            await Clients.Group(UserGroup(userId)).SendAsync("conversation:updated", updateDto, ct);
-        });
-
-        await Task.WhenAll(tasks);
+            await Clients.Group(UserGroup(userId))
+                .SendAsync("conversation:updated", updateDto, ct);
+        }
     }
 
     public async Task MarkRead(MarkReadRequest request)

@@ -4,6 +4,7 @@ using JamSpace.Application.Common.Models;
 using JamSpace.Application.Features.Conversations.Commands.GetOrCreateDirectConversation;
 using JamSpace.Application.Features.Conversations.Commands.MarkConversationAsRead;
 using JamSpace.Application.Features.Conversations.DTOs;
+using JamSpace.Application.Features.Conversations.Queries.GetConversationDetails;
 using JamSpace.Application.Features.Conversations.Queries.GetConversationMessages;
 using JamSpace.Application.Features.Conversations.Queries.GetMyConversations;
 using MediatR;
@@ -30,6 +31,15 @@ public class ConversationsController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize]
+    public async Task<ActionResult<ConversationDetailsDto>> GetConversationDetails(Guid id, CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(new GetConversationDetailsQuery(id, userId), ct);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:guid}/messages")]
     [Authorize]
     public async Task<ActionResult<CursorResult<MessageDto>>> GetConversationMessages(Guid id,
         [FromQuery] DateTimeOffset? before, [FromQuery] int take = 50, CancellationToken ct = default)

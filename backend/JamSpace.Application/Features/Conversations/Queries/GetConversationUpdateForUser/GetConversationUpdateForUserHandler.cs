@@ -10,7 +10,14 @@ public class GetConversationUpdateForUserHandler : IRequestHandler<GetConversati
     private readonly IConversationParticipantRepository _conversationParticipant;
     private readonly IConversationRepository _conversation;
     private readonly IMessageRepository _message;
-    
+
+    public GetConversationUpdateForUserHandler(IConversationParticipantRepository conversationParticipant, IConversationRepository conversation, IMessageRepository message)
+    {
+        _conversationParticipant = conversationParticipant;
+        _conversation = conversation;
+        _message = message;
+    }
+
     public async Task<ConversationUpdatedDto> Handle(GetConversationUpdateForUserQuery request, CancellationToken ct)
     {
         var conversation = await _conversation.GetByIdAsync(request.ConversationId, ct);

@@ -15,6 +15,8 @@ public class ConversationRepository : IConversationRepository
     {
         return await _db.Conversations
             .Include(c => c.Participants)
+                .ThenInclude(p => p.User)
+            .Include(c => c.Team)
             .FirstOrDefaultAsync(c => c.Id == conversationId, ct);
     }
 

@@ -60,3 +60,9 @@
     border: 1px solid rgba(255,255,255,0.14);
     border-bottom-left-radius: 8px;
 }
+
+.messageBlock {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}

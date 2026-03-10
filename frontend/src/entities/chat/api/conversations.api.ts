@@ -6,6 +6,7 @@ import type {
     GetMessagesParams,
     CreateDirectConversationRequest,
     CreateDirectConversationResponse,
+    ConversationDetailsDto,
 } from "../model/types";
 
 const ROOT = "/conversations";
@@ -13,6 +14,13 @@ const ROOT = "/conversations";
 export const getConversations = async (): Promise<ConversationListItemDto[]> => {
     const res = await api.get<ConversationListItemDto[]>(ROOT);
     return res.data ?? [];
+};
+
+export const getConversationDetails = async (
+    conversationId: string
+): Promise<ConversationDetailsDto> => {
+    const res = await api.get<ConversationDetailsDto>(`${ROOT}/${conversationId}`);
+    return res.data;
 };
 
 export const getConversationMessages = async ({
@@ -26,7 +34,7 @@ export const getConversationMessages = async ({
     searchParams.set("take", String(take));
 
     const res = await api.get<CursorResult<MessageDto>>(
-        `${ROOT}/${conversationId}?${searchParams.toString()}`
+        `${ROOT}/${conversationId}/messages?${searchParams.toString()}`
     );
 
     return {

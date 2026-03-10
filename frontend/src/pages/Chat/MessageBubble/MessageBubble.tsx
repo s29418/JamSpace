@@ -1,11 +1,19 @@
 import React from "react";
 import type { MessageDto } from "entities/chat/model/types";
+import SeenAvatars from "../SeenAvatars/SeenAvatars";
 import styles from "./MessageBubble.module.css";
+
+type SeenUser = {
+    userId: string;
+    displayName: string;
+    avatarUrl: string | null;
+};
 
 type Props = {
     message: MessageDto;
     isOwn: boolean;
     showAvatar: boolean;
+    seenBy?: SeenUser[];
 };
 
 function formatMessageTime(value: string) {
@@ -15,29 +23,33 @@ function formatMessageTime(value: string) {
     });
 }
 
-const MessageBubble = ({ message, isOwn, showAvatar }: Props) => {
+const MessageBubble = ({ message, isOwn, showAvatar, seenBy = [] }: Props) => {
     return (
-        <div className={`${styles.row} ${isOwn ? styles.ownRow : styles.otherRow}`}>
-            {!isOwn && (
-                <div className={styles.avatarContainer}>
-                    {showAvatar ? (
-                        <img
-                            src={message.senderPictureUrl}
-                            className={styles.avatar}
-                            alt=""
-                        />
-                    ) : (
-                        <div className={styles.avatarSpacer} />
-                    )}
-                </div>
-            )}
+        <div className={styles.messageBlock}>
+            <div className={`${styles.row} ${isOwn ? styles.ownRow : styles.otherRow}`}>
+                {!isOwn && (
+                    <div className={styles.avatarContainer}>
+                        {showAvatar ? (
+                            <img
+                                src={message.senderPictureUrl}
+                                className={styles.avatar}
+                                alt=""
+                            />
+                        ) : (
+                            <div className={styles.avatarSpacer} />
+                        )}
+                    </div>
+                )}
 
-            <div className={`${styles.bubble} ${isOwn ? styles.ownBubble : styles.otherBubble}`}>
-                <div className={styles.content}>{message.content}</div>
-                <div className={styles.time}>
-                    {formatMessageTime(message.createdAt)}
+                <div className={`${styles.bubble} ${isOwn ? styles.ownBubble : styles.otherBubble}`}>
+                    <div className={styles.content}>{message.content}</div>
+                    <div className={styles.time}>
+                        {formatMessageTime(message.createdAt)}
+                    </div>
                 </div>
             </div>
+
+            {isOwn && seenBy.length > 0 && <SeenAvatars users={seenBy} />}
         </div>
     );
 };

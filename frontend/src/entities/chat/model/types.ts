@@ -72,3 +72,21 @@ export type ConversationTypingEvent = {
     userId: string;
     isTyping: boolean;
 };
+
+export type ConversationParticipantDto = {
+    userId: string;
+    displayName: string;
+    avatarUrl: string | null;
+    lastReadMessageId: string | null;
+    lastReadAt: string | null;
+};
+
+export type ConversationDetailsDto = {
+    id: string;
+    type: ConversationType;
+    targetUserId: string | null;
+    teamId: string | null;
+    displayName: string;
+    displayPictureUrl: string | null;
+    participants: ConversationParticipantDto[];
+};

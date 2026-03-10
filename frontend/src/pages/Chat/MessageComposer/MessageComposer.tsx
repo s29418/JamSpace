@@ -1,13 +1,20 @@
 import React, { FormEvent, KeyboardEvent, useRef, useState } from "react";
-import { chatHub } from "shared/lib/realtime/chatHub";
 import styles from "./MessageComposer.module.css";
 
 type Props = {
     conversationId: string;
     onMessageSent?: (content: string) => void;
+    onTyping?: () => void;
+    onStopTyping?: () => Promise<void>;
+    onSendMessage: (content: string) => Promise<void>;
 };
 
-const MessageComposer = ({ conversationId, onMessageSent }: Props) => {
+const MessageComposer = ({
+                             onMessageSent,
+                             onTyping,
+                             onStopTyping,
+                             onSendMessage,
+                         }: Props) => {
     const [value, setValue] = useState("");
     const [sending, setSending] = useState(false);
 
@@ -23,13 +30,9 @@ const MessageComposer = ({ conversationId, onMessageSent }: Props) => {
         setSending(true);
 
         try {
-            await chatHub.sendMessage({
-                conversationId,
-                content: trimmed,
-                replyToMessageId: null,
-            });
-
+            await onSendMessage(trimmed);
             onMessageSent?.(trimmed);
+            await onStopTyping?.();
         } catch (error) {
             console.error("Failed to send message", error);
         } finally {
@@ -56,7 +59,10 @@ const MessageComposer = ({ conversationId, onMessageSent }: Props) => {
                 className={styles.input}
                 placeholder="Write a message..."
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={(e) => {
+                    setValue(e.target.value);
+                    onTyping?.();
+                }}
                 onKeyDown={handleKeyDown}
                 rows={1}
             />

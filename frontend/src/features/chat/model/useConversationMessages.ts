@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getConversationMessages } from "entities/chat/api/conversations.api";
-import type { MessageDto } from "entities/chat/model/types";
+import type { ConversationReadEvent, MessageDto } from "entities/chat/model/types";
 import { ApiError, isApiError } from "shared/lib/api/base";
 import { chatHub } from "shared/lib/realtime/chatHub";
 import { getCurrentUserId } from "shared/lib/utils/auth";
@@ -21,7 +21,11 @@ export function useConversationMessages({ conversationId, onMarkedAsRead }: Para
 
     const [messages, setMessages] = useState<MessageDto[]>([]);
     const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState(false);
+    const [nextBefore, setNextBefore] = useState<string | null>(null);
+    const [readEvents, setReadEvents] = useState<ConversationReadEvent[]>([]);
 
     const lastMessageId = useMemo(
         () => (messages.length > 0 ? messages[messages.length - 1].id : null),
@@ -31,6 +35,9 @@ export function useConversationMessages({ conversationId, onMarkedAsRead }: Para
     const refresh = useCallback(async () => {
         if (!conversationId) {
             setMessages([]);
+            setReadEvents([]);
+            setHasMore(false);
+            setNextBefore(null);
             return;
         }
 
@@ -44,7 +51,11 @@ export function useConversationMessages({ conversationId, onMarkedAsRead }: Para
             });
 
             const sorted = sortMessages(result.items);
+
             setMessages(sorted);
+            setHasMore(result.hasMore);
+            setNextBefore(result.nextBefore);
+            setReadEvents([]);
 
             try {
                 await chatHub.markRead({
@@ -62,14 +73,45 @@ export function useConversationMessages({ conversationId, onMarkedAsRead }: Para
                 : "Failed to load conversation messages";
 
             setError(msg);
-        }finally {
+        } finally {
             setLoading(false);
         }
     }, [conversationId, onMarkedAsRead]);
 
+    const loadMore = useCallback(async () => {
+        if (!conversationId || !hasMore || !nextBefore || loadingMore) return;
+
+        setLoadingMore(true);
+
+        try {
+            const result = await getConversationMessages({
+                conversationId,
+                before: nextBefore,
+                take: 50,
+            });
+
+            setMessages((prev) => {
+                const merged = [...result.items, ...prev];
+                const unique = merged.filter(
+                    (message, index, arr) => arr.findIndex((x) => x.id === message.id) === index
+                );
+
+                return sortMessages(unique);
+            });
+
+            setHasMore(result.hasMore);
+            setNextBefore(result.nextBefore);
+        } catch (e) {
+            console.error("Failed to load older messages", e);
+        } finally {
+            setLoadingMore(false);
+        }
+    }, [conversationId, hasMore, nextBefore, loadingMore]);
+
     useEffect(() => {
         if (!conversationId) {
             setMessages([]);
+            setReadEvents([]);
             return;
         }
 
@@ -127,19 +169,29 @@ export function useConversationMessages({ conversationId, onMarkedAsRead }: Para
         return unsubscribe;
     }, [conversationId, currentUserId, onMarkedAsRead]);
 
-    const appendOwnMessage = useCallback((message: MessageDto) => {
-        setMessages((prev) => {
-            if (prev.some((x) => x.id === message.id)) return prev;
-            return sortMessages([...prev, message]);
+    useEffect(() => {
+        const unsubscribe = chatHub.onConversationRead((event) => {
+            if (event.conversationId !== conversationId) return;
+            if (event.userId === currentUserId) return;
+
+            setReadEvents((prev) => {
+                const filtered = prev.filter((x) => x.userId !== event.userId);
+                return [...filtered, event];
+            });
         });
-    }, []);
+
+        return unsubscribe;
+    }, [conversationId, currentUserId]);
 
     return {
         messages,
         loading,
+        loadingMore,
         error,
         refresh,
+        loadMore,
+        hasMore,
         lastMessageId,
-        appendOwnMessage,
+        readEvents,
     };
 }

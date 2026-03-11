@@ -87,7 +87,7 @@ export function useConversationMessages({ conversationId, onMarkedAsRead }: Para
             const result = await getConversationMessages({
                 conversationId,
                 before: nextBefore,
-                take: 50,
+                take: 30,
             });
 
             setMessages((prev) => {

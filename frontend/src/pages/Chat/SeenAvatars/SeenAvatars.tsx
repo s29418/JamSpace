@@ -22,7 +22,7 @@ const SeenAvatars = ({ users }: Props) => {
                         key={user.userId}
                         src={user.avatarUrl}
                         alt={user.displayName}
-                        title={user.displayName}
+                        title={"seen by: " + user.displayName}
                         className={styles.avatar}
                     />
                 ) : (

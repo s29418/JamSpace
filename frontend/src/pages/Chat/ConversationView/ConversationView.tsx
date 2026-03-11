@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ConversationListItemDto, MessageDto } from "entities/chat/model/types";
 import { useConversationMessages } from "features/chat/model/useConversationMessages";
@@ -50,9 +50,6 @@ const ConversationView = ({ conversation, onMarkedAsRead, updateConversationPrev
         conversationId: conversation.id,
     });
 
-    const messagesAreaRef = useRef<HTMLDivElement | null>(null);
-    const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
     function shouldShowAvatar(messages: MessageDto[], index: number) {
         const current = messages[index];
         const next = messages[index + 1];
@@ -62,13 +59,43 @@ const ConversationView = ({ conversation, onMarkedAsRead, updateConversationPrev
         return next.senderUserId !== current.senderUserId;
     }
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    }, [conversation.id]);
+    const messagesAreaRef = useRef<HTMLDivElement | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+    const isInitialLoadRef = useRef(true);
+    const previousMessagesCountRef = useRef(0);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages.length]);
+        isInitialLoadRef.current = true;
+        previousMessagesCountRef.current = 0;
+    }, [conversation.id]);
+
+    useLayoutEffect(() => {
+        if (loading) return;
+
+        const container = messagesAreaRef.current;
+        if (!container) return;
+
+        // 1️⃣ pierwszy render rozmowy → instant
+        if (isInitialLoadRef.current) {
+            container.scrollTop = container.scrollHeight;
+
+            isInitialLoadRef.current = false;
+            previousMessagesCountRef.current = messages.length;
+            return;
+        }
+
+        // 2️⃣ nowa wiadomość → smooth
+        if (messages.length > previousMessagesCountRef.current) {
+            messagesEndRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+            });
+        }
+
+        previousMessagesCountRef.current = messages.length;
+
+    }, [messages.length, loading]);
 
     const handleHeaderClick = () => {
         if (!details) return;
@@ -222,10 +249,13 @@ const ConversationView = ({ conversation, onMarkedAsRead, updateConversationPrev
                             );
                         })}
 
-                        <TypingIndicator names={typingNames} />
                         <div ref={messagesEndRef} />
                     </div>
                 )}
+            </div>
+
+            <div className={styles.typingBar}>
+                <TypingIndicator names={typingNames} />
             </div>
 
             <MessageComposer

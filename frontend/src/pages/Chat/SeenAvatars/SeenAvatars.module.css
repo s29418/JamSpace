@@ -2,7 +2,8 @@
     display: flex;
     justify-content: flex-end;
     gap: 4px;
-    margin-top: 6px;
+    margin-top: -6px;
+    margin-bottom: 16px;
     padding-right: 6px;
 }
 

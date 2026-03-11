@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { getConversations } from "entities/chat/api/conversations.api";
 import type {
     ConversationListItemDto,
-    ConversationUpdatedEvent,
 } from "entities/chat/model/types";
 import { ApiError, isApiError } from "shared/lib/api/base";
 import { chatHub } from "shared/lib/realtime/chatHub";
@@ -50,16 +49,18 @@ export function useInbox() {
                     const existing = prev.find((x) => x.id === event.conversationId);
                     if (!existing) return prev;
 
-                    const updated = {
+                    const updated: ConversationListItemDto = {
                         ...existing,
                         lastMessageAt: event.lastMessageAt,
                         lastMessagePreview: event.lastMessagePreview,
                         unreadCount: event.unreadCount,
                     };
 
-                    const filtered = prev.filter((x) => x.id !== event.conversationId);
-
-                    return [updated, ...filtered];
+                    return sortConversations(
+                        prev.map((item) =>
+                            item.id === event.conversationId ? updated : item
+                        )
+                    );
                 });
             });
         };
@@ -87,15 +88,17 @@ export function useInbox() {
                 const existing = prev.find((x) => x.id === conversationId);
                 if (!existing) return prev;
 
-                const updated = {
+                const updated: ConversationListItemDto = {
                     ...existing,
                     lastMessagePreview: content,
                     lastMessageAt: new Date().toISOString(),
                 };
 
-                const filtered = prev.filter((x) => x.id !== conversationId);
-
-                return [updated, ...filtered];
+                return sortConversations(
+                    prev.map((item) =>
+                        item.id === conversationId ? updated : item
+                    )
+                );
             });
         },
         []

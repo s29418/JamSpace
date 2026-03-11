@@ -49,7 +49,7 @@ export function useTyping({ conversationId }: Params) {
 
             lastTypingSentRef.current = false;
             await chatHub.sendTyping(conversationId, false);
-        }, 1200);
+        }, 2500);
     }, [conversationId]);
 
     const stopTypingNow = useCallback(async () => {

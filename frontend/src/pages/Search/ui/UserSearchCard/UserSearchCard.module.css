@@ -152,7 +152,7 @@
     background: transparent;
     border: 1px solid #26cdd4;
     color: #26cdd4;
-    /*cursor: not-allowed;*/
+    cursor: pointer;
     /*opacity: 0.6;*/
 }
 

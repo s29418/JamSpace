@@ -1,4 +1,7 @@
 import React, {useMemo} from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { getOrCreateDirectConversation } from "entities/chat/api/conversations.api";
+
 import { UserProfile } from "../../../../entities/user/model/types";
 import styles from "./ProfileHeaderCard.module.css";
 import {
@@ -44,6 +47,23 @@ export const ProfileHeaderCard: React.FC<Props> = (props) => {
             city ? city :
                 country ? country :
                     null;
+
+    const navigate = useNavigate();
+    const { id } = useParams();
+
+    const handleMessageClick = async () => {
+        if (!id) return;
+
+        try {
+            const result = await getOrCreateDirectConversation({
+                otherUserId: id,
+            });
+
+            navigate(`/chat?conversationId=${result.conversationId}`);
+        } catch (error) {
+            console.error("Failed to open direct conversation", error);
+        }
+    };
 
     return (
         <div className={styles.profileCard}>
@@ -121,7 +141,11 @@ export const ProfileHeaderCard: React.FC<Props> = (props) => {
                             )}
                         </button>
 
-                        <button className={`${styles.button} ${styles.buttonGhost}`} type="button">
+                        <button
+                            className={`${styles.button} ${styles.buttonGhost}`}
+                            type="button"
+                            onClick={() => void handleMessageClick()}
+                        >
                             <MessageIcon className={styles.icon}/>
                             Message
                         </button>

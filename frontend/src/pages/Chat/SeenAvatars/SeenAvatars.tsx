@@ -9,13 +9,14 @@ type SeenUser = {
 
 type Props = {
     users: SeenUser[];
+    isOwn: boolean;
 };
 
-const SeenAvatars = ({ users }: Props) => {
+const SeenAvatars = ({ users, isOwn }: Props) => {
     if (users.length === 0) return null;
 
     return (
-        <div className={styles.wrapper}>
+        <div className={`${styles.wrapper} ${isOwn ? styles.own : styles.other}`}>
             {users.map((user) =>
                 user.avatarUrl ? (
                     <img

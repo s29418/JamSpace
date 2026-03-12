@@ -71,7 +71,7 @@ const MessageBubble = ({ message, isOwn, showAvatar, senderAvatarUrl, senderDisp
                 </div>
             </div>
 
-            {isOwn && seenBy.length > 0 && <SeenAvatars users={seenBy} />}
+            {seenBy.length > 0 && <SeenAvatars users={seenBy} isOwn={isOwn} />}
         </div>
     );
 };

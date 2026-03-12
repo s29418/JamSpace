@@ -1,4 +1,6 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { getOrCreateDirectConversation } from "entities/chat/api/conversations.api";
 import styles from "./UserSearchCard.module.css";
 import type { UserSearchItem } from "entities/user/model/types";
 import {Link} from "react-router-dom";
@@ -14,6 +16,20 @@ type Props = {
 
 const UserSearchCard: React.FC<Props> = ({ user, busy, onToggleFollow }) => {
     const loc = [user.location?.city, user.location?.country].filter(Boolean).join(", ");
+
+    const navigate = useNavigate();
+
+    const handleMessageClick = async () => {
+        try {
+            const result = await getOrCreateDirectConversation({
+                otherUserId: user.id,
+            });
+
+            navigate(`/chat?conversationId=${result.conversationId}`);
+        } catch (error) {
+            console.error("Failed to open direct conversation", error);
+        }
+    };
 
     return (
         <div className={styles.card}>
@@ -56,7 +72,10 @@ const UserSearchCard: React.FC<Props> = ({ user, busy, onToggleFollow }) => {
 
             <div className={styles.right}>
 
-                <button className={styles.messageBtn} disabled>
+                <button
+                    className={styles.messageBtn}
+                    onClick={() => void handleMessageClick()}
+                >
                     <ChatIcon className={styles.icon} />
                     Message
                 </button>

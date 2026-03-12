@@ -28,7 +28,7 @@ const SeenAvatars = ({ users }: Props) => {
                 ) : (
                     <div
                         key={user.userId}
-                        title={user.displayName}
+                        title={"seen by: " + user.displayName}
                         className={styles.fallback}
                     >
                         {user.displayName.charAt(0).toUpperCase()}

@@ -51,13 +51,28 @@ const ConversationView = ({ conversation, onMarkedAsRead, updateConversationPrev
         conversationId: conversation.id,
     });
 
+    function isSameDay(a: string, b: string) {
+        const first = new Date(a);
+        const second = new Date(b);
+
+        return (
+            first.getFullYear() === second.getFullYear() &&
+            first.getMonth() === second.getMonth() &&
+            first.getDate() === second.getDate()
+        );
+    }
+
     function shouldShowAvatar(messages: MessageDto[], index: number) {
         const current = messages[index];
         const next = messages[index + 1];
 
         if (!next) return true;
 
-        return next.senderUserId !== current.senderUserId;
+        if (next.senderUserId !== current.senderUserId) return true;
+
+        if (!isSameDay(current.createdAt, next.createdAt)) return true;
+
+        return false;
     }
 
     function isNewDay(messages: MessageDto[], index: number) {

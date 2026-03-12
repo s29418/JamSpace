@@ -37,7 +37,7 @@ const ConversationListItem = ({ conversation, isActive, onClick }: Props) => {
                     <img
                         src={conversation.displayPictureUrl}
                         alt={conversation.displayName}
-                        className={styles.avatar}
+                        className={`${styles.avatar} ${isActive ? styles.activeAvatar : ""}`}
                     />
                 ) : (
                     <div className={styles.avatarFallback}>

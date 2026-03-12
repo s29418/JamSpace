@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import type { MessageDto } from "entities/chat/model/types";
 import SeenAvatars from "../SeenAvatars/SeenAvatars";
 import styles from "./MessageBubble.module.css";
@@ -26,6 +27,13 @@ function formatMessageTime(value: string) {
 }
 
 const MessageBubble = ({ message, isOwn, showAvatar, senderAvatarUrl, senderDisplayName, seenBy = [] }: Props) => {
+
+    const navigate = useNavigate();
+
+    const handleAvatarClick = () => {
+        navigate(`/profile/${message.senderUserId}`);
+    };
+
     return (
         <div className={styles.messageBlock}>
             <div className={`${styles.row} ${isOwn ? styles.ownRow : styles.otherRow}`}>
@@ -38,11 +46,13 @@ const MessageBubble = ({ message, isOwn, showAvatar, senderAvatarUrl, senderDisp
                                     className={styles.avatar}
                                     alt={senderDisplayName ?? ""}
                                     title={senderDisplayName ?? ""}
+                                    onClick={handleAvatarClick}
                                 />
                             ) : (
                                 <div
                                     className={styles.avatarFallback}
                                     title={senderDisplayName ?? ""}
+                                    onClick={handleAvatarClick}
                                 >
                                     {(senderDisplayName ?? "?").charAt(0).toUpperCase()}
                                 </div>

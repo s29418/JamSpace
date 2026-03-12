@@ -35,7 +35,13 @@
     height: 72px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid rgba(38, 205, 212, 0.85);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    transition: border-color .2s ease
+}
+
+.card:hover .avatar,
+.card:hover .avatarFallback {
+    border-color: #26cdd4;
 }
 
 .avatarFallback {
@@ -45,6 +51,10 @@
     color: #26cdd4;
     font-size: 28px;
     font-weight: 700;
+}
+
+.activeAvatar {
+    border: 2px solid rgba(38, 205, 212, 0.85);
 }
 
 .content {

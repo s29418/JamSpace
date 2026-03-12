@@ -21,15 +21,31 @@
 }
 
 .avatar {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 1px solid #26cdd4;
+    cursor: pointer;
 }
 
 .avatarSpacer {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
+}
+
+.avatarFallback {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #172425;
+    color: #26cdd4;
+    font-size: 20px;
+    font-weight: 600;
+    border: 1px solid #26cdd4;
+    cursor: pointer;
 }
 
 .bubble {
@@ -65,16 +81,4 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-}
-
-.avatarFallback {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: #172425;
-    color: #26cdd4;
-    font-size: 13px;
-    font-weight: 700;
 }

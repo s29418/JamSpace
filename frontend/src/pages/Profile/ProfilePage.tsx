@@ -12,6 +12,8 @@ import { ProfileHeaderCard } from '../../features/user/profileHeader/ui/ProfileH
 import { EditProfilePanel } from '../../features/user/profileHeader/ui/EditProfilePanel/EditProfilePanel';
 import {ProfileHeaderCardSkeleton} from "../../features/user/profileHeader/ui/ProfileHeaderCardSkeleton";
 import { getToken, clearToken } from '../../shared/lib/utils/auth';
+import { chatHub } from '../../shared/lib/realtime/chatHub';
+
 type JwtPayload = { sub: string; username: string; email: string };
 
 const ProfilePage: FC = () => {
@@ -83,11 +85,12 @@ const ProfilePage: FC = () => {
     async function handleLogout() {
         const token = localStorage.getItem("accessToken");
         try {
-            const res = await fetch(`http://localhost:5072/api/auth/logout`, {
+            await fetch(`http://localhost:5072/api/auth/logout`, {
                 method: "POST",
                 credentials: "include",
                 headers: token ? { Authorization: `Bearer ${token}` } : undefined,
             });
+            await chatHub.stop();
         } catch (e) {
             console.error("logout error", e);
         }

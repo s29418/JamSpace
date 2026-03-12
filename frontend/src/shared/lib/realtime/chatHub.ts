@@ -50,15 +50,19 @@ class ChatHubClient {
     async start() {
         const connection = this.ensureConnection();
 
-        if (connection.state === HubConnectionState.Connected ||
-            connection.state === HubConnectionState.Connecting) {
-            return;
-        }
+        if (connection.state === HubConnectionState.Connected) return;
         if (this.startPromise) return this.startPromise;
 
         this.startPromise = connection
             .start()
             .catch((error) => {
+                const message =
+                    error instanceof Error ? error.message : String(error);
+
+                if (message.includes("stopped during negotiation")) {
+                    return;
+                }
+
                 console.error("Failed to start chat hub", error);
                 throw error;
             })
@@ -67,6 +71,24 @@ class ChatHubClient {
             });
 
         return this.startPromise;
+    }
+
+    async stop() {
+        const connection = this.connection;
+
+        this.activeConversationId = null;
+        this.startPromise = null;
+        this.connection = null;
+
+        if (!connection) return;
+
+        if (connection.state !== HubConnectionState.Disconnected) {
+            try {
+                await connection.stop();
+            } catch (error) {
+                console.error("Failed to stop chat hub", error);
+            }
+        }
     }
 
     async joinConversation(conversationId: string) {

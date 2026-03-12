@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { chatHub } from "shared/lib/realtime/chatHub";
-import { getToken } from "shared/lib/utils/auth";
+import { getCurrentUserId } from "shared/lib/utils/auth";
 
 export function useChatHub() {
+    const currentUserId = getCurrentUserId();
+
     useEffect(() => {
-        const token = getToken();
-        if (!token) return;
+        if (!currentUserId) return;
 
         void chatHub.start();
-    }, []);
+    }, [currentUserId]);
 }

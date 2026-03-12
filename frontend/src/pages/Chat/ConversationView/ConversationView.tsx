@@ -9,6 +9,7 @@ import { getCurrentUserId } from "shared/lib/utils/auth";
 import MessageBubble from "../MessageBubble/MessageBubble";
 import MessageComposer from "../MessageComposer/MessageComposer";
 import TypingIndicator from "../TypingIndicator/TypingIndicator";
+import DateDivider from "../DateDivider/DateDivider";
 import styles from "./ConversationView.module.css";
 
 type Props = {
@@ -59,6 +60,19 @@ const ConversationView = ({ conversation, onMarkedAsRead, updateConversationPrev
         return next.senderUserId !== current.senderUserId;
     }
 
+    function isNewDay(messages: MessageDto[], index: number) {
+        if (index === 0) return true;
+
+        const current = new Date(messages[index].createdAt);
+        const prev = new Date(messages[index - 1].createdAt);
+
+        return (
+            current.getFullYear() !== prev.getFullYear() ||
+            current.getMonth() !== prev.getMonth() ||
+            current.getDate() !== prev.getDate()
+        );
+    }
+
     const messagesAreaRef = useRef<HTMLDivElement | null>(null);
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -76,7 +90,6 @@ const ConversationView = ({ conversation, onMarkedAsRead, updateConversationPrev
         const container = messagesAreaRef.current;
         if (!container) return;
 
-        // 1️⃣ pierwszy render rozmowy → instant
         if (isInitialLoadRef.current) {
             container.scrollTop = container.scrollHeight;
 
@@ -85,7 +98,6 @@ const ConversationView = ({ conversation, onMarkedAsRead, updateConversationPrev
             return;
         }
 
-        // 2️⃣ nowa wiadomość → smooth
         if (messages.length > previousMessagesCountRef.current) {
             messagesEndRef.current?.scrollIntoView({
                 behavior: "smooth",
@@ -237,15 +249,24 @@ const ConversationView = ({ conversation, onMarkedAsRead, updateConversationPrev
                     <div className={styles.messagesList}>
                         {messages.map((message, index) => {
                             const showAvatar = shouldShowAvatar(messages, index);
+                            const showDateDivider = isNewDay(messages, index);
+                            const sender = participantsMap.get(message.senderUserId);
 
                             return (
-                                <MessageBubble
-                                    key={message.id}
-                                    message={message}
-                                    isOwn={message.senderUserId === currentUserId}
-                                    showAvatar={showAvatar}
-                                    seenBy={seenByMessageId.get(message.id) ?? []}
-                                />
+                                <React.Fragment key={message.id}>
+                                    {showDateDivider && (
+                                        <DateDivider date={message.createdAt} />
+                                    )}
+
+                                    <MessageBubble
+                                        message={message}
+                                        isOwn={message.senderUserId === currentUserId}
+                                        showAvatar={showAvatar}
+                                        senderAvatarUrl={sender?.avatarUrl ?? null}
+                                        senderDisplayName={sender?.displayName ?? null}
+                                        seenBy={seenByMessageId.get(message.id) ?? []}
+                                    />
+                                </React.Fragment>
                             );
                         })}
 

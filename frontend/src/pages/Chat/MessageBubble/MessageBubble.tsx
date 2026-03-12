@@ -13,6 +13,8 @@ type Props = {
     message: MessageDto;
     isOwn: boolean;
     showAvatar: boolean;
+    senderAvatarUrl?: string | null;
+    senderDisplayName?: string | null;
     seenBy?: SeenUser[];
 };
 
@@ -23,18 +25,28 @@ function formatMessageTime(value: string) {
     });
 }
 
-const MessageBubble = ({ message, isOwn, showAvatar, seenBy = [] }: Props) => {
+const MessageBubble = ({ message, isOwn, showAvatar, senderAvatarUrl, senderDisplayName, seenBy = [] }: Props) => {
     return (
         <div className={styles.messageBlock}>
             <div className={`${styles.row} ${isOwn ? styles.ownRow : styles.otherRow}`}>
                 {!isOwn && (
                     <div className={styles.avatarContainer}>
                         {showAvatar ? (
-                            <img
-                                src={message.senderPictureUrl}
-                                className={styles.avatar}
-                                alt=""
-                            />
+                            senderAvatarUrl ? (
+                                <img
+                                    src={senderAvatarUrl}
+                                    className={styles.avatar}
+                                    alt={senderDisplayName ?? ""}
+                                    title={senderDisplayName ?? ""}
+                                />
+                            ) : (
+                                <div
+                                    className={styles.avatarFallback}
+                                    title={senderDisplayName ?? ""}
+                                >
+                                    {(senderDisplayName ?? "?").charAt(0).toUpperCase()}
+                                </div>
+                            )
                         ) : (
                             <div className={styles.avatarSpacer} />
                         )}

@@ -40,7 +40,7 @@ const ConversationListItem = ({ conversation, isActive, onClick }: Props) => {
                         className={`${styles.avatar} ${isActive ? styles.activeAvatar : ""}`}
                     />
                 ) : (
-                    <div className={styles.avatarFallback}>
+                    <div className={`${styles.avatarFallback} ${isActive ? styles.activeAvatar : ""}`}>
                         {conversation.displayName.charAt(0).toUpperCase()}
                     </div>
                 )}

@@ -72,13 +72,15 @@ const UserSearchCard: React.FC<Props> = ({ user, busy, onToggleFollow }) => {
 
             <div className={styles.right}>
 
-                <button
-                    className={styles.messageBtn}
-                    onClick={() => void handleMessageClick()}
-                >
-                    <ChatIcon className={styles.icon} />
-                    Message
-                </button>
+                {!user.isMe && (
+                    <button
+                        className={styles.messageBtn}
+                        onClick={() => void handleMessageClick()}
+                    >
+                        <ChatIcon className={styles.icon} />
+                        Message
+                    </button>
+                )}
 
                 {!user.isMe && (
                     <button

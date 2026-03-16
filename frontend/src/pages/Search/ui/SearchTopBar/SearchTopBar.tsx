@@ -7,11 +7,12 @@ import { FunnelIcon as FunnelActive } from "@heroicons/react/24/solid";
 type Props = {
     value: string;
     onChange: (v: string) => void;
-    onOpenFilters: () => void;
+    onToggleFilters: () => void;
     isActive: boolean;
+    isOpen: boolean;
 };
 
-const SearchTopBar: React.FC<Props> = ({ value, onChange, onOpenFilters, isActive }) => {
+const SearchTopBar: React.FC<Props> = ({ value, onChange, onToggleFilters, isActive, isOpen }) => {
     return (
         <div className={styles.wrap}>
             <div className={styles.searchBar}>
@@ -25,9 +26,10 @@ const SearchTopBar: React.FC<Props> = ({ value, onChange, onOpenFilters, isActiv
                 />
 
                 <button
+                    type="button"
                     className={styles.filterBtn}
-                    onClick={onOpenFilters}
-                    aria-label="Open filters"
+                    onClick={onToggleFilters}
+                    aria-label={isOpen ? "Hide filters" : "Show filters"}
                     aria-pressed={isActive}
                 >
                     {isActive ? (

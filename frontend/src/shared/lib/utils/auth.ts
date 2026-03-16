@@ -22,7 +22,6 @@ export function getToken(): string | null {
 export function clearToken() {
     accessTokenInMemory = null;
     localStorage.removeItem('accessToken');
-    localStorage.removeItem("refreshToken");
 }
 
 export function getDecodedToken(): AppJwtPayload | null {

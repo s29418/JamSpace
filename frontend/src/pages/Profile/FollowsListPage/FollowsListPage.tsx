@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import { getToken } from '../../../shared/lib/utils/auth';
 import { Link, useParams } from 'react-router-dom';
 import styles from './FollowsListPage.module.css';
 import {FollowsMode, useUserFollows} from "../../../features/user/profileHeader/model/useUserFollows";
@@ -20,7 +21,7 @@ const FollowsListPage: React.FC<Props> = ({ mode }) => {
     const { items, loading, busy, ownerName, toggleFollow } = useUserFollows(id, mode);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (!token) { setMyId(null); return; }
         try {
             const { sub } = jwtDecode<JwtPayload>(token);

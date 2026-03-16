@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import React, { useState } from "react";
 import styles from "./FiltersDrawer.module.css";
 import Chips from "../Chips/Chips";
 
 type Props = {
-    open: boolean;
-    onClose: () => void;
-
     location: string;
     onLocationChange: (v: string) => void;
 
@@ -22,44 +18,36 @@ type Props = {
 };
 
 const FiltersDrawer: React.FC<Props> = ({
-                                            open,
-                                            onClose,
-                                            location,
-                                            onLocationChange,
-                                            skills,
-                                            onAddSkill,
-                                            onRemoveSkill,
-                                            genres,
-                                            onAddGenre,
-                                            onRemoveGenre,
-                                            onClear,
-                                        }) => {
+    location,
+    onLocationChange,
+    skills,
+    onAddSkill,
+    onRemoveSkill,
+    genres,
+    onAddGenre,
+    onRemoveGenre,
+    onClear,
+}) => {
     const [skillInput, setSkillInput] = useState("");
     const [genreInput, setGenreInput] = useState("");
 
-    useEffect(() => {
-        if (!open) return;
-        const onKey = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, [open, onClose]);
+    const handleAddSkill = () => {
+        onAddSkill(skillInput);
+        setSkillInput("");
+    };
 
-    if (!open) return null;
-    const modalRoot = document.getElementById("modal-root");
-    if (!modalRoot) return null;
+    const handleAddGenre = () => {
+        onAddGenre(genreInput);
+        setGenreInput("");
+    };
 
-    const body = (
-        <div className={styles.overlay} onMouseDown={onClose}>
-            <div className={styles.panel} onMouseDown={(e) => e.stopPropagation()}>
-                <div className={styles.header}>
-                    <h3 className={styles.title}>Filters</h3>
-                    <button className={styles.close} onClick={onClose} aria-label="Close filters">
-                        ✕
-                    </button>
-                </div>
+    return (
+        <div className={styles.panel}>
+            <div className={styles.header}>
+                <h3 className={styles.title}>Filters</h3>
+            </div>
 
+            <div className={styles.body}>
                 <div className={styles.section}>
                     <div className={styles.label}>Location:</div>
                     <input
@@ -81,18 +69,11 @@ const FiltersDrawer: React.FC<Props> = ({
                             onChange={(e) => setSkillInput(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
-                                    onAddSkill(skillInput);
-                                    setSkillInput("");
+                                    handleAddSkill();
                                 }
                             }}
                         />
-                        <button
-                            className={styles.addBtn}
-                            onClick={() => {
-                                onAddSkill(skillInput);
-                                setSkillInput("");
-                            }}
-                        >
+                        <button className={styles.addBtn} onClick={handleAddSkill} type="button">
                             Add
                         </button>
                     </div>
@@ -111,35 +92,26 @@ const FiltersDrawer: React.FC<Props> = ({
                             onChange={(e) => setGenreInput(e.target.value)}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
-                                    onAddGenre(genreInput);
-                                    setGenreInput("");
+                                    handleAddGenre();
                                 }
                             }}
                         />
-                        <button
-                            className={styles.addBtn}
-                            onClick={() => {
-                                onAddGenre(genreInput);
-                                setGenreInput("");
-                            }}
-                        >
+                        <button className={styles.addBtn} onClick={handleAddGenre} type="button">
                             Add
                         </button>
                     </div>
 
                     <Chips items={genres} onRemove={onRemoveGenre} />
                 </div>
+            </div>
 
-                <div className={styles.footer}>
-                    <button className={styles.clearBtn} onClick={onClear}>
-                        Clear
-                    </button>
-                </div>
+            <div className={styles.footer}>
+                <button className={styles.clearBtn} onClick={onClear} type="button">
+                    Clear
+                </button>
             </div>
         </div>
     );
-
-    return ReactDOM.createPortal(body, modalRoot);
 };
 
 export default FiltersDrawer;

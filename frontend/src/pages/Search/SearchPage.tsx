@@ -10,7 +10,7 @@ import UsersResults from "./ui/UsersResults/UsersResults";
 import Pagination from "./ui/Pagination/Pagination";
 
 const SearchPage: React.FC = () => {
-    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [filtersOpen, setFiltersOpen] = useState(true);
 
     const {
         filters,
@@ -36,45 +36,56 @@ const SearchPage: React.FC = () => {
         (updater) => setData((prev) => ({ ...prev, items: updater(prev.items) }))
     );
 
-    const filtersActive = Boolean(
-        filtersOpen || filters.location ||
+    const hasAppliedFilters = Boolean(
+        filters.location ||
         (filters.skills && filters.skills.length > 0) ||
         (filters.genres && filters.genres.length > 0)
     );
 
     return (
-        <div className={styles.wrapper}>
-            <SearchTopBar
-                value={filters.q}
-                onChange={setQ}
-                onOpenFilters={() => setFiltersOpen(true)}
-                isActive={filtersActive}
-            />
+        <div className={styles.page}>
+            <div className={styles.layout}>
+                <aside
+                    className={`${styles.sidebar} ${
+                        filtersOpen ? styles.sidebarOpen : styles.sidebarClosed
+                    }`}
+                >
+                    <div className={styles.sidebarInner}>
+                        <FiltersDrawer
+                            location={filters.location}
+                            onLocationChange={setLocation}
+                            skills={filters.skills}
+                            onAddSkill={addSkill}
+                            onRemoveSkill={removeSkill}
+                            genres={filters.genres}
+                            onAddGenre={addGenre}
+                            onRemoveGenre={removeGenre}
+                            onClear={clearFilters}
+                        />
+                    </div>
+                </aside>
 
-            <FiltersDrawer
-                open={filtersOpen}
-                onClose={() => setFiltersOpen(false)}
-                location={filters.location}
-                onLocationChange={setLocation}
-                skills={filters.skills}
-                onAddSkill={addSkill}
-                onRemoveSkill={removeSkill}
-                genres={filters.genres}
-                onAddGenre={addGenre}
-                onRemoveGenre={removeGenre}
-                onClear={clearFilters}
-            />
+                <section className={styles.content}>
+                    <SearchTopBar
+                        value={filters.q}
+                        onChange={setQ}
+                        onToggleFilters={() => setFiltersOpen((prev) => !prev)}
+                        isActive={filtersOpen || hasAppliedFilters}
+                        isOpen={filtersOpen}
+                    />
 
-            {error && <p className={styles.message}>{error}</p>}
+                    {error && <p className={styles.message}>{error}</p>}
 
-            <UsersResults
-                items={data.items}
-                loading={loading}
-                busy={busy}
-                onToggleFollow={toggleFollow}
-            />
+                    <UsersResults
+                        items={data.items}
+                        loading={loading}
+                        busy={busy}
+                        onToggleFollow={toggleFollow}
+                    />
 
-            <Pagination page={data.page} totalPages={data.totalPages} onChange={setPage} />
+                    <Pagination page={data.page} totalPages={data.totalPages} onChange={setPage} />
+                </section>
+            </div>
         </div>
     );
 };

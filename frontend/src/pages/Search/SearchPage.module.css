@@ -1,10 +1,75 @@
-.wrapper {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 18px 14px;
+.page {
+    padding: 2.5% 7%;
+    color: white;
+}
+
+.layout {
+    display: flex;
+    gap: 24px;
+    align-items: stretch;
+}
+
+.layoutWithFilters {
+    grid-template-columns: 360px minmax(0, 1fr);
+}
+
+.layoutWithoutFilters {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.sidebar {
+    flex: 0 0 auto;
+    overflow: hidden;
+    transition:
+            width 0.28s ease,
+            opacity 0.2s ease,
+            transform 0.28s ease,
+            margin 0.28s ease;
+}
+
+.sidebarOpen {
+    width: 320px;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sidebarClosed {
+    width: 0;
+    opacity: 0;
+    transform: translateX(-12px);
+}
+
+.sidebarInner {
+    width: 320px;
+    min-width: 320px;
+    transition: opacity 0.18s ease;
+}
+
+.sidebarClosed .sidebarInner {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
 }
 
 .message {
     margin: 12px 0;
     opacity: 0.9;
+}
+
+@media (max-width: 1100px) {
+    .page {
+        padding: 20px 14px;
+    }
+
+    .layoutWithFilters {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+    }
 }

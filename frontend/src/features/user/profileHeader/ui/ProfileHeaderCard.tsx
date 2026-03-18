@@ -73,7 +73,7 @@ export const ProfileHeaderCard: React.FC<Props> = (props) => {
                 {profile.profilePictureUrl ? (
                     <img src={profile.profilePictureUrl} alt={`${profile.username} avatar`} />
                 ) : (
-                    <div className={styles.avatarFallback}>{profile.username?.[0] ?? "?"}</div>
+                    <div className={styles.avatarFallback}>{profile.username?.[0].toUpperCase() ?? "?"}</div>
                 )}
             </div>
 

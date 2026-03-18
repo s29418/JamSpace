@@ -63,7 +63,7 @@ const ConversationListItem = ({ conversation, isActive, onClick }: Props) => {
 
                     {conversation.unreadCount > 0 && (
                         <span className={styles.badge}>
-                            {conversation.unreadCount}
+                            {conversation.unreadCount > 9 ? "9+" : conversation.unreadCount}
                         </span>
                     )}
                 </div>

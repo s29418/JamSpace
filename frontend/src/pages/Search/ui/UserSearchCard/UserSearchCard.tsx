@@ -39,7 +39,7 @@ const UserSearchCard: React.FC<Props> = ({ user, busy, onToggleFollow }) => {
                         {user.profilePictureUrl ? (
                             <img className={styles.avatar} src={user.profilePictureUrl} alt={`${user.username} avatar`} />
                         ) : (
-                            <div className={styles.avatarFallback}>{user.username?.[0] ?? "?"}</div>
+                            <div className={styles.avatarFallback}>{user.username?.[0].toUpperCase() ?? "?"}</div>
                         )}
                     </div>
                 </Link>

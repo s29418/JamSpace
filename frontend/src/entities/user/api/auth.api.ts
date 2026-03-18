@@ -1,5 +1,6 @@
 import { api } from '../../../shared/lib/api/base';
 import {clearToken, setToken} from "../../../shared/lib/utils/auth";
+import { markAuthReady } from "shared/lib/utils/waitForAuthReady";
 
 const ROOT = `/auth`;
 
@@ -11,6 +12,7 @@ export type AuthResponse = {
 export async function login(email: string, password: string) {
     const res = await api.post(`${ROOT}/login`, { email, password });
     setToken(res.data.accessToken);
+    markAuthReady();
     return res.data;
 }
 

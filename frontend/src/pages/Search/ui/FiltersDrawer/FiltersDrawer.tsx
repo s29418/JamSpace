@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import styles from "./FiltersDrawer.module.css";
 import Chips from "../Chips/Chips";
 
+import {
+    XMarkIcon as ClearIcon,
+    PlusIcon as AddIcon
+} from '@heroicons/react/24/outline';
+
 type Props = {
     location: string;
     onLocationChange: (v: string) => void;
@@ -74,6 +79,7 @@ const FiltersDrawer: React.FC<Props> = ({
                             }}
                         />
                         <button className={styles.addBtn} onClick={handleAddSkill} type="button">
+                            <AddIcon className={styles.icon}/>
                             Add
                         </button>
                     </div>
@@ -97,6 +103,7 @@ const FiltersDrawer: React.FC<Props> = ({
                             }}
                         />
                         <button className={styles.addBtn} onClick={handleAddGenre} type="button">
+                            <AddIcon className={styles.icon}/>
                             Add
                         </button>
                     </div>
@@ -107,6 +114,7 @@ const FiltersDrawer: React.FC<Props> = ({
 
             <div className={styles.footer}>
                 <button className={styles.clearBtn} onClick={onClear} type="button">
+                    <ClearIcon className={styles.icon} />
                     Clear
                 </button>
             </div>

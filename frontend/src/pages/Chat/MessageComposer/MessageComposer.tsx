@@ -1,5 +1,8 @@
 import React, { FormEvent, KeyboardEvent, useRef, useState } from "react";
 import styles from "./MessageComposer.module.css";
+import {
+        PaperAirplaneIcon as SendIcon
+} from '@heroicons/react/24/outline';
 
 type Props = {
     conversationId: string;
@@ -73,6 +76,7 @@ const MessageComposer = ({
                 disabled={sending || !value.trim()}
             >
                 Send
+                <SendIcon className={styles.icon}/>
             </button>
         </form>
     );

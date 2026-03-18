@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getConversations } from "entities/chat/api/conversations.api";
+import { useAuthState } from "shared/lib/hooks/useAuthState";
+import { waitForAuthReady } from "shared/lib/utils/waitForAuthReady";
 import type {
     ConversationListItemDto,
 } from "entities/chat/model/types";
@@ -16,8 +18,9 @@ function sortConversations(items: ConversationListItemDto[]) {
 
 export function useInbox() {
     const [conversations, setConversations] = useState<ConversationListItemDto[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { currentUserId, isAuthenticated } = useAuthState();
 
     const refresh = useCallback(async () => {
         setLoading(true);
@@ -35,14 +38,43 @@ export function useInbox() {
     }, []);
 
     useEffect(() => {
-        void refresh();
-    }, [refresh]);
-
-    useEffect(() => {
-        let unsubscribe: (() => void) | undefined;
+        let cancelled = false;
 
         const init = async () => {
+            setLoading(true);
+            setError(null);
+
+            await waitForAuthReady();
+            if (cancelled) return;
+
+            if (!isAuthenticated || !currentUserId) {
+                setConversations([]);
+                setLoading(false);
+                return;
+            }
+
+            await refresh();
+        };
+
+        void init();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [refresh, currentUserId, isAuthenticated]);
+
+    useEffect(() => {
+        if (!isAuthenticated || !currentUserId) return;
+
+        let unsubscribe: (() => void) | undefined;
+        let cancelled = false;
+
+        const init = async () => {
+            await waitForAuthReady();
+            if (cancelled) return;
+
             await chatHub.start();
+            if (cancelled) return;
 
             unsubscribe = chatHub.onConversationUpdated((event) => {
                 setConversations((prev) => {
@@ -68,9 +100,10 @@ export function useInbox() {
         void init();
 
         return () => {
+            cancelled = true;
             unsubscribe?.();
         };
-    }, []);
+    }, [currentUserId, isAuthenticated]);
 
     const markConversationLocallyAsRead = useCallback((conversationId: string) => {
         setConversations((prev) =>

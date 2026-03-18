@@ -9,8 +9,11 @@ export function useConversationDetails(conversationId: string | null) {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        setDetails(null);
+        setError(null);
+
         if (!conversationId) {
-            setDetails(null);
+            setLoading(false);
             return;
         }
 

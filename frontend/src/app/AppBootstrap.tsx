@@ -1,26 +1,64 @@
-import { useEffect } from 'react';
-import { setToken, clearToken, getDecodedToken } from 'shared/lib/utils/auth';
+import { useEffect } from "react";
+import {
+    setToken,
+    clearToken,
+    getDecodedToken,
+    getToken,
+} from "shared/lib/utils/auth";
+import { markAuthReady } from "shared/lib/utils/waitForAuthReady";
 
 export default function AppBootstrap() {
     useEffect(() => {
-        (async () => {
-            const decoded = getDecodedToken();
+        let cancelled = false;
 
-            if (decoded) return;
+        const bootstrap = async () => {
+            try {
+                if (getDecodedToken()) {
+                    markAuthReady();
+                    return;
+                }
 
-            const res = await fetch('http://localhost:5072/api/auth/refresh', {
-                method: 'POST',
-                credentials: 'include',
-            });
+                const res = await fetch("http://localhost:5072/api/auth/refresh", {
+                    method: "POST",
+                    credentials: "include",
+                });
 
-            if (!res.ok) {
-                clearToken();
-                return;
+                if (cancelled) return;
+
+                if (!res.ok) {
+                    if (!getDecodedToken() && !getToken()) {
+                        clearToken();
+                    }
+
+                    markAuthReady();
+                    return;
+                }
+
+                const { accessToken } = await res.json();
+
+                if (cancelled) return;
+
+                if (!getDecodedToken()) {
+                    setToken(accessToken);
+                }
+
+                markAuthReady();
+            } catch {
+                if (!cancelled && !getDecodedToken() && !getToken()) {
+                    clearToken();
+                }
+
+                if (!cancelled) {
+                    markAuthReady();
+                }
             }
+        };
 
-            const { accessToken } = await res.json();
-            setToken(accessToken);
-        })();
+        void bootstrap();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     return null;

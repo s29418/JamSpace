@@ -52,6 +52,7 @@ const ChatPage = () => {
 
                 {activeConversation ? (
                     <ConversationView
+                        key={activeConversation.id}
                         conversation={activeConversation}
                         onMarkedAsRead={markConversationLocallyAsRead}
                         updateConversationPreview={updateConversationPreview}

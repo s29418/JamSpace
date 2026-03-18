@@ -44,47 +44,55 @@ const SearchPage: React.FC = () => {
 
     return (
         <div className={styles.page}>
-            <div className={styles.layout}>
-                <aside
-                    className={`${styles.sidebar} ${
-                        filtersOpen ? styles.sidebarOpen : styles.sidebarClosed
-                    }`}
-                >
-                    <div className={styles.sidebarInner}>
-                        <FiltersDrawer
-                            location={filters.location}
-                            onLocationChange={setLocation}
-                            skills={filters.skills}
-                            onAddSkill={addSkill}
-                            onRemoveSkill={removeSkill}
-                            genres={filters.genres}
-                            onAddGenre={addGenre}
-                            onRemoveGenre={removeGenre}
-                            onClear={clearFilters}
-                        />
-                    </div>
-                </aside>
+            <div className={styles.shell}>
+                <div className={styles.layout}>
+                    <aside
+                        className={`${styles.sidebar} ${
+                            filtersOpen ? styles.sidebarOpen : styles.sidebarClosed
+                        }`}
+                    >
+                        <div className={styles.sidebarInner}>
+                            <FiltersDrawer
+                                location={filters.location}
+                                onLocationChange={setLocation}
+                                skills={filters.skills}
+                                onAddSkill={addSkill}
+                                onRemoveSkill={removeSkill}
+                                genres={filters.genres}
+                                onAddGenre={addGenre}
+                                onRemoveGenre={removeGenre}
+                                onClear={clearFilters}
+                            />
+                        </div>
+                    </aside>
 
-                <section className={styles.content}>
-                    <SearchTopBar
-                        value={filters.q}
-                        onChange={setQ}
-                        onToggleFilters={() => setFiltersOpen((prev) => !prev)}
-                        isActive={filtersOpen || hasAppliedFilters}
-                        isOpen={filtersOpen}
-                    />
+                    <section className={styles.content}>
+                        <div className={styles.contentInner}>
+                            <SearchTopBar
+                                value={filters.q}
+                                onChange={setQ}
+                                onToggleFilters={() => setFiltersOpen((prev) => !prev)}
+                                isActive={filtersOpen || hasAppliedFilters}
+                                isOpen={filtersOpen}
+                            />
 
-                    {error && <p className={styles.message}>{error}</p>}
+                            {error && <p className={styles.message}>{error}</p>}
 
-                    <UsersResults
-                        items={data.items}
-                        loading={loading}
-                        busy={busy}
-                        onToggleFollow={toggleFollow}
-                    />
+                            <UsersResults
+                                items={data.items}
+                                loading={loading}
+                                busy={busy}
+                                onToggleFollow={toggleFollow}
+                            />
 
-                    <Pagination page={data.page} totalPages={data.totalPages} onChange={setPage} />
-                </section>
+                            <Pagination
+                                page={data.page}
+                                totalPages={data.totalPages}
+                                onChange={setPage}
+                            />
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
     );

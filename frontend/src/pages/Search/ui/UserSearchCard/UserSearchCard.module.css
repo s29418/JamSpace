@@ -62,13 +62,23 @@
 .avatarFallback {
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 64px;
-    opacity: 0.9;
+    display: grid;
+    place-items: center;
+    /*background: #142223;*/
+    /*color: #26cdd4;*/
     color: inherit;
+    font-size: 80px;
+    font-weight: 700;
 }
+
+/*.avatarFallback {*/
+/*    display: grid;*/
+/*    place-items: center;*/
+/*    background: #142223;*/
+/*    color: #26cdd4;*/
+/*    font-size: 80px;*/
+/*    font-weight: 700;*/
+/*}*/
 
 .meta {
     display: flex;

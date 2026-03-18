@@ -3,46 +3,48 @@
     color: white;
 }
 
+.shell {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 .layout {
     display: flex;
-    gap: 24px;
     align-items: stretch;
-}
-
-.layoutWithFilters {
-    grid-template-columns: 360px minmax(0, 1fr);
-}
-
-.layoutWithoutFilters {
-    grid-template-columns: minmax(0, 1fr);
+    justify-content: center;
+    width: 100%;
+    max-width: 1320px;
+    gap: 32px;
 }
 
 .sidebar {
     flex: 0 0 auto;
     overflow: hidden;
     transition:
-            width 0.28s ease,
-            opacity 0.2s ease,
-            transform 0.28s ease,
-            margin 0.28s ease;
+            width 280ms cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 180ms ease,
+            margin-right 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: width, opacity, margin-right;
 }
 
 .sidebarOpen {
     width: 320px;
     opacity: 1;
-    transform: translateX(0);
+    margin-right: 24px;
 }
 
 .sidebarClosed {
     width: 0;
     opacity: 0;
-    transform: translateX(-12px);
+    margin-right: 0;
 }
 
 .sidebarInner {
     width: 320px;
     min-width: 320px;
-    transition: opacity 0.18s ease;
+    opacity: 1;
+    transition: opacity 140ms ease;
 }
 
 .sidebarClosed .sidebarInner {
@@ -51,8 +53,13 @@
 }
 
 .content {
-    flex: 1;
+    flex: 0 0 auto;
+    width: 1260px;
     min-width: 0;
+}
+
+.contentInner {
+    width: 100%;
 }
 
 .message {
@@ -60,16 +67,45 @@
     opacity: 0.9;
 }
 
+@media (max-width: 1400px) {
+    .layout {
+        max-width: 1200px;
+    }
+
+    .content {
+        width: 900px;
+    }
+}
+
 @media (max-width: 1100px) {
     .page {
         padding: 20px 14px;
     }
 
-    .layoutWithFilters {
-        grid-template-columns: 1fr;
+    .shell {
+        justify-content: stretch;
     }
 
-    .sidebar {
-        position: static;
+    .layout {
+        display: block;
+        max-width: none;
+    }
+
+    .sidebar,
+    .sidebarOpen,
+    .sidebarClosed {
+        width: 100%;
+        margin-right: 0;
+        opacity: 1;
+    }
+
+    .sidebarInner {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .content {
+        width: 100%;
+        margin-top: 16px;
     }
 }

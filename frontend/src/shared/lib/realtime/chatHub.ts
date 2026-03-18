@@ -6,6 +6,7 @@ import {
     HttpTransportType,
 } from "@microsoft/signalr";
 import { getToken } from "shared/lib/utils/auth";
+import { waitForAuthReady } from "shared/lib/utils/waitForAuthReady";
 import type {
     ConversationReadEvent,
     ConversationTypingEvent,
@@ -48,6 +49,11 @@ class ChatHubClient {
     }
 
     async start() {
+        await waitForAuthReady();
+
+        const token = getToken();
+        if (!token) return;
+
         const connection = this.ensureConnection();
 
         if (connection.state === HubConnectionState.Connected) return;

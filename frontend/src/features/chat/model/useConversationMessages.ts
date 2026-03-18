@@ -3,7 +3,8 @@ import { getConversationMessages } from "entities/chat/api/conversations.api";
 import type { ConversationReadEvent, MessageDto } from "entities/chat/model/types";
 import { ApiError, isApiError } from "shared/lib/api/base";
 import { chatHub } from "shared/lib/realtime/chatHub";
-import { getCurrentUserId } from "shared/lib/utils/auth";
+import { useAuthState } from "shared/lib/hooks/useAuthState";
+import { waitForAuthReady } from "shared/lib/utils/waitForAuthReady";
 
 type Params = {
     conversationId: string | null;
@@ -17,7 +18,7 @@ function sortMessages(items: MessageDto[]) {
 }
 
 export function useConversationMessages({ conversationId, onMarkedAsRead }: Params) {
-    const currentUserId = getCurrentUserId();
+    const { currentUserId, isAuthenticated } = useAuthState();
 
     const [messages, setMessages] = useState<MessageDto[]>([]);
     const [loading, setLoading] = useState(false);
@@ -112,12 +113,25 @@ export function useConversationMessages({ conversationId, onMarkedAsRead }: Para
         if (!conversationId) {
             setMessages([]);
             setReadEvents([]);
+            setHasMore(false);
+            setNextBefore(null);
             return;
         }
 
         let isCancelled = false;
 
         const init = async () => {
+            await waitForAuthReady();
+            if (isCancelled) return;
+
+            if (!isAuthenticated || !currentUserId) {
+                setMessages([]);
+                setReadEvents([]);
+                setHasMore(false);
+                setNextBefore(null);
+                return;
+            }
+
             try {
                 await chatHub.joinConversation(conversationId);
 
@@ -141,7 +155,7 @@ export function useConversationMessages({ conversationId, onMarkedAsRead }: Para
             isCancelled = true;
             void chatHub.leaveConversation(conversationId);
         };
-    }, [conversationId, refresh]);
+    }, [conversationId, refresh, currentUserId, isAuthenticated]);
 
     useEffect(() => {
         const unsubscribe = chatHub.onMessageNew(async (message) => {

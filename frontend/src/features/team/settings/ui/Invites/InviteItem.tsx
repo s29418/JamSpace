@@ -6,20 +6,30 @@ import {Link} from "react-router-dom";
 
 type Props = {
     invite: InviteView;
-    avatarSrc: string;
     onCancel: () => void | Promise<void>;
 };
 
-const _InviteItem: React.FC<Props> = ({ invite, avatarSrc, onCancel }) => {
+const _InviteItem: React.FC<Props> = ({ invite, onCancel }) => {
     return (
         <li className={styles.member}>
-            <Link to={`/profile/${invite.invitedUserId}`} className={styles.userAvatarWrapper}>
-                <img
-                    src={avatarSrc}
-                    alt={invite.invitedUserName}
-                    className={styles.userAvatar}
-                />
+            <Link to={`/profile/${invite.invitedUserId}`} className={styles.userAvatarWrapper + " " + styles.noUnderline}>
+                {invite.invitedUserPictureUrl ? (
+
+                    <img
+                        src={invite.invitedUserPictureUrl}
+                        alt={invite.invitedUserName}
+                        className={styles.userAvatar}
+                    />
+
+                ) : (
+
+                    <div className={styles.avatarFallback}>
+                        {invite.invitedUserName?.[0].toUpperCase() ?? "?"}
+                    </div>
+
+                )}
             </Link>
+
 
             <div className={styles.invitedUserDetails}>
                 <div>

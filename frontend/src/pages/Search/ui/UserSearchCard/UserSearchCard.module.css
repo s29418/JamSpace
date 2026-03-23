@@ -20,6 +20,12 @@
     transform: translateY(-3px);
 }
 
+.card:hover .avatarWrap {
+    box-shadow: 0 0 12px rgba(53, 215, 255, 0.3);
+    transform: translateY(-3px);
+    /*border-color: #26cdd4;*/
+}
+
 .left {
     display: flex;
     align-items: center;
@@ -31,13 +37,17 @@
     width: 160px;
     height: 160px;
     border-radius: 999px;
-    border: 2px solid rgba(255,255,255,0.14);
+    border: 2px solid #26cdd4;;
+    /*box-shadow: 0 0 12px rgba(53, 215, 255, 0.3);*/
+
     overflow: hidden;
     flex-shrink: 0;
     background: #141414;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.5s ease;
 }
 
 .avatar {
@@ -64,9 +74,13 @@
     height: 100%;
     display: grid;
     place-items: center;
-    /*background: #142223;*/
-    /*color: #26cdd4;*/
-    color: inherit;
+
+    background: #142223;
+    color: #26cdd4;
+
+    /*background: #131313;*/
+    /*color: inherit;*/
+
     font-size: 80px;
     font-weight: 700;
 }
@@ -167,7 +181,7 @@
 }
 
 .messageBtn:hover, .followBtn:hover {
-    background: rgba(53, 215, 255, 0.05);
+    background: rgba(53, 215, 255, 0.1);
 }
 
 .icon{

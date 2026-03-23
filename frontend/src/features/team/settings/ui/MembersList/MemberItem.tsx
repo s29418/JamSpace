@@ -8,7 +8,6 @@ import {Link} from "react-router-dom";
 
 type Props = {
     member: TeamMember;
-    avatarSrc: string;
     isSelf?: boolean;
 
     canChangeRole: boolean;
@@ -22,7 +21,6 @@ type Props = {
 
 const _MemberItem: React.FC<Props> = ({
                                           member,
-                                          avatarSrc,
                                           isSelf = false,
                                           canChangeRole,
                                           canEditMusicalRole,
@@ -37,9 +35,17 @@ const _MemberItem: React.FC<Props> = ({
     return (
         <li className={styles.member}>
             {/* AVATAR */}
-            <Link to={`/profile/${member.userId}`}>
+            <Link to={`/profile/${member.userId}`}
+            className={styles.noUnderline}>
                 <div className={styles.userAvatarWrapper}>
-                    <img src={avatarSrc} alt={member.username} className={styles.userAvatar}/>
+
+                    {member.userPictureUrl ? (
+                        <img src={member.userPictureUrl} alt={member.username} className={styles.userAvatar}/>
+                    ) : (
+                        <div className={styles.avatarFallback}>
+                            {member.username[0].toUpperCase()}
+                        </div>
+                    )}
                 </div>
             </Link>
 

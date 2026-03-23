@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import styles from '../TeamSettingsModal.module.css';
-import defaultTeamIcon from '../../../../../shared/assets/defaultTeamIcon.jpg';
 
 import { TeamMember, TeamRoleLabel } from '../../../../../entities/team/model/types'
 import { MemberItem } from './MemberItem';
@@ -28,7 +27,6 @@ type Props = {
 export const MembersList: React.FC<Props> = ({
                                                  members,
                                                  currentUserId,
-                                                 avatarFallbackSrc = defaultTeamIcon,
                                                  onChangeRole,
                                                  onChangeMusicalRole,
                                                  onKick,
@@ -47,7 +45,6 @@ export const MembersList: React.FC<Props> = ({
                     <MemberItem
                         key={m.userId}
                         member={m}
-                        avatarSrc={m.userPictureUrl || avatarFallbackSrc}
                         isSelf={currentUserId === m.userId}
                         canChangeRole={canChangeRole(m)}
                         canEditMusicalRole={canEditMusicalRole(m)}

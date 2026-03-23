@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import styles from '../TeamSettingsModal.module.css';
-import defaultTeamIcon from '../../../../../shared/assets/defaultTeamIcon.jpg';
 import { InviteItem } from './InviteItem';
 
 export type InviteView = {
@@ -34,7 +33,6 @@ export const InvitesList: React.FC<Props> = ({
                     <InviteItem
                         key={invite.id}
                         invite={invite}
-                        avatarSrc={invite.invitedUserPictureUrl || defaultTeamIcon}
                         onCancel={() => onCancel(invite.id)}
                     />
                 ))}

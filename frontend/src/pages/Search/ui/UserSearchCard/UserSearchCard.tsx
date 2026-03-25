@@ -4,6 +4,7 @@ import { getOrCreateDirectConversation } from "entities/chat/api/conversations.a
 import styles from "./UserSearchCard.module.css";
 import type { UserSearchItem } from "entities/user/model/types";
 import {Link} from "react-router-dom";
+import TagRow from "../TagRow/TagRow";
 
 import { UserPlusIcon, ChatBubbleOvalLeftEllipsisIcon as ChatIcon } from "@heroicons/react/24/outline";
 import { UserMinusIcon } from "@heroicons/react/24/solid";
@@ -57,21 +58,9 @@ const UserSearchCard: React.FC<Props> = ({ user, busy, onToggleFollow }) => {
 
                     <div className={styles.followerss}>{user.followersCount} followers</div>
 
-                    <div className={styles.tagsRow}>
-                        {user.skills.map((s) => (
-                            <span key={s} className={styles.tag}>
-                                {s}
-                            </span>
-                        ))}
-                    </div>
+                    <TagRow tags={user.skills} />
+                    <TagRow tags={user.genres} variant="primary" />
 
-                    <div className={styles.tagsRow}>
-                        {user.genres.map((g) => (
-                            <span key={g} className={`${styles.tag} ${styles.tagPrimary}`}>
-                                {g}
-                            </span>
-                        ))}
-                    </div>
                 </div>
             </div>
 

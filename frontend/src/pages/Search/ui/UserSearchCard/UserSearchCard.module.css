@@ -31,6 +31,7 @@
     align-items: center;
     gap: 18px;
     flex: 1;
+    min-width: 0;
 }
 
 .avatarWrap {
@@ -98,6 +99,7 @@
 .meta {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     /*gap: 6px;*/
 }
 
@@ -120,24 +122,41 @@
 
 .tagsRow {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 10px;
     margin-top: 8px;
+    overflow: hidden;
+    min-width: 0;
+    position: relative;
 }
 
 .tag {
     padding: 4px 10px;
     border-radius: 999px;
-    /*border: 1px solid rgba(255,255,255,0.16);*/
     background: #26cdd4;
     color: #0b1414;
     font-size: 13px;
+    white-space: nowrap;
+    flex: 0 0 auto;
 }
 
 .tagPrimary {
     background: transparent;
     border: 1px solid #26cdd4;
     color: #26cdd4;
+}
+
+.tagMore {
+    background: rgba(255,255,255,0.1);
+    color: #26cdd4;
+    border: 1px solid rgba(255,255,255,0.12);
+}
+
+.tagMeasureHidden {
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
+    white-space: nowrap;
 }
 
 .right {

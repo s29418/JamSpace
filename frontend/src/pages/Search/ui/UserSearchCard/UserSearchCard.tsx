@@ -47,24 +47,29 @@ const UserSearchCard: React.FC<Props> = ({ user, busy, onToggleFollow }) => {
                 <div className={styles.meta}>
 
                     <Link to={`/profile/${user.id}`} className={styles.avatarLink}>
-                        <div className={styles.name}>{user.username}</div>
+                        <div className={styles.displayName}>{user.displayName}</div>
+                        {/*<div className={styles.displayName}>·</div>*/}
+                        <div className={styles.username}>@{user.username}</div>
                     </Link>
+
 
                     <div className={styles.location}>{loc}</div>
 
+                    <div className={styles.followerss}>{user.followersCount} followers</div>
+
                     <div className={styles.tagsRow}>
                         {user.skills.map((s) => (
-                            <span key={s} className={`${styles.tag} ${styles.tagPrimary}`}>
-                {s}
-              </span>
+                            <span key={s} className={styles.tag}>
+                                {s}
+                            </span>
                         ))}
                     </div>
 
                     <div className={styles.tagsRow}>
                         {user.genres.map((g) => (
-                            <span key={g} className={styles.tag}>
-                {g}
-              </span>
+                            <span key={g} className={`${styles.tag} ${styles.tagPrimary}`}>
+                                {g}
+                            </span>
                         ))}
                     </div>
                 </div>
@@ -82,6 +87,8 @@ const UserSearchCard: React.FC<Props> = ({ user, busy, onToggleFollow }) => {
                     </button>
                 )}
 
+
+
                 {!user.isMe && (
                     <button
                         className={`${styles.followBtn} ${user.isFollowing ? styles.following : styles.follow}`}
@@ -97,7 +104,7 @@ const UserSearchCard: React.FC<Props> = ({ user, busy, onToggleFollow }) => {
                     </button>
                 )}
 
-                <div className={styles.followers}>{user.followersCount} followers</div>
+                {/*<div className={styles.followers}>{user.followersCount} followers</div>*/}
 
             </div>
         </div>

@@ -48,6 +48,7 @@ export interface PagedResult<T> {
 export interface UserSearchItem {
     id: string;
     username: string;
+    displayName: string;
     profilePictureUrl?: string | null;
     location?: LocationDto | null;
 

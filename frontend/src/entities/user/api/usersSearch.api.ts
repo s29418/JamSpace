@@ -38,6 +38,7 @@ export const searchUsers = async (params: SearchUsersParams): Promise<PagedResul
         items: (raw.items ?? []).map((u: any) => ({
             id: u.id,
             username: u.username ?? "",
+            displayName: u.displayName ?? "",
             profilePictureUrl: u.profilePictureUrl ?? null,
             location: {
                 city: u.city ?? null,

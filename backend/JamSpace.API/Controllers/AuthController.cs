@@ -29,6 +29,18 @@ public class AuthController : ControllerBase
         _jwtOptions = jwtOptions;
     }
 
+    private CookieOptions BuildRefreshTokenCookieOptions()
+    {
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTimeOffset.UtcNow.AddDays(_jwtOptions.Value.RefreshDays),
+            Path = "/"
+        };
+    }
+
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginDto dto)
@@ -38,14 +50,7 @@ public class AuthController : ControllerBase
 
         var result = await _mediator.Send(new LoginUserQuery(dto.Email, dto.Password, userAgent, ip));
         
-        Response.Cookies.Append(RefreshTokenCookieName, result.RefreshToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = false,
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.UtcNow.AddDays(_jwtOptions.Value.RefreshDays),
-            Path = "/"
-        });
+        Response.Cookies.Append(RefreshTokenCookieName, result.RefreshToken, BuildRefreshTokenCookieOptions());
         
         return Ok(new AuthResponse(result.UserId, result.UserName, result.Email, result.AccessToken));
     }
@@ -65,13 +70,7 @@ public class AuthController : ControllerBase
         Request.Cookies.TryGetValue(RefreshTokenCookieName, out var cookie);
         var result = await _mediator.Send(new RefreshCommand(cookie ?? string.Empty));
 
-        Response.Cookies.Append(RefreshTokenCookieName, result.RefreshToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Expires = DateTimeOffset.UtcNow.AddDays(_jwtOptions.Value.RefreshDays)
-        });
+        Response.Cookies.Append(RefreshTokenCookieName, result.RefreshToken, BuildRefreshTokenCookieOptions());
 
         return Ok(new AuthResponse(result.UserId, result.UserName, result.Email, result.AccessToken));
     }
@@ -96,10 +95,7 @@ public class AuthController : ControllerBase
 
         await sessions.LogoutAsync(userId, cookie, ct);
 
-        Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions
-        {
-            HttpOnly = true, Secure = true, SameSite = SameSiteMode.None
-        });
+        Response.Cookies.Delete(RefreshTokenCookieName, BuildRefreshTokenCookieOptions());
         return NoContent();
     }
 
@@ -112,10 +108,7 @@ public class AuthController : ControllerBase
         var userId = User.GetUserId();
         await sessions.LogoutEverywhereAsync(userId, ct);
 
-        Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions
-        {
-            HttpOnly = true, Secure = true, SameSite = SameSiteMode.None
-        });
+        Response.Cookies.Delete(RefreshTokenCookieName, BuildRefreshTokenCookieOptions());
         return NoContent();
     }
 }

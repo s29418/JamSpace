@@ -15,5 +15,5 @@ public class Conversation
     public string? LastMessagePreview { get; set; }
     public Guid? LastMessageId { get; set; }
     
-    public ICollection<ConversationParticipant> Participants { get; private set; } = new List<ConversationParticipant>();
+    public ICollection<ConversationParticipant> Participants { get; set; } = new List<ConversationParticipant>();
 }

@@ -14,26 +14,29 @@ public class UserSearchRepository : IUserSearchRepository
     {
         _db = db;
     }
-
+    
     public async Task<PagedResult<UserCardDto>> SearchAsync(
-        string? usernameQuery,
-        LocationFilter? location,
-        IReadOnlyList<string> requiredSkills,
-        IReadOnlyList<string> requiredGenres,
-        Guid? currentUserId,
-        int page,
-        int pageSize,
-        CancellationToken ct)
+    string? usernameQuery,
+    LocationFilter? location,
+    IReadOnlyList<string> requiredSkills,
+    IReadOnlyList<string> requiredGenres,
+    Guid? currentUserId,
+    int page,
+    int pageSize,
+    CancellationToken ct)
     {
         var query = _db.Users
             .AsNoTracking()
             .AsQueryable();
 
-        // username
-        if (!string.IsNullOrWhiteSpace(usernameQuery))
+        var normalizedQuery = usernameQuery?.Trim().ToLowerInvariant();
+
+        // username & displayName
+        if (!string.IsNullOrWhiteSpace(normalizedQuery))
         {
-            var q = usernameQuery.ToLowerInvariant();
-            query = query.Where(u => u.UserName.ToLower().Contains(q));
+            query = query.Where(u =>
+                u.UserName.ToLower().Contains(normalizedQuery) ||
+                (u.DisplayName.ToLower().Contains(normalizedQuery)));
         }
 
         // location
@@ -95,14 +98,35 @@ public class UserSearchRepository : IUserSearchRepository
 
         var skip = (page - 1) * pageSize;
 
+        if (!string.IsNullOrWhiteSpace(normalizedQuery))
+        {
+            query = query
+                .OrderBy(u =>
+                    u.UserName.ToLower() == normalizedQuery ? 0 :
+                    u.DisplayName.ToLower() == normalizedQuery ? 1 :
+                    u.UserName.ToLower().StartsWith(normalizedQuery) ? 2 :
+                    u.DisplayName.ToLower().StartsWith(normalizedQuery) ? 3 :
+                    4)
+                .ThenByDescending(u => u.Followers.Count)
+                .ThenBy(u => u.DisplayName)
+                .ThenBy(u => u.UserName);
+        }
+        else
+        {
+            query = query
+                .OrderByDescending(u => u.Followers.Count)
+                .ThenBy(u => u.DisplayName)
+                .ThenBy(u => u.UserName);
+        }
+
         var items = await query
-            .OrderBy(u => u.UserName)
             .Skip(skip)
             .Take(pageSize)
             .Select(u => new UserCardDto
             {
                 Id = u.Id,
                 Username = u.UserName,
+                DisplayName = u.DisplayName,
                 ProfilePictureUrl = u.ProfilePictureUrl,
 
                 City = u.Location != null ? u.Location.City : null,

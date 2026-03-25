@@ -25,9 +25,6 @@ public class GetConversationDetailsHandler : IRequestHandler<GetConversationDeta
 
         var participants = conversation.Participants.ToList();
 
-        if (participants.Count < 2)
-            throw new InvalidOperationException("Conversation must have at least two participants.");
-
         if (!participants.Any(p => p.UserId == request.UserId))
             throw new ForbiddenAccessException("User is not a participant of this conversation.");
 

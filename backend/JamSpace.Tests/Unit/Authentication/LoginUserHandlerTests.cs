@@ -2,6 +2,7 @@
 using Moq;
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Common.Settings;
 using JamSpace.Application.Features.Authentication.Queries.Login;
 using JamSpace.Domain.Entities;
@@ -21,6 +22,7 @@ public class LoginUserHandlerTests
         var refreshRepo = new Mock<IRefreshTokenRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
         var hasher = new Mock<IPasswordHasher>();
+        var uow = new Mock<IUnitOfWork>();
 
         var jwtSettings = new JwtSettings
         {
@@ -38,7 +40,8 @@ public class LoginUserHandlerTests
             refreshRepo.Object,
             jwt.Object,
             jwtOptions,
-            hasher.Object
+            hasher.Object,
+            uow.Object
         );
 
         var query = new LoginUserQuery("user@example.com", "password", "127.0.0.1", "UA");
@@ -68,6 +71,7 @@ public class LoginUserHandlerTests
         var refreshRepo = new Mock<IRefreshTokenRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
         var hasher = new Mock<IPasswordHasher>();
+        var uow = new Mock<IUnitOfWork>();
 
         var jwtSettings = new JwtSettings
         {
@@ -89,7 +93,8 @@ public class LoginUserHandlerTests
             refreshRepo.Object,
             jwt.Object,
             jwtOptions,
-            hasher.Object
+            hasher.Object,
+            uow.Object
         );
 
         var query = new LoginUserQuery(user.Email, "wrong-password", "127.0.0.1", "UA");
@@ -122,6 +127,7 @@ public class LoginUserHandlerTests
         var refreshRepo = new Mock<IRefreshTokenRepository>();
         var jwt = new Mock<IJwtTokenGenerator>();
         var hasher = new Mock<IPasswordHasher>();
+        var uow = new Mock<IUnitOfWork>();
 
         var jwtSettings = new JwtSettings
         {
@@ -154,7 +160,8 @@ public class LoginUserHandlerTests
             refreshRepo.Object,
             jwt.Object,
             jwtOptions,
-            hasher.Object
+            hasher.Object,
+            uow.Object
         );
 
         var query = new LoginUserQuery(user.Email, "correct-password", "UA","127.0.0.1");

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getTeamById } from 'entities/team/api/teams.api';
 import type { Team } from 'entities/team/model/types';
-import { ApiError, isApiError } from 'shared/lib/api/base';
+import { ApiError, isApiError } from 'shared/api/base';
 import { onTeamRemoved, onTeamUpdated } from 'shared/lib/events/teamEvents';
 
 export function useTeam(teamId?: string) {

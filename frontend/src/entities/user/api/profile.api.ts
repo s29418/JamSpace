@@ -1,4 +1,4 @@
-import {api, ApiError} from '../../../shared/lib/api/base';
+import {api, ApiError} from '../../../shared/api/base';
 import type { UserProfile } from '../model/types';
 
 const ROOT = '/users';

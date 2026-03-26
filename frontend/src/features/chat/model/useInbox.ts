@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { getConversations } from "entities/chat/api/conversations.api";
 import { useAuthState } from "shared/lib/hooks/useAuthState";
-import { waitForAuthReady } from "shared/lib/utils/waitForAuthReady";
+import { waitForAuthReady } from "shared/lib/auth/waitForAuthReady";
 import type {
     ConversationListItemDto,
 } from "entities/chat/model/types";
-import { ApiError, isApiError } from "shared/lib/api/base";
+import { ApiError, isApiError } from "shared/api/base";
 import { chatHub } from "shared/lib/realtime/chatHub";
 
 function sortConversations(items: ConversationListItemDto[]) {

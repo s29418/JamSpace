@@ -1,5 +1,5 @@
 import {login, logout, logoutAll, register} from "../../../entities/user/api/auth.api";
-import { getToken } from "../../../shared/lib/utils/auth";
+import { getToken } from "../../../shared/lib/auth/auth";
 
 export function useAuth() {
     return {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getDecodedToken, getCurrentUserId, getToken } from "../utils/auth";
+import { getDecodedToken, getCurrentUserId, getToken } from "../auth/auth";
 
 type AuthState = {
     isAuthenticated: boolean;

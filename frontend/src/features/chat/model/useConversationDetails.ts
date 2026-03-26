@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getConversationDetails } from "entities/chat/api/conversations.api";
 import type { ConversationDetailsDto } from "entities/chat/model/types";
-import { ApiError, isApiError } from "shared/lib/api/base";
+import { ApiError, isApiError } from "shared/api/base";
 
 export function useConversationDetails(conversationId: string | null) {
     const [details, setDetails] = useState<ConversationDetailsDto | null>(null);

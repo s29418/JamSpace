@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getConversationMessages } from "entities/chat/api/conversations.api";
 import type { ConversationReadEvent, MessageDto } from "entities/chat/model/types";
-import { ApiError, isApiError } from "shared/lib/api/base";
+import { ApiError, isApiError } from "shared/api/base";
 import { chatHub } from "shared/lib/realtime/chatHub";
 import { useAuthState } from "shared/lib/hooks/useAuthState";
-import { waitForAuthReady } from "shared/lib/utils/waitForAuthReady";
+import { waitForAuthReady } from "shared/lib/auth/waitForAuthReady";
 
 type Params = {
     conversationId: string | null;

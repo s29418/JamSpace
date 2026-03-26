@@ -1,6 +1,6 @@
-import { api } from '../../../shared/lib/api/base';
-import {clearToken, setToken} from "../../../shared/lib/utils/auth";
-import { markAuthReady } from "shared/lib/utils/waitForAuthReady";
+import { api } from '../../../shared/api/base';
+import {clearToken, setToken} from "../../../shared/lib/auth/auth";
+import { markAuthReady } from "shared/lib/auth/waitForAuthReady";
 
 const ROOT = `/auth`;
 

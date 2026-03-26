@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { isApiError, ApiError } from '../../../shared/lib/api/base';
-import styles from '../../../pages/Profile/ProfilePage.module.css';
+import { isApiError, ApiError } from '../../../shared/api/base';
+import styles from '../../../pages/Profile/ui/ProfilePage.module.css';
 import {useAuth} from "../model/useAuth";
 
 type FieldErr = {

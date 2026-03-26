@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../model/useAuth';
-import styles from '../../../pages/Profile/ProfilePage.module.css';
+import styles from '../../../pages/Profile/ui/ProfilePage.module.css';
 
 const LoginForm = ({ onLogin }: { onLogin: () => void }) => {
     const [email, setEmail] = useState('');

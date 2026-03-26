@@ -1,5 +1,5 @@
-import React, {FC, useEffect, useState} from 'react';
-import { useParams } from 'react-router-dom';
+import React, { FC, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 import styles from './ProfilePage.module.css';
@@ -7,10 +7,12 @@ import LoginForm from '../../../features/auth/ui/LoginForm';
 import RegisterForm from '../../../features/auth/ui/RegisterForm';
 
 import { useProfile } from '../../../features/user/profile/model/useProfile';
+import { logout } from '../../../entities/user/api/auth.api';
+import { getOrCreateDirectConversation } from '../../../entities/chat/api/conversations.api';
 
 import { ProfileHeaderCard } from '../../../widgets/profile-header/ui/ProfileHeaderCard';
 import { EditProfilePanel } from '../../../features/user/edit-profile/ui/EditProfilePanel';
-import {ProfileHeaderCardSkeleton} from "../../../widgets/profile-header/ui/ProfileHeaderCardSkeleton";
+import { ProfileHeaderCardSkeleton } from "../../../widgets/profile-header/ui/ProfileHeaderCardSkeleton";
 import { getToken, clearToken } from '../../../shared/lib/auth/auth';
 import { chatHub } from '../../../shared/lib/realtime/chatHub';
 
@@ -18,13 +20,18 @@ type JwtPayload = { sub: string; username: string; email: string };
 
 const ProfilePage: FC = () => {
     const params = useParams<{ id?: string }>();
+    const navigate = useNavigate();
 
     const [isLoginView, setIsLoginView] = useState(true);
     const [myId, setMyId] = useState<string | null>(null);
 
     useEffect(() => {
         const token = getToken();
-        if (!token) { setMyId(null); return; }
+        if (!token) {
+            setMyId(null);
+            return;
+        }
+
         try {
             const { sub } = jwtDecode<JwtPayload>(token);
             setMyId(sub);
@@ -36,16 +43,30 @@ const ProfilePage: FC = () => {
     const handleLoggedIn = () => {
         const token = getToken();
         if (!token) return;
+
         try {
             const { sub } = jwtDecode<JwtPayload>(token);
             setMyId(sub);
-            } catch {  }
-        };
+        } catch {}
+    };
 
     const targetUserId = params.id ?? myId ?? undefined;
 
-    const { profile, loading, error, toggleFollow, followLoading, updateProfile,
-    addGenre, removeGenre, addSkill, removeSkill, updateEmail, changePassword, deleteAccount, logoutAll
+    const {
+        profile,
+        loading,
+        error,
+        toggleFollow,
+        followLoading,
+        updateProfile,
+        addGenre,
+        removeGenre,
+        addSkill,
+        removeSkill,
+        updateEmail,
+        changePassword,
+        deleteAccount,
+        logoutAll,
     } = useProfile(targetUserId);
 
     const [editOpen, setEditOpen] = useState(false);
@@ -55,7 +76,6 @@ const ProfilePage: FC = () => {
             <div className={styles.wrapper}>
                 <div className={styles.loginForm}>
                     {isLoginView ? (
-
                         <>
                             <LoginForm onLogin={handleLoggedIn} />
                             <p>
@@ -64,7 +84,6 @@ const ProfilePage: FC = () => {
                             </p>
                         </>
                     ) : (
-
                         <>
                             <RegisterForm />
                             <p>
@@ -73,7 +92,6 @@ const ProfilePage: FC = () => {
                             </p>
                         </>
                     )}
-
                 </div>
             </div>
         );
@@ -81,15 +99,9 @@ const ProfilePage: FC = () => {
 
     const isOwner = !!profile && !!myId && profile.id === myId;
 
-
     async function handleLogout() {
-        const token = localStorage.getItem("accessToken");
         try {
-            await fetch(`http://localhost:5072/api/auth/logout`, {
-                method: "POST",
-                credentials: "include",
-                headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-            });
+            await logout();
             await chatHub.stop();
         } catch (e) {
             console.error("logout error", e);
@@ -97,14 +109,43 @@ const ProfilePage: FC = () => {
 
         clearToken();
         setMyId(null);
+        navigate('/');
     }
 
     async function handleLogoutAll() {
-        try{
+        try {
             await logoutAll();
+            await chatHub.stop();
         } catch {}
+
         clearToken();
         setMyId(null);
+        navigate('/');
+    }
+
+    async function handleDeleteAccount() {
+        try {
+            await deleteAccount();
+            await chatHub.stop();
+        } catch {}
+
+        clearToken();
+        setMyId(null);
+        navigate('/');
+    }
+
+    async function handleMessage() {
+        if (!profile) return;
+
+        try {
+            const result = await getOrCreateDirectConversation({
+                otherUserId: profile.id,
+            });
+
+            navigate(`/chat?conversationId=${result.conversationId}`);
+        } catch (error) {
+            console.error("Failed to open direct conversation", error);
+        }
     }
 
     return (
@@ -112,9 +153,7 @@ const ProfilePage: FC = () => {
             {error && <p className={styles.error}>{error}</p>}
             {loading && <ProfileHeaderCardSkeleton />}
 
-
             <div className={styles.wrapper}>
-
                 {profile && (
                     <>
                         <ProfileHeaderCard
@@ -123,13 +162,10 @@ const ProfilePage: FC = () => {
                             onEdit={() => setEditOpen(true)}
                             onLogout={isOwner ? handleLogout : undefined}
                             onToggleFollow={!isOwner ? toggleFollow : undefined}
+                            onMessage={!isOwner ? handleMessage : undefined}
                             followLoading={!isOwner ? followLoading : undefined}
-                            onOpenFollowers={() => {
-                                    window.location.href = `/profile/${profile.id}/followers`;
-                            }}
-                            onOpenFollowing={() => {
-                                    window.location.href = `/profile/${profile.id}/following`;
-                            }}
+                            onOpenFollowers={() => navigate(`/profile/${profile.id}/followers`)}
+                            onOpenFollowing={() => navigate(`/profile/${profile.id}/following`)}
                         />
 
                         <EditProfilePanel
@@ -147,7 +183,7 @@ const ProfilePage: FC = () => {
                                 await changePassword(oldPassword, newPassword);
                                 await handleLogoutAll();
                             }}
-                            onDeleteAccount={deleteAccount}
+                            onDeleteAccount={handleDeleteAccount}
                             onLogoutAll={handleLogoutAll}
                         />
                     </>

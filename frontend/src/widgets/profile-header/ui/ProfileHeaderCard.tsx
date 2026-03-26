@@ -1,7 +1,4 @@
-import React, {useMemo} from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getOrCreateDirectConversation } from "entities/chat/api/conversations.api";
-
+import React, { useMemo } from "react";
 import { UserProfile } from "../../../entities/user/model/types";
 import styles from "./ProfileHeaderCard.module.css";
 import {
@@ -9,7 +6,7 @@ import {
     UserPlusIcon as FollowIcon,
     UserMinusIcon as UnfollowIcon,
     ChatBubbleOvalLeftIcon as MessageIcon,
-    ArrowRightStartOnRectangleIcon as LogoutIcon
+    ArrowRightStartOnRectangleIcon as LogoutIcon,
 } from '@heroicons/react/24/outline';
 
 type Props = {
@@ -18,6 +15,7 @@ type Props = {
     onEdit: () => void;
     onLogout?: () => void;
     onToggleFollow?: () => void;
+    onMessage?: () => void | Promise<void>;
     followLoading?: boolean;
     onOpenFollowers?: () => void;
     onOpenFollowing?: () => void;
@@ -25,17 +23,28 @@ type Props = {
 
 function useRegionName(locale = "en") {
     const dn = useMemo(() => {
-        try { return new Intl.DisplayNames([locale], { type: "region" }); }
-        catch { return null; }
+        try {
+            return new Intl.DisplayNames([locale], { type: "region" });
+        } catch {
+            return null;
+        }
     }, [locale]);
 
     return (code?: string | null) =>
         !code ? undefined : (dn?.of(code.toUpperCase()) ?? code.toUpperCase());
 }
 
-export const ProfileHeaderCard: React.FC<Props> = (props) => {
-    const { profile, isOwner, onEdit, onLogout, onToggleFollow, followLoading, onOpenFollowers, onOpenFollowing } = props;
-
+export const ProfileHeaderCard: React.FC<Props> = ({
+                                                       profile,
+                                                       isOwner,
+                                                       onEdit,
+                                                       onLogout,
+                                                       onToggleFollow,
+                                                       onMessage,
+                                                       followLoading,
+                                                       onOpenFollowers,
+                                                       onOpenFollowing,
+                                                   }) => {
     const regionName = useRegionName("en");
 
     const city = profile.location?.city?.trim();
@@ -48,36 +57,18 @@ export const ProfileHeaderCard: React.FC<Props> = (props) => {
                 country ? country :
                     null;
 
-    const navigate = useNavigate();
-    const { id } = useParams();
-
-    const handleMessageClick = async () => {
-        if (!id) return;
-
-        try {
-            const result = await getOrCreateDirectConversation({
-                otherUserId: id,
-            });
-
-            navigate(`/chat?conversationId=${result.conversationId}`);
-        } catch (error) {
-            console.error("Failed to open direct conversation", error);
-        }
-    };
-
     return (
         <div className={styles.profileCard}>
-
-            {/* Avatar */}
             <div className={styles.profileCardAvatar}>
                 {profile.profilePictureUrl ? (
                     <img src={profile.profilePictureUrl} alt={`${profile.username} avatar`} />
                 ) : (
-                    <div className={styles.avatarFallback}>{profile.username?.[0].toUpperCase() ?? "?"}</div>
+                    <div className={styles.avatarFallback}>
+                        {profile.username?.[0].toUpperCase() ?? "?"}
+                    </div>
                 )}
             </div>
 
-            {/* EDIT & LOGOUT*/}
             {isOwner && (
                 <div className={styles.editTopRight}>
                     <button
@@ -118,7 +109,6 @@ export const ProfileHeaderCard: React.FC<Props> = (props) => {
                     </button>
                 </div>
 
-                {/* FOLLOW / MESSAGE */}
                 {!isOwner && (
                     <div className={styles.actionsInline}>
                         <button
@@ -127,15 +117,14 @@ export const ProfileHeaderCard: React.FC<Props> = (props) => {
                             disabled={!!followLoading}
                             type="button"
                         >
-
                             {profile.isFollowing ? (
                                 <>
-                                    <UnfollowIcon className={styles.icon}/>
+                                    <UnfollowIcon className={styles.icon} />
                                     Unfollow
                                 </>
                             ) : (
                                 <>
-                                    <FollowIcon className={styles.icon}/>
+                                    <FollowIcon className={styles.icon} />
                                     Follow
                                 </>
                             )}
@@ -144,25 +133,27 @@ export const ProfileHeaderCard: React.FC<Props> = (props) => {
                         <button
                             className={`${styles.button} ${styles.buttonGhost}`}
                             type="button"
-                            onClick={() => void handleMessageClick()}
+                            onClick={() => void onMessage?.()}
                         >
-                            <MessageIcon className={styles.icon}/>
+                            <MessageIcon className={styles.icon} />
                             Message
                         </button>
                     </div>
                 )}
 
-
                 <div className={styles.profileCardChipsRow}>
-                    {(profile.skills ?? []).slice(0, 12).map(s => (
-                        <span key={s.id} className={styles.chip}>{s.name}</span>
+                    {(profile.skills ?? []).slice(0, 12).map((s) => (
+                        <span key={s.id} className={styles.chip}>
+                            {s.name}
+                        </span>
                     ))}
                 </div>
 
-
                 <div className={styles.profileCardChipsRow}>
-                    {(profile.genres ?? []).slice(0, 12).map(g => (
-                        <span key={g.id} className={`${styles.chip} ${styles.chipHollow}`}>{g.name}</span>
+                    {(profile.genres ?? []).slice(0, 12).map((g) => (
+                        <span key={g.id} className={`${styles.chip} ${styles.chipHollow}`}>
+                            {g.name}
+                        </span>
                     ))}
                 </div>
 

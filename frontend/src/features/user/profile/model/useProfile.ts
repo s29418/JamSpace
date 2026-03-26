@@ -2,14 +2,17 @@ import { useCallback, useEffect, useState } from 'react';
 import {
     getUserById,
     updateUserProfile,
-    UpdateUserProfileRequest, deleteUserAccount, changeUserPassword
+    UpdateUserProfileRequest,
+    deleteUserAccount,
+    changeUserPassword,
 } from '../../../../entities/user/api/profile.api';
-import type {UserProfile} from '../../../../entities/user/model/types';
+import type { UserProfile } from '../../../../entities/user/model/types';
 import { ApiError, isApiError } from 'shared/api/base';
-import {addUserGenre, deleteUserGenre} from "../../../../entities/user/api/genres.api";
-import {addUserSkill, deleteUserSkill} from "../../../../entities/user/api/skills.api";
-import {useFollowActions} from "../../follow-user/model/useFollowActions";
-import {logoutAll as logoutAllApi} from "../../../../entities/user/api/auth.api"
+import { addUserGenre, deleteUserGenre } from "../../../../entities/user/api/genres.api";
+import { addUserSkill, deleteUserSkill } from "../../../../entities/user/api/skills.api";
+import { useFollowActions } from "../../follow-user/model/useFollowActions";
+import { logoutAll as logoutAllApi } from "../../../../entities/user/api/auth.api";
+import { clearToken } from '../../../../shared/lib/auth/auth';
 
 export function useProfile(userId?: string) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -35,6 +38,7 @@ export function useProfile(userId?: string) {
     useEffect(() => {
         let alive = true;
         if (!userId) return;
+
         (async () => {
             try {
                 setLoading(true);
@@ -50,7 +54,10 @@ export function useProfile(userId?: string) {
                 if (alive) setLoading(false);
             }
         })();
-        return () => { alive = false; };
+
+        return () => {
+            alive = false;
+        };
     }, [userId]);
 
     const { toggleFollow: toggleFollowShared } = useFollowActions(
@@ -66,9 +73,9 @@ export function useProfile(userId?: string) {
         await toggleFollowShared(profile.id);
     }, [profile, toggleFollowShared]);
 
-
     const updateProfile = useCallback(async (draft: UpdateUserProfileRequest, file?: File) => {
         if (!userId) return;
+
         try {
             await updateUserProfile(userId, draft, file);
         } catch (e) {
@@ -79,65 +86,75 @@ export function useProfile(userId?: string) {
             await refresh();
             return;
         }
-        setProfile(prev => {
+
+        setProfile((prev) => {
             if (!prev) return prev;
+
             const patch: Partial<UserProfile> = {};
-            if (draft.setDisplayName)    patch.displayName = draft.displayName ?? '';
-            if (draft.setBio)            patch.bio = draft.bio ?? '';
-            if (draft.setLocation)       patch.location = {
-                city: draft.location?.city ?? '',
-                country: draft.location?.country ?? ''
-            };
+
+            if (draft.setDisplayName) patch.displayName = draft.displayName ?? '';
+            if (draft.setBio) patch.bio = draft.bio ?? '';
+            if (draft.setLocation) {
+                patch.location = {
+                    city: draft.location?.city ?? '',
+                    country: draft.location?.country ?? '',
+                };
+            }
             if (draft.setProfilePicture) patch.profilePictureUrl = draft.profilePictureUrl ?? '';
+
             return { ...prev, ...patch };
         });
-    }, [userId, setProfile, refresh]);
+    }, [userId, refresh]);
 
     const addGenre = useCallback(async (name: string) => {
         if (!profile) throw new ApiError(400, 'Profile not loaded');
+
         try {
             const tag = await addUserGenre(profile.id, name);
-            setProfile(p => p ? { ...p, genres: [...(p.genres ?? []), tag] } : p);
+            setProfile((p) => p ? { ...p, genres: [...(p.genres ?? []), tag] } : p);
         } catch (e) {
             throw isApiError(e) ? e : new ApiError(0, 'Failed to add genre');
         }
-    }, [profile, setProfile]);
+    }, [profile]);
 
     const removeGenre = useCallback(async (id: string) => {
         if (!profile) throw new ApiError(400, 'Profile not loaded');
+
         try {
             await deleteUserGenre(profile.id, id);
-            setProfile(p => p ? { ...p, genres: (p.genres ?? []).filter(g => g.id !== id) } : p);
+            setProfile((p) => p ? { ...p, genres: (p.genres ?? []).filter((g) => g.id !== id) } : p);
         } catch (e) {
             throw isApiError(e) ? e : new ApiError(0, 'Failed to remove genre');
         }
-    }, [profile, setProfile]);
+    }, [profile]);
 
     const addSkill = useCallback(async (name: string) => {
         if (!profile) throw new ApiError(400, 'Profile not loaded');
+
         try {
             const tag = await addUserSkill(profile.id, name);
-            setProfile(p => p ? { ...p, skills: [...(p.skills ?? []), tag] } : p);
+            setProfile((p) => p ? { ...p, skills: [...(p.skills ?? []), tag] } : p);
         } catch (e) {
-            throw isApiError(e) ? e : new ApiError(0, 'Failed to add genre');
+            throw isApiError(e) ? e : new ApiError(0, 'Failed to add skill');
         }
-    }, [profile, setProfile]);
+    }, [profile]);
 
     const removeSkill = useCallback(async (skillId: string) => {
         if (!profile) throw new ApiError(400, 'Profile not loaded');
+
         try {
             await deleteUserSkill(profile.id, skillId);
-            setProfile(p => p ? { ...p, skills: (p.skills ?? []).filter(g => g.id !== skillId) } : p);
+            setProfile((p) => p ? { ...p, skills: (p.skills ?? []).filter((g) => g.id !== skillId) } : p);
         } catch (e) {
-            throw isApiError(e) ? e : new ApiError(0, 'Failed to remove genre');
+            throw isApiError(e) ? e : new ApiError(0, 'Failed to remove skill');
         }
-    }, [profile, setProfile]);
+    }, [profile]);
 
     const updateEmail = useCallback(async (email: string) => {
         if (!userId) return;
         await updateUserProfile(userId, { setEmail: true, email });
-        setProfile(prev => (prev ? { ...prev, email } : prev));
-    }, [userId, setProfile]);
+        setProfile((prev) => (prev ? { ...prev, email } : prev));
+    }, [userId]);
 
     const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
         if (!userId) return;
@@ -147,16 +164,30 @@ export function useProfile(userId?: string) {
     const deleteAccount = useCallback(async () => {
         if (!userId) return;
         await deleteUserAccount(userId);
-        localStorage.removeItem('token');
-        window.location.href = '/';
+        clearToken();
     }, [userId]);
 
     const logoutAll = useCallback(async () => {
         await logoutAllApi();
-        localStorage.removeItem('token');
-        window.location.href = '/';
-    }, [])
+        clearToken();
+    }, []);
 
-    return { profile, setProfile, loading, error, refresh, toggleFollow, followLoading, updateProfile
-        , addGenre, removeGenre, addSkill, removeSkill, updateEmail, changePassword, deleteAccount, logoutAll };
+    return {
+        profile,
+        setProfile,
+        loading,
+        error,
+        refresh,
+        toggleFollow,
+        followLoading,
+        updateProfile,
+        addGenre,
+        removeGenre,
+        addSkill,
+        removeSkill,
+        updateEmail,
+        changePassword,
+        deleteAccount,
+        logoutAll,
+    };
 }

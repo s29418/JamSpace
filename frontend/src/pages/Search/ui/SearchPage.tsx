@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getOrCreateDirectConversation } from "entities/chat/api/conversations.api";
 import styles from "./SearchPage.module.css";
 
 import { useUserSearch } from "../../../features/user/search-users/model/useUserSearch";
@@ -11,6 +13,7 @@ import Pagination from "../../../widgets/search-results/ui/Pagination";
 
 const SearchPage: React.FC = () => {
     const [filtersOpen, setFiltersOpen] = useState(true);
+    const navigate = useNavigate();
 
     const {
         filters,
@@ -18,16 +21,13 @@ const SearchPage: React.FC = () => {
         setData,
         loading,
         error,
-
         setQ,
         setLocation,
         setPage,
-
         addSkill,
         removeSkill,
         addGenre,
         removeGenre,
-
         clearFilters,
     } = useUserSearch({ pageSize: 10 });
 
@@ -41,6 +41,18 @@ const SearchPage: React.FC = () => {
         (filters.skills && filters.skills.length > 0) ||
         (filters.genres && filters.genres.length > 0)
     );
+
+    const handleMessage = async (userId: string) => {
+        try {
+            const result = await getOrCreateDirectConversation({
+                otherUserId: userId,
+            });
+
+            navigate(`/chat?conversationId=${result.conversationId}`);
+        } catch (error) {
+            console.error("Failed to open direct conversation", error);
+        }
+    };
 
     return (
         <div className={styles.page}>
@@ -83,6 +95,7 @@ const SearchPage: React.FC = () => {
                                 loading={loading}
                                 busy={busy}
                                 onToggleFollow={toggleFollow}
+                                onMessage={handleMessage}
                             />
 
                             <Pagination

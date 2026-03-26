@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useMyTeams } from '../../../features/team/browse-my-teams/model/useMyTeams';
@@ -7,11 +7,14 @@ import { useCreateTeam } from '../../../features/team/create-team/model/useCreat
 
 import TeamCard from '../../../entities/team/ui/TeamCard';
 import TeamInviteCard from '../../../entities/team/ui/TeamInviteCard';
+import TeamCardSkeleton from '../../../entities/team/ui/TeamCardSkeleton';
+import TeamSettingsModal from '../../../widgets/team-settings/ui/TeamSettingsModal';
+import { getCurrentUserId } from '../../../shared/lib/auth/auth';
 import styles from './TeamsPage.module.css';
-import TeamCardSkeleton from "../../../entities/team/ui/TeamCardSkeleton";
 
 const TeamsPage: React.FC = () => {
     const navigate = useNavigate();
+    const currentUserId = useMemo(() => getCurrentUserId(), []);
 
     const {
         teams,
@@ -41,14 +44,27 @@ const TeamsPage: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [settingsTeamId, setSettingsTeamId] = useState<string | null>(null);
+
     const setSuccess = useCallback((msg: string) => {
         setSuccessMessage(msg);
         window.setTimeout(() => setSuccessMessage(''), 7000);
     }, []);
+
     const setErrorMsg = useCallback((msg: string) => {
         setErrorMessage(msg);
         window.setTimeout(() => setErrorMessage(''), 7000);
     }, []);
+
+    useEffect(() => {
+        const onTeamUpdated = async () => {
+            await refreshTeams();
+            await refreshInvites();
+        };
+
+        window.addEventListener('team:updated', onTeamUpdated);
+        return () => window.removeEventListener('team:updated', onTeamUpdated);
+    }, [refreshTeams, refreshInvites]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
@@ -59,6 +75,7 @@ const TeamsPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const nm = teamName.trim();
+
         if (nm.length < 4) return setErrorMsg('Name of the team must be at least 4 characters long.');
         if (nm.length > 25) return setErrorMsg('Name of the team must be less than 25 characters long.');
 
@@ -66,11 +83,12 @@ const TeamsPage: React.FC = () => {
             await create(nm, selectedFile);
             setTeamName('');
             setSelectedFile(null);
+            setFileLabel('Upload Image (optional)');
             setShowForm(false);
             setErrorMessage('');
             setSuccess('The team has been successfully created');
         } catch (err: any) {
-            setErrorMsg(err?.message ?? 'Failed to create-team team. Please try again.');
+            setErrorMsg(err?.message ?? 'Failed to create team. Please try again.');
         }
     };
 
@@ -93,10 +111,8 @@ const TeamsPage: React.FC = () => {
         }
     };
 
-
     return (
         <div className={styles.wrapper}>
-            {/* INVITES */}
             {invites.length > 0 && (
                 <div className={styles.inviteSection}>
                     <h1 className={styles.title}>Team Invites</h1>
@@ -116,19 +132,18 @@ const TeamsPage: React.FC = () => {
                 </div>
             )}
 
-            {/* HEADER */}
             <div className={styles.header}>
                 <h1 className={styles.title}>Teams</h1>
                 <button
                     className={styles.createButton}
                     onClick={() => setShowForm(true)}
                     disabled={creating}
+                    type="button"
                 >
                     + Create new team
                 </button>
             </div>
 
-            {/* CREATE FORM */}
             <div
                 className={`${styles.expandable} ${showForm ? styles.expanded : ''}`}
                 aria-hidden={!showForm}
@@ -178,15 +193,14 @@ const TeamsPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* MESSAGES/ERRORS */}
             {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
+
             {(errorMessage || createError || teamsError || invitesError) && (
                 <p className={styles.message}>
                     {errorMessage || createError || teamsError || invitesError}
                 </p>
             )}
 
-            {/* TEAM LIST */}
             {teamsLoading && (
                 <>
                     <TeamCardSkeleton />
@@ -194,17 +208,39 @@ const TeamsPage: React.FC = () => {
                     <TeamCardSkeleton />
                 </>
             )}
-            {!teamsLoading && teams.map((team) => (
 
-                <TeamCard
-                    key={team.id}
-                    id={team.id}
-                    name={team.name}
-                    teamPictureUrl={team.teamPictureUrl}
-                    members={team.members}
-                    onClick={() => navigate(`/teams/${team.id}`)}
+            {!teamsLoading &&
+                teams.map((team) => (
+                    <TeamCard
+                        key={team.id}
+                        id={team.id}
+                        name={team.name}
+                        teamPictureUrl={team.teamPictureUrl}
+                        members={team.members}
+                        onClick={() => navigate(`/teams/${team.id}`)}
+                        onOpenSettings={setSettingsTeamId}
+                    />
+                ))}
+
+            {settingsTeamId && (
+                <TeamSettingsModal
+                    isOpen={true}
+                    teamId={settingsTeamId}
+                    currentUserId={currentUserId ?? ''}
+                    onClose={async () => {
+                        setSettingsTeamId(null);
+                        await refreshTeams();
+                    }}
+                    onTeamDeleted={async () => {
+                        setSettingsTeamId(null);
+                        await refreshTeams();
+                    }}
+                    onLeftTeam={async () => {
+                        setSettingsTeamId(null);
+                        await refreshTeams();
+                    }}
                 />
-            ))}
+            )}
         </div>
     );
 };

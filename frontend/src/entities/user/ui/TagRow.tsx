@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
-import styles from "../../../entities/user/ui/UserSearchCard.module.css";
+import styles from "./UserSearchCard.module.css";
 
 type TagRowProps = {
     tags: string[];

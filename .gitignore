@@ -28,7 +28,7 @@ Thumbs.db
 **/appsettings.*.local.json
 **/appsettings.json
 
-**/docker-compose.override.yml
+**/docker-compose.yml
 
 
 # Frontend / JS

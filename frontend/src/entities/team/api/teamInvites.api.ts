@@ -1,7 +1,7 @@
 import { api } from '../../../shared/api/base';
 import type { TeamInvite } from '../model/types';
 
-const ROOT = '/teams/team-invites';
+const ROOT = '/teams/invites';
 
 export const getTeamInvites = async () => {
     const res = await api.get<TeamInvite[]>(`${ROOT}`);

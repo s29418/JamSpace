@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useRef, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useMyTeams } from '../../../features/team/my-teams/model/useMyTeams';
@@ -55,16 +55,6 @@ const TeamsPage: React.FC = () => {
         setErrorMessage(msg);
         window.setTimeout(() => setErrorMessage(''), 7000);
     }, []);
-
-    useEffect(() => {
-        const onTeamUpdated = async () => {
-            await refreshTeams();
-            await refreshInvites();
-        };
-
-        window.addEventListener('team:updated', onTeamUpdated);
-        return () => window.removeEventListener('team:updated', onTeamUpdated);
-    }, [refreshTeams, refreshInvites]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
@@ -229,7 +219,6 @@ const TeamsPage: React.FC = () => {
                     currentUserId={currentUserId ?? ''}
                     onClose={async () => {
                         setSettingsTeamId(null);
-                        await refreshTeams();
                     }}
                     onTeamDeleted={async () => {
                         setSettingsTeamId(null);

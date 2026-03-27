@@ -22,7 +22,7 @@ export const InvitesList: React.FC<Props> = ({
                                                  invites,
                                                  onCancel,
                                                  className,
-                                                 emptyText = 'No pending team-invites',
+                                                 emptyText = 'No pending invites',
                                              }) => {
     const [parent] = useAutoAnimate({ duration: 350, easing: 'cubic-bezier(0.22,1,0.36,1)' });
 

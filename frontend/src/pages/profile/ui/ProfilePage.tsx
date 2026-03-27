@@ -109,7 +109,7 @@ const ProfilePage: FC = () => {
 
         clearToken();
         setMyId(null);
-        navigate('/');
+        navigate('/profile');
     }
 
     async function handleLogoutAll() {
@@ -120,7 +120,7 @@ const ProfilePage: FC = () => {
 
         clearToken();
         setMyId(null);
-        navigate('/');
+        navigate('/profile');
     }
 
     async function handleDeleteAccount() {
@@ -131,7 +131,7 @@ const ProfilePage: FC = () => {
 
         clearToken();
         setMyId(null);
-        navigate('/');
+        navigate('/profile');
     }
 
     async function handleMessage() {

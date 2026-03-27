@@ -1,34 +1,54 @@
 ﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.TeamMembers.DTOs;
+using JamSpace.Domain.Enums;
 using MediatR;
 
 namespace JamSpace.Application.Features.TeamMembers.Commands.EditTeamMemberMusicalRole;
 
-public class EditTeamMemberMusicalRoleHandler : IRequestHandler<EditTeamMemberMusicalRoleCommand, TeamMemberDto>
+public sealed class EditTeamMemberMusicalRoleHandler
+    : IRequestHandler<EditTeamMemberMusicalRoleCommand, TeamMemberDto>
 {
     private readonly ITeamMemberRepository _repo;
+    private readonly IUnitOfWork _uow;
+    private readonly IConversationParticipantRepository _conversationParticipant;
 
-    public EditTeamMemberMusicalRoleHandler(ITeamMemberRepository repo)
+    public EditTeamMemberMusicalRoleHandler(ITeamMemberRepository repo, IUnitOfWork uow,
+        IConversationParticipantRepository conversationParticipant)
     {
         _repo = repo;
+        _uow = uow;
+        _conversationParticipant = conversationParticipant;
     }
 
     public async Task<TeamMemberDto> Handle(EditTeamMemberMusicalRoleCommand request, CancellationToken ct)
     {
-        if (!await _repo.IsUserALeaderAsync(request.TeamId, request.RequestingUserId, ct) &&
-            !await _repo.IsUserAnAdminAsync(request.TeamId, request.RequestingUserId, ct))
-            throw new ForbiddenAccessException("Only team leaders and admins can edit members musial roles.");
+        if (!await _repo.HasRequiredRoleAsync(request.TeamId, request.RequestingUserId, FunctionalRole.Admin, ct))
+            throw new ForbiddenAccessException("Only team leaders and admins can edit members musical roles.");
+
+        var member = await _repo.GetByTeamAndUserAsync(request.TeamId, request.UserId, ct)
+                     ?? throw new NotFoundException("Team member not found.");
+
+        member.MusicalRole = request.MusicalRole;
+
+        var conversationParticipant = 
+            await _conversationParticipant.GetAsync(request.TeamId, request.UserId, ct);
+
+        if (conversationParticipant is null)
+            throw new ForbiddenAccessException("You're not part of this conversation.");
         
-        var teamMember = await _repo.EditTeamMemberMusicalRole(request.TeamId, request.UserId, request.MusicalRole, ct);
+        conversationParticipant.Role = request.MusicalRole;
+
+        await _uow.SaveChangesAsync(ct);
 
         return new TeamMemberDto
         {
-            UserId = teamMember.UserId,
-            Username = teamMember.User.UserName,
-            Role = teamMember.Role.ToString(),
-            MusicalRole = teamMember.MusicalRole,
-            UserPictureUrl = teamMember.User.ProfilePictureUrl
+            UserId = member.UserId,
+            Username = member.User.UserName,
+            Role = member.Role.ToString(),
+            MusicalRole = member.MusicalRole,
+            UserPictureUrl = member.User.ProfilePictureUrl
         };
     }
 }

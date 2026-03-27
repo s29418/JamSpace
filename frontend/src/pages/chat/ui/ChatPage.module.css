@@ -1,0 +1,61 @@
+.page {
+    padding: 2.5% 7%;
+    color: white;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 22px;
+    align-items: start;
+}
+
+.previewPanel {
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 34px;
+    min-height: 680px;
+    background: rgba(255, 255, 255, 0.01);
+    overflow: hidden;
+}
+
+.previewHeader {
+    min-height: 92px;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.previewBody {
+    min-height: calc(680px - 92px);
+    display: grid;
+    place-items: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 22px;
+}
+
+.avatarWrapper {
+    width: 72px;
+    height: 72px;
+    margin-right: 16px;
+}
+
+.avatar,
+.avatarFallback {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(38, 205, 212, 0.85);
+}
+
+.avatarFallback {
+    display: grid;
+    place-items: center;
+    background: #142223;
+    color: #26cdd4;
+    font-size: 28px;
+    font-weight: 700;
+}

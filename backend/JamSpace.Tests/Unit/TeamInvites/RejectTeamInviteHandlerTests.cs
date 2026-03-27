@@ -2,6 +2,7 @@
 using Moq;
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.TeamInvites.Commands.RejectTeamInvite;
 using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
@@ -13,48 +14,46 @@ public class RejectTeamInviteHandlerTests
     [Fact]
     public async Task Should_Throw_Forbidden_When_User_Not_Invited()
     {
-        // Arrange
         var repo = new Mock<ITeamInviteRepository>();
-        repo.Setup(r => r.GetTeamInviteByIdAsync(
-                It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new TeamInvite { InvitedUserId = Guid.NewGuid() });
+        var uow = new Mock<IUnitOfWork>();
 
-        var handler = new RejectTeamInviteHandler(repo.Object);
+        repo.Setup(r => r.GetByIdWithDetailsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TeamInvite { InvitedUserId = Guid.NewGuid(), Status = InviteStatus.Pending });
 
+        var handler = new RejectTeamInviteHandler(repo.Object, uow.Object);
         var command = new RejectTeamInviteCommand(Guid.NewGuid(), Guid.NewGuid());
 
-        // Act & Assert
         await Assert.ThrowsAsync<ForbiddenAccessException>(() => handler.Handle(command, CancellationToken.None));
     }
 
     [Fact]
     public async Task Should_Reject_Invite_When_User_Is_Invited()
     {
-        // Arrange
         var inviteId = Guid.NewGuid();
         var userId = Guid.NewGuid();
 
         var repo = new Mock<ITeamInviteRepository>();
-        repo.Setup(r => r.GetTeamInviteByIdAsync(
-                inviteId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new TeamInvite { InvitedUserId = userId });
-        repo.Setup(r => r.RejectInviteAsync(
-                inviteId, userId, It.IsAny<CancellationToken>()))
+        var uow = new Mock<IUnitOfWork>();
+
+        repo.Setup(r => r.GetByIdWithDetailsAsync(inviteId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new TeamInvite
             {
-                Status = InviteStatus.Rejected,
+                Id = inviteId,
+                InvitedUserId = userId,
+                Status = InviteStatus.Pending,
                 Team = new Team { Id = Guid.NewGuid(), Name = "Test team" },
-                InvitedByUser = new User { Id = Guid.NewGuid(), UserName = "Inviter" },
-                InvitedUser = new User { Id = Guid.NewGuid(), UserName = "Invitee" }
+                InvitedByUser = new User { Id = Guid.NewGuid(), UserName = "Inviter", DisplayName = "Inviter" },
+                InvitedUser = new User { Id = userId, UserName = "Invitee", DisplayName = "Invitee" }
             });
 
-        var handler = new RejectTeamInviteHandler(repo.Object);
+        uow.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
-        // Act
-        var result = await handler.Handle(
-            new RejectTeamInviteCommand(inviteId, userId), CancellationToken.None);
+        var handler = new RejectTeamInviteHandler(repo.Object, uow.Object);
 
-        // Assert
+        var result = await handler.Handle(new RejectTeamInviteCommand(inviteId, userId), CancellationToken.None);
+
         result.Status.Should().Be(InviteStatus.Rejected.ToString());
+        uow.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

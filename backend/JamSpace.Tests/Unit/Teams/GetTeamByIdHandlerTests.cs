@@ -4,6 +4,7 @@ using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.Teams.Queries.GetTeamById;
 using JamSpace.Domain.Entities;
+using JamSpace.Domain.Enums;
 
 namespace JamSpace.Tests.Unit.Teams;
 
@@ -16,13 +17,13 @@ public class GetTeamByIdHandlerTests
         var teamRepo = new Mock<ITeamRepository>();
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
         
-        var creator = new User { UserName = "creator" };
+        var creator = new User { UserName = "creator", DisplayName = "creator" };
 
-        teamMemberRepo.Setup(r => r.IsUserInTeamAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        teamMemberRepo.Setup(r => r.HasRequiredRoleAsync(
+                It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Member, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
         
-        teamRepo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        teamRepo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Team
             {
                 Id = Guid.NewGuid(),
@@ -50,13 +51,13 @@ public class GetTeamByIdHandlerTests
         var teamRepo = new Mock<ITeamRepository>();
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
         
-        var creator = new User { UserName = "creator" };
+        var creator = new User { UserName = "creator", DisplayName = "creator" };
 
-        teamMemberRepo.Setup(r => r.IsUserInTeamAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        teamMemberRepo.Setup(r => r.HasRequiredRoleAsync(
+                It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Member, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
     
-        teamRepo.Setup(r => r.GetTeamByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        teamRepo.Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Team
             {
                 Id = Guid.NewGuid(),

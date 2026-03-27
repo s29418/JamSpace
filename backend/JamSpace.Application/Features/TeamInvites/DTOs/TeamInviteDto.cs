@@ -11,6 +11,7 @@ public class TeamInviteDto
     public DateTime CreatedAt { get; set; }
     public string? InvitedByUserName { get; set; } = default!;
     public string? InvitedUserName { get; set; } = default!;
+    public Guid? InvitedUserId { get; set; }
     public string? InvitedUserPictureUrl { get; set; }
     public string? Status { get; set; }
 }

@@ -1,0 +1,24 @@
+.wrap {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #26cdd4;
+    color: #26cdd4;
+    font-size: 14px;
+}
+
+.x {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}

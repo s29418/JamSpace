@@ -1,0 +1,111 @@
+.page {
+    padding: 2.5% 7%;
+    color: white;
+}
+
+.shell {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.layout {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+    max-width: 1320px;
+    gap: 32px;
+}
+
+.sidebar {
+    flex: 0 0 auto;
+    overflow: hidden;
+    transition:
+            width 380ms cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 280ms ease,
+            margin-right 380ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: width, opacity, margin-right;
+}
+
+.sidebarOpen {
+    width: 350px;
+    opacity: 1;
+    margin-right: 24px;
+}
+
+.sidebarClosed {
+    width: 0;
+    opacity: 0;
+    margin-right: 0;
+}
+
+.sidebarInner {
+    width: 350px;
+    min-width: 350px;
+    opacity: 1;
+    transition: opacity 240ms ease;
+}
+
+.sidebarClosed .sidebarInner {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.content {
+    flex: 0 0 auto;
+    width: 930px;
+    min-width: 0;
+}
+
+.contentInner {
+    width: 100%;
+}
+
+.message {
+    margin: 12px 0;
+    opacity: 0.9;
+}
+
+@media (max-width: 1400px) {
+    .layout {
+        max-width: 1200px;
+    }
+
+    .content {
+        width: 900px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .page {
+        padding: 20px 14px;
+    }
+
+    .shell {
+        justify-content: stretch;
+    }
+
+    .layout {
+        display: block;
+        max-width: none;
+    }
+
+    .sidebar,
+    .sidebarOpen,
+    .sidebarClosed {
+        width: 100%;
+        margin-right: 0;
+        opacity: 1;
+    }
+
+    .sidebarInner {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .content {
+        width: 100%;
+        margin-top: 16px;
+    }
+}

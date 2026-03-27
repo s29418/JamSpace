@@ -22,6 +22,185 @@ namespace JamSpace.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("JamSpace.Domain.Entities.Conversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DirectKey")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateTimeOffset?>("LastMessageAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("LastMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LastMessagePreview")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DirectKey")
+                        .IsUnique()
+                        .HasFilter("[DirectKey] IS NOT NULL");
+
+                    b.HasIndex("LastMessageAt");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("Conversation", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.ConversationParticipant", b =>
+                {
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("LastReadAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("LastReadMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.HasKey("ConversationId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ConversationParticipant", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.Genre", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Genre", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<Guid?>("ReplyToMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SenderUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReplyToMessageId");
+
+                    b.HasIndex("SenderUserId");
+
+                    b.HasIndex("ConversationId", "CreatedAt");
+
+                    b.ToTable("Message", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshToken", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.Skill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Skill", (string)null);
+                });
+
             modelBuilder.Entity("JamSpace.Domain.Entities.Team", b =>
                 {
                     b.Property<Guid>("Id")
@@ -36,8 +215,8 @@ namespace JamSpace.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
                     b.Property<string>("TeamPictureUrl")
                         .HasMaxLength(255)
@@ -79,7 +258,9 @@ namespace JamSpace.Infrastructure.Migrations
 
                     b.HasIndex("InvitedUserId");
 
-                    b.HasIndex("TeamId");
+                    b.HasIndex("TeamId", "InvitedUserId", "Status")
+                        .IsUnique()
+                        .HasFilter("[Status] = 'Pending'");
 
                     b.ToTable("TeamInvite", (string)null);
                 });
@@ -91,12 +272,12 @@ namespace JamSpace.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("MusicalRole")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("Role")
+                        .HasMaxLength(25)
+                        .HasColumnType("int");
 
                     b.Property<Guid>("TeamId")
                         .HasColumnType("uniqueidentifier");
@@ -106,9 +287,10 @@ namespace JamSpace.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TeamId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("TeamId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("TeamMember", (string)null);
                 });
@@ -120,19 +302,24 @@ namespace JamSpace.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Bio")
-                        .HasColumnType("text");
+                        .HasMaxLength(170)
+                        .HasColumnType("nvarchar(170)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Location")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -151,6 +338,9 @@ namespace JamSpace.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<int>("TokenVersion")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -158,10 +348,143 @@ namespace JamSpace.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.HasIndex("UserName")
                         .IsUnique();
 
                     b.ToTable("User", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.UserFollow", b =>
+                {
+                    b.Property<Guid>("FollowerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FolloweeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("FollowedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("FollowerId", "FolloweeId");
+
+                    b.HasIndex("FolloweeId")
+                        .HasDatabaseName("IX_UserFollows_FollowedId");
+
+                    b.HasIndex("FollowerId")
+                        .HasDatabaseName("IX_UserFollows_FollowerId");
+
+                    b.ToTable("UserFollows", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_UserFollows_NoSelfFollow", "[FollowerId] <> [FolloweeId]");
+                        });
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.UserGenre", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GenreId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId", "GenreId");
+
+                    b.HasIndex("GenreId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserGenre", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.UserSkill", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AddeddAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId", "SkillId");
+
+                    b.HasIndex("SkillId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSkill", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.Conversation", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.ConversationParticipant", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.Conversation", "Conversation")
+                        .WithMany("Participants")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JamSpace.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.Message", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.Conversation", "Conversation")
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JamSpace.Domain.Entities.Message", null)
+                        .WithMany()
+                        .HasForeignKey("ReplyToMessageId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("JamSpace.Domain.Entities.User", "SenderUser")
+                        .WithMany()
+                        .HasForeignKey("SenderUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("SenderUser");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("JamSpace.Domain.Entities.Team", b =>
@@ -221,6 +544,120 @@ namespace JamSpace.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("JamSpace.Domain.Entities.User", b =>
+                {
+                    b.OwnsOne("JamSpace.Domain.ValueObjects.Location", "Location", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("City")
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)");
+
+                            b1.Property<string>("CountryCode")
+                                .HasMaxLength(2)
+                                .HasColumnType("nvarchar(2)");
+
+                            b1.Property<string>("StateCode")
+                                .HasMaxLength(2)
+                                .HasColumnType("nvarchar(2)");
+
+                            b1.HasKey("UserId");
+
+                            b1.HasIndex("City")
+                                .HasDatabaseName("IX_User_Loc_City");
+
+                            b1.HasIndex("CountryCode")
+                                .HasDatabaseName("IX_User_Loc_Country");
+
+                            b1.HasIndex("CountryCode", "City")
+                                .HasDatabaseName("IX_User_Loc_Country_City");
+
+                            b1.HasIndex("CountryCode", "StateCode", "City")
+                                .HasDatabaseName("IX_User_Loc_US_State_City");
+
+                            b1.ToTable("User");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.UserFollow", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.User", "Followee")
+                        .WithMany("Followers")
+                        .HasForeignKey("FolloweeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("JamSpace.Domain.Entities.User", "Follower")
+                        .WithMany("Following")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Followee");
+
+                    b.Navigation("Follower");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.UserGenre", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.Genre", "Genre")
+                        .WithMany("UserGenres")
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JamSpace.Domain.Entities.User", "User")
+                        .WithMany("UserGenres")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Genre");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.UserSkill", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.Skill", "Skill")
+                        .WithMany("UserSkills")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JamSpace.Domain.Entities.User", "User")
+                        .WithMany("UserSkills")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.Conversation", b =>
+                {
+                    b.Navigation("Participants");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.Genre", b =>
+                {
+                    b.Navigation("UserGenres");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.Skill", b =>
+                {
+                    b.Navigation("UserSkills");
+                });
+
             modelBuilder.Entity("JamSpace.Domain.Entities.Team", b =>
                 {
                     b.Navigation("Members");
@@ -230,7 +667,17 @@ namespace JamSpace.Infrastructure.Migrations
                 {
                     b.Navigation("CreatedTeams");
 
+                    b.Navigation("Followers");
+
+                    b.Navigation("Following");
+
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("Teams");
+
+                    b.Navigation("UserGenres");
+
+                    b.Navigation("UserSkills");
                 });
 #pragma warning restore 612, 618
         }

@@ -44,18 +44,32 @@ public class ExceptionMiddleware
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             context.Response.ContentType = "application/json";
 
-            var errors = ex.Errors.Select(e => new { e.PropertyName, e.ErrorMessage });
+            var errorDict = ex.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
             await context.Response.WriteAsJsonAsync(new
             {
                 Title = "Validation failed",
-                Errors = errors
+                Errors = errorDict
             });
         }
         catch (UnauthorizedAccessException ex)
         {
             _logger.LogWarning(ex, "Unauthorized access.");
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+        }
+        catch (ConcurrencyException ex)
+        {
+            _logger.LogWarning(ex, "Concurrency conflict.");
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
+            await context.Response.WriteAsJsonAsync(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation.");
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await context.Response.WriteAsJsonAsync(new { message = ex.Message });       
         }
         catch (Exception ex)

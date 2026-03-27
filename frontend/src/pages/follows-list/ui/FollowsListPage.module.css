@@ -1,0 +1,129 @@
+.wrapper {
+    max-width: 760px;
+    margin: 64px auto;
+    padding: 0 16px;
+}
+
+.title {
+    margin: 0 0 16px;
+    font-size: 22px;
+}
+
+.info {
+    color: #a7ded8;
+}
+
+.error {
+    color: #ff9b9b;
+}
+
+.list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.item {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid #2b3c3b;
+    border-radius: 12px;
+    background: #121415;
+    align-items: center;
+}
+
+.item:hover {
+    box-shadow: 0 0 5px rgba(53, 215, 255, 0.3);
+}
+
+.avatarLink {
+    width: 60px;
+    height: 60px;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 2px solid #26cdd4;
+    display: block;
+    text-decoration: none;
+}
+
+.avatarLink img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.avatarFallback {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: #26cdd4;
+    background: #142223;
+    font-size: 24px;
+}
+
+.meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.displayName {
+    color: #e8f7f5;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.displayName:hover {
+    text-decoration: underline;
+}
+
+.username {
+    color: #93cbc5;
+    font-size: 14px;
+    margin-top: 2px;
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    color: #26cdd4;
+    background: none;
+    border: none;
+    margin-right: 4px;
+    cursor: pointer;
+    justify-self: center;
+}
+
+.action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn {
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btnPrimary {
+    background: #26cdd4;
+    color: #0b1414;
+}
+
+.btnGhost {
+    background: transparent;
+    color: #26cdd4;
+    border-color: #2b3c3b;
+}
+
+.btn:disabled {
+    opacity: .6;
+    cursor: default;
+}

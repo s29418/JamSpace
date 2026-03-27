@@ -2,70 +2,65 @@
 using Moq;
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
+using JamSpace.Application.Common.Persistence;
 using JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
 using JamSpace.Domain.Entities;
+using JamSpace.Domain.Enums;
 
 namespace JamSpace.Tests.Unit.Teams;
 
 public class ChangeTeamNameHandlerTests
 {
     [Fact]
-    public async Task Should_Change_Team_Name_When_User_Is_Leader()
+    public async Task Should_Change_Team_Name_When_User_Has_Permission()
     {
-        // Arrange
         var teamRepo = new Mock<ITeamRepository>();
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
-        var creator = new User { UserName = "creator" };
+        var uow = new Mock<IUnitOfWork>();
 
-        teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-                It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        var teamId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+
+        teamMemberRepo.Setup(r => r.HasRequiredRoleAsync(teamId, userId, FunctionalRole.Admin, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        teamRepo.Setup(r => r.ChangeTeamNameAsync(
-                It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Team
-            {
-                Id = Guid.NewGuid(),
-                Name = "New Name",
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = creator,
-                Members = new List<TeamMember>
-                {
-                    new TeamMember
-                    {
-                        User = creator
-                    }
-                }
-            });
+        var team = new Team
+        {
+            Id = teamId,
+            Name = "Old",
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = new User { UserName = "creator", DisplayName = "creator" },
+            Members = new List<TeamMember>()
+        };
 
-        var handler = new ChangeTeamNameHandler(teamRepo.Object, teamMemberRepo.Object);
+        teamRepo.Setup(r => r.GetByIdAsync(teamId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(team);
 
-        // Act
-        var result = await handler.Handle(
-            new ChangeTeamNameCommand(Guid.NewGuid(), Guid.NewGuid(), "New Name"), 
-            CancellationToken.None);
+        var handler = new ChangeTeamNameHandler(teamRepo.Object, teamMemberRepo.Object, uow.Object);
 
-        // Assert
+        var result = await handler.Handle(new ChangeTeamNameCommand(teamId, userId, "New Name"), CancellationToken.None);
+
         result.Name.Should().Be("New Name");
+        team.Name.Should().Be("New Name");
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
     public async Task Should_Throw_Forbidden_When_User_Has_No_Permission()
     {
-        // Arrange
         var teamRepo = new Mock<ITeamRepository>();
         var teamMemberRepo = new Mock<ITeamMemberRepository>();
+        var uow = new Mock<IUnitOfWork>();
 
-        teamMemberRepo.Setup(r => r.IsUserALeaderAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        teamMemberRepo.Setup(r => r.IsUserAnAdminAsync(
-            It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
-        
-        var handler = new ChangeTeamNameHandler(teamRepo.Object, teamMemberRepo.Object);
+        teamMemberRepo.Setup(r => r.HasRequiredRoleAsync(
+                It.IsAny<Guid>(), It.IsAny<Guid>(), FunctionalRole.Admin, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
-        // Act & Assert
+        var handler = new ChangeTeamNameHandler(teamRepo.Object, teamMemberRepo.Object, uow.Object);
+
         await Assert.ThrowsAsync<ForbiddenAccessException>(() =>
-            handler.Handle(new ChangeTeamNameCommand(Guid.NewGuid(), Guid.NewGuid(), "New Name"), 
-                CancellationToken.None));
+            handler.Handle(new ChangeTeamNameCommand(Guid.NewGuid(), Guid.NewGuid(), "New Name"), CancellationToken.None));
+
+        uow.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 }

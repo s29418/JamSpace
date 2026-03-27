@@ -1,5 +1,4 @@
-﻿using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Interfaces;
 using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
 using JamSpace.Infrastructure.Data;
@@ -10,70 +9,63 @@ namespace JamSpace.Infrastructure.Repositories;
 public class TeamInviteRepository : ITeamInviteRepository
 {
     private readonly JamSpaceDbContext _db;
-    private readonly ITeamMemberRepository _memberRepo;
 
-    public TeamInviteRepository(JamSpaceDbContext db, ITeamMemberRepository memberRepo)
+    public TeamInviteRepository(JamSpaceDbContext db)
     {
         _db = db;
-        _memberRepo = memberRepo;
     }
-    
-    public async Task<TeamInvite> SendTeamInviteAsync(
-        Guid teamId, Guid invitedUserId, Guid invitedByUserId, CancellationToken ct)
-    {
-        var alreadyExists = await _db.TeamInvites
-            .AnyAsync(i => i.TeamId == teamId && i.InvitedUserId == invitedUserId 
-                                              && i.Status == InviteStatus.Pending, ct);
-        if (alreadyExists || await _memberRepo.IsUserInTeamAsync(teamId, invitedUserId, ct))
-            throw new ConflictException("Invite already exists or user is in the team.");
 
-        var invite = new TeamInvite
-        {
-            Id = Guid.NewGuid(),
-            TeamId = teamId,
-            InvitedUserId = invitedUserId,
-            InvitedByUserId = invitedByUserId,
-            CreatedAt = DateTime.UtcNow,
-            Status = InviteStatus.Pending
-        };
+    public async Task<TeamInvite?> GetByIdAsync(Guid inviteId, CancellationToken ct)
+    {
+        return await _db.TeamInvites
+            .SingleOrDefaultAsync(i => i.Id == inviteId, ct);
+    }
 
-        await _db.TeamInvites.AddAsync(invite);
-        await _db.SaveChangesAsync(ct);
-        
-        await _db.Entry(invite).Reference(i => i.Team).LoadAsync(ct);
-        await _db.Entry(invite).Reference(i => i.InvitedUser).LoadAsync(ct);
-        await _db.Entry(invite).Reference(i => i.InvitedByUser).LoadAsync(ct);
-        
-        return invite;
-    }
-    
-    public async Task<TeamInvite> GetTeamInviteByIdAsync(Guid teamInviteId, CancellationToken ct)
+    public async Task<TeamInvite?> GetByIdWithDetailsAsync(Guid inviteId, CancellationToken ct)
     {
-        var invite = await _db.TeamInvites
-                         .Include(i => i.Team)
-                         .Include(i => i.InvitedByUser)
-                         .Include(i => i.InvitedUser)
-                         .SingleOrDefaultAsync(i => i.Id == teamInviteId, ct)
-                     ?? throw new NotFoundException("Invite not found.");
-        
-        return invite;
+        return await _db.TeamInvites
+            .Include(i => i.Team)
+            .Include(i => i.InvitedByUser)
+            .Include(i => i.InvitedUser)
+            .SingleOrDefaultAsync(i => i.Id == inviteId, ct);
     }
-    
-    public async Task<List<TeamInvite>> GetTeamInvitesAsync(Guid teamId, Guid requestingUserId, CancellationToken ct)
+
+    public async Task<bool> ExistsPendingInviteAsync(Guid teamId, Guid invitedUserId, CancellationToken ct)
     {
-        var query = _db.TeamInvites
+        return await _db.TeamInvites.AnyAsync(
+            i => i.TeamId == teamId &&
+                 i.InvitedUserId == invitedUserId &&
+                 i.Status == InviteStatus.Pending,
+            ct);
+    }
+
+    public async Task<bool> WasInviteSentByUserAsync(Guid inviteId, Guid userId, CancellationToken ct)
+    {
+        return await _db.TeamInvites.AnyAsync(i => i.Id == inviteId && i.InvitedByUserId == userId, ct);
+    }
+
+    public async Task<List<TeamInvite>> GetPendingInvitesForTeamAsync(Guid teamId, CancellationToken ct)
+    {
+        return await _db.TeamInvites
             .Where(i => i.TeamId == teamId && i.Status == InviteStatus.Pending)
             .Include(i => i.Team)
             .Include(i => i.InvitedByUser)
-            .Include(i => i.InvitedUser);
-
-        if (await _memberRepo.IsUserALeaderAsync(teamId, requestingUserId, ct) 
-            || await _memberRepo.IsUserAnAdminAsync(teamId, requestingUserId, ct))
-            return await query.ToListAsync(ct);
-
-        return await query.Where(i => i.InvitedByUserId == requestingUserId).ToListAsync(ct);
+            .Include(i => i.InvitedUser)
+            .ToListAsync(ct);
     }
-    
+
+    public async Task<List<TeamInvite>> GetPendingInvitesForTeamSentByUserAsync(Guid teamId, Guid invitedByUserId, CancellationToken ct)
+    {
+        return await _db.TeamInvites
+            .Where(i => i.TeamId == teamId &&
+                        i.InvitedByUserId == invitedByUserId &&
+                        i.Status == InviteStatus.Pending)
+            .Include(i => i.Team)
+            .Include(i => i.InvitedByUser)
+            .Include(i => i.InvitedUser)
+            .ToListAsync(ct);
+    }
+
     public async Task<List<TeamInvite>> GetMyPendingInvitesAsync(Guid userId, CancellationToken ct)
     {
         return await _db.TeamInvites
@@ -84,43 +76,13 @@ public class TeamInviteRepository : ITeamInviteRepository
             .ToListAsync(ct);
     }
 
-    public async Task<bool> WasInviteSentByUserAsync(Guid inviteId, Guid userId, CancellationToken ct)
+    public async Task AddAsync(TeamInvite invite, CancellationToken ct)
     {
-        return await _db.TeamInvites.AnyAsync(i => i.Id == inviteId && i.InvitedByUserId == userId, ct);
+        await _db.TeamInvites.AddAsync(invite, ct);
     }
 
-    public async Task<TeamInvite> AcceptInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
+    public void Remove(TeamInvite invite)
     {
-        var invite = await GetTeamInviteByIdAsync(inviteId, ct);
-        
-        if (invite.Status != InviteStatus.Pending)
-            throw new InvalidOperationException("Invite is no longer pending.");
-
-        invite.Status = InviteStatus.Accepted;
-        await _db.TeamMembers.AddAsync(new TeamMember { TeamId = invite.TeamId, UserId = userId });
-        await _db.SaveChangesAsync(ct);
-        
-        return invite;
-    }
-
-    public async Task<TeamInvite> RejectInviteAsync(Guid inviteId, Guid userId, CancellationToken ct)
-    {
-        var invite = await GetTeamInviteByIdAsync(inviteId, ct);
-        if (invite.Status != InviteStatus.Pending)
-            throw new InvalidOperationException("Invite is no longer pending.");
-
-        invite.Status = InviteStatus.Rejected;
-        await _db.SaveChangesAsync(ct);
-        
-        return invite;
-    }
-
-    public async Task<TeamInvite> CancelTeamInviteAsync(Guid inviteId, Guid requestingUserId, CancellationToken ct)
-    {
-        var invite = await GetTeamInviteByIdAsync(inviteId, ct);
-
-        invite.Status = InviteStatus.Cancelled;
-        await _db.SaveChangesAsync(ct);
-        return invite;
+        _db.TeamInvites.Remove(invite);
     }
 }

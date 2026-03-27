@@ -22,8 +22,9 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
             .HasMaxLength(255);
         
         // builder.Property(t => t.CreatedById)
-        //     .IsRequired();
+        // .IsRequired();
 
+        builder.HasQueryFilter(t => !t.CreatedBy.IsDeleted);
 
         builder.HasOne(t => t.CreatedBy)
             .WithMany(u => u.CreatedTeams)

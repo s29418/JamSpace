@@ -14,9 +14,9 @@ public class GetMyTeamsHandlerTests
         // Arrange
         var teamRepo = new Mock<ITeamRepository>();
 
-        var creator = new User { UserName = "creator" };
+        var creator = new User { UserName = "creator", DisplayName = "creator" };
 
-        teamRepo.Setup(r => r.GetTeamsByUserIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+        teamRepo.Setup(r => r.GetByUserIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Team>
             {
                 new Team

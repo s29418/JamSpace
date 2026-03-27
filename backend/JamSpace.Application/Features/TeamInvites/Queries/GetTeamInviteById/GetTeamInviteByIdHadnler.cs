@@ -1,4 +1,5 @@
-﻿using JamSpace.Application.Common.Interfaces;
+﻿using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Features.TeamInvites.DTOs;
 using JamSpace.Application.Features.TeamInvites.Mappers;
 using MediatR;
@@ -17,6 +18,7 @@ public class GetTeamInviteByIdHadnler : IRequestHandler<GetTeamInviteByIdQuery, 
 
     public async Task<TeamInviteDto> Handle(GetTeamInviteByIdQuery request, CancellationToken cancellationToken)
     {
-        return TeamInviteMapper.ToDto(await _repo.GetTeamInviteByIdAsync(request.Id, cancellationToken));
+        return TeamInviteMapper.ToDto(await _repo.GetByIdAsync(request.Id, cancellationToken) 
+        ??  throw new NotFoundException("Invite not found"));
     }
 }

@@ -1,0 +1,10 @@
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.info {
+    opacity: 0.85;
+    margin-top: 14px;
+}

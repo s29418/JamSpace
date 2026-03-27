@@ -1,0 +1,172 @@
+.profileCard {
+    position: relative;
+    margin: 96px auto 24px;
+    max-width: 680px;
+    min-width: 680px;
+    border: 2px solid rgba(38, 205, 212, 0.6);
+    border-radius: 16px;
+    padding: 28px 64px 22px;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 18px;
+    background: rgba(25, 71, 66, 0.02);
+}
+
+.profileCardAvatar {
+    position: absolute;
+    left: 42px;
+    top: -80px;
+}
+
+.profileCardAvatar img, .avatarFallback {
+    width: 160px;
+    height: 160px;
+    border-radius: 100%;
+    object-fit: cover;
+    border: 2px solid #26cdd4;
+    box-shadow: 0 6px 24px rgba(63, 224, 207, .15);
+}
+
+.profileCard {
+    grid-template-columns: 1fr;
+}
+
+.avatarFallback {
+    display: grid;
+    place-items: center;
+    background: #142223;
+    color: #26cdd4;
+    font-size: 80px;
+    font-weight: 700;
+}
+
+.editTopRight {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    padding: 6px 6px;
+    line-height: 1;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    gap: 8px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    color: #26cdd4;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    justify-self: center;
+}
+
+
+.profileCardName {
+    font-size: 64px;
+    color: #e9fffb;
+    margin-top: 48px;
+}
+
+.profileUserName{
+    font-size: 16px;
+    color: rgba(233, 255, 251, 0.61);
+    margin-top: -8px;
+    margin-bottom: 8px;
+}
+
+.profileCardBio {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.76);
+    margin: 8px 0;
+}
+
+.profileCardLocation {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.76);
+}
+
+.chip {
+    background: #26cdd4;
+    color: #0b1414;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 13px;
+    font-weight: 599;
+}
+
+.chipHollow {
+    background: transparent;
+    color: #26cdd4;
+    border: 1px solid #26cdd4;
+}
+
+.profileCardMeta {
+    margin-top: 10px;
+    display: flex;
+    gap: 16px;
+    color: rgba(181, 255, 255, 0.76);
+    font-size: 13px;
+}
+
+.metaLink {
+    background: transparent;
+    border: 0; color: #a7ded8;
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+}
+
+.metaLink:hover {
+    color: #26cdd4;
+    text-decoration: underline;
+}
+
+.profileCardActions {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+}
+
+.button {
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.buttonGhost {
+    background: transparent;
+    color: #26cdd4;
+    border-color: #26cdd4;
+    align-items: center;
+    display: inline-flex;
+    gap: 4px;
+}
+
+.buttonEdit  {
+    background: transparent;
+    color: #26cdd4;
+    border-color: #26cdd4;
+}
+
+.button:hover {
+    filter: brightness(1.5);
+    background-color: rgba(38, 205, 212, 0.07);
+}
+
+.actionsInline {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.profileCardChipsRow {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}

@@ -1,4 +1,4 @@
-import { api } from '../../../shared/lib/api/base';
+import { api } from '../../../shared/api/base';
 import type { Team } from '../model/types';
 
 const ROOT = '/teams';

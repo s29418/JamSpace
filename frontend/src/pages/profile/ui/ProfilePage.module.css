@@ -1,0 +1,73 @@
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 32px;
+    color: white;
+    background-color: #121212;
+}
+
+.loginForm {
+    display: flex;
+    flex-direction: column;
+
+    padding: 32px 64px;
+    border-radius: 32px;
+    border: 1px solid #26cdd4;
+    background-color: #1e1e1e;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+.loginForm input {
+    padding: 12px 10px;
+    margin-top: 16px;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    /*background-color: #2e2e2e;*/
+    /*color: white;*/
+    width: 100%;
+}
+
+.loginForm button {
+    padding: 10px;
+    margin-top: 16px;
+    font-size: 1rem;
+    background-color: #26cdd4;
+    color: black;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.loginForm p {
+    margin-top: 8px;
+    text-align: center;
+}
+
+.loginForm span {
+    color: #26cdd4;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.loginForm span:hover {
+    text-decoration: none;
+}
+
+.error{
+    color: #ff4d4d;
+    margin-top: 4px;
+    text-align: center;
+}
+
+.success{
+    color: #26cdd4;
+    margin-top: 22px;
+    text-align: center;
+    font-size: 14px;
+}

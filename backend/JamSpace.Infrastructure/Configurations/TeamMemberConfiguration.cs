@@ -14,8 +14,13 @@ public class TeamMemberConfiguration : IEntityTypeConfiguration<TeamMember>
 
         builder.Property(tm => tm.Role)
             .IsRequired()
-            .HasConversion<string>()
             .HasMaxLength(25);
+
+        builder.Property(tm => tm.MusicalRole)
+            .IsRequired(false)
+            .HasMaxLength(25);
+        
+        builder.HasQueryFilter(tm => !tm.User.IsDeleted);
 
         builder.HasOne(tm => tm.User)
             .WithMany(u => u.Teams)

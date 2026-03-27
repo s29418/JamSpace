@@ -1,4 +1,4 @@
-import { getDecodedToken } from "./auth";
+import { getDecodedToken } from "./token";
 
 let authReadyResolved = false;
 let authReadyPromise: Promise<void> | null = null;

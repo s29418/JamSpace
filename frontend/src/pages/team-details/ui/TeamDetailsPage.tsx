@@ -2,10 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TeamDetailsPage.module.css';
 import defaultTeamIcon from '../../../shared/assets/defaultTeamIcon.jpg';
-import { getCurrentUserId } from '../../../shared/lib/auth/auth';
+import { getCurrentUserId } from '../../../shared/lib/auth/token';
 import TeamSettingsModal from '../../../widgets/team-settings/ui/TeamSettingsModal';
 import { CogIcon as SettingsIcon } from '@heroicons/react/24/outline';
-import { useTeam } from '../../../features/team/settings/model/useTeam';
+import { useTeam } from '../../../features/team/manage-team/model/useTeam';
 
 const TeamDetailsPage = () => {
     const { id } = useParams<{ id: string }>();

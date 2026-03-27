@@ -1,10 +1,10 @@
 import React, {FC, useEffect, useState} from "react";
-import { ProfileTab } from "./profileTab/ProfileTab";
+import { ProfileTab } from "./profile-tab/ProfileTab";
 import styles from "./EditProfilePanel.module.css";
 import {UserProfile} from "../../../../entities/user/model/types";
 import {UpdateUserProfileRequest} from "../../../../entities/user/api/profile.api";
-import {TagsEditorTab} from "./tagsEditorTab/TagsEditorTab";
-import {AccountTab} from "./accountTab/AccountTab";
+import {TagsEditorTab} from "./tags-editor-tab/TagsEditorTab";
+import {AccountTab} from "./account-tab/AccountTab";
 import {verifyPassword} from "../../../../entities/user/api/auth.api";
 import {ApiError} from "../../../../shared/api/base";
 

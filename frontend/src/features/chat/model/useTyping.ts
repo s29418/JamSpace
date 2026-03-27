@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { chatHub } from "shared/lib/realtime/chatHub";
 import type { ConversationTypingEvent } from "entities/chat/model/types";
-import { getCurrentUserId } from "shared/lib/auth/auth";
+import { getCurrentUserId } from "shared/lib/auth/token";
 
 type Params = {
     conversationId: string | null;

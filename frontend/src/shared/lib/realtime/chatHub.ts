@@ -5,7 +5,7 @@ import {
     LogLevel,
     HttpTransportType,
 } from "@microsoft/signalr";
-import { getToken } from "shared/lib/auth/auth";
+import { getToken } from "shared/lib/auth/token";
 import { waitForAuthReady } from "shared/lib/auth/waitForAuthReady";
 import type {
     ConversationReadEvent,

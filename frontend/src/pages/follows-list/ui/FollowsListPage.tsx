@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import { getToken } from '../../../shared/lib/auth/auth';
+import { getToken } from '../../../shared/lib/auth/token';
 import { Link, useParams } from 'react-router-dom';
 import styles from './FollowsListPage.module.css';
-import {FollowsMode, useUserFollows} from "../../../features/user/follow-user/model/useUserFollows";
+import {FollowsMode, useUserFollows} from "../../../features/user/follows/model/useUserFollows";
 import {jwtDecode} from "jwt-decode";
 import {FollowsListPageSkeleton} from "./FollowsListPageSkeleton";
 
@@ -54,7 +54,7 @@ const FollowsListPage: React.FC<Props> = ({ mode }) => {
                             {u.profilePictureUrl
                                 ? <img src={u.profilePictureUrl} alt={`${u.username} avatar`}/>
                                 : <div
-                                    className={styles.avatarFallback}>{u.displayName?.[0] ?? u.username?.[0] ?? '?'}</div>}
+                                    className={styles.avatarFallback}>{u.displayName?.[0].toUpperCase() ?? u.username?.[0].toUpperCase() ?? '?'}</div>}
                         </Link>
 
                         <div className={styles.meta}>

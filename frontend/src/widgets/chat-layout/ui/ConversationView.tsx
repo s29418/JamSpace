@@ -5,7 +5,7 @@ import { useConversationMessages } from "features/chat/model/useConversationMess
 import { useConversationDetails } from "features/chat/model/useConversationDetails";
 import { useTyping } from "features/chat/model/useTyping";
 import { chatHub } from "shared/lib/realtime/chatHub";
-import { getCurrentUserId } from "shared/lib/auth/auth";
+import { getCurrentUserId } from "shared/lib/auth/token";
 import MessageBubble from "../../../entities/chat/ui/MessageBubble";
 import MessageComposer from "../../../entities/chat/ui/MessageComposer";
 import TypingIndicator from "../../../entities/chat/ui/TypingIndicator";

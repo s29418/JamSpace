@@ -1,5 +1,5 @@
 import { api } from '../../../shared/api/base';
-import {clearToken, setToken} from "../../../shared/lib/auth/auth";
+import {clearToken, setToken} from "../../../shared/lib/auth/token";
 import { markAuthReady } from "shared/lib/auth/waitForAuthReady";
 
 const ROOT = `/auth`;

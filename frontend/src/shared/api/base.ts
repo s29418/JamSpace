@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { getToken, setToken, clearToken } from '../lib/auth/auth'
+import { getToken, setToken, clearToken } from '../lib/auth/token'
 
 export const API_BASE_URL = "http://localhost:5072";
 

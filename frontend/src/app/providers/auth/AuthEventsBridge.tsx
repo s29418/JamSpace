@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { clearToken } from 'shared/lib/auth/auth';
+import { clearToken } from 'shared/lib/auth/token';
 
 const LOGIN_ROUTE = '/profile';
 

@@ -27,7 +27,7 @@ export function useTeamInvites(opts: Options = {}) {
             const data = teamId ? await getTeamInvitesByTeamId(teamId) : await getTeamInvites();
             setInvites(data);
         } catch (e) {
-            const msg = isApiError(e) ? (e as ApiError).message : 'Failed to load invites';
+            const msg = isApiError(e) ? (e as ApiError).message : 'Failed to load team-invites';
             setError(msg);
         } finally {
             setLoading(false);

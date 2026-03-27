@@ -137,7 +137,7 @@ export const ProfileTab: React.FC<Props> = ({
             noValidate
         >
 
-            {/* Profile picture */}
+            {/* profile picture */}
             <div className={styles.formRow}>
                 <label className={styles.labelCenter}>Profile picture</label>
 

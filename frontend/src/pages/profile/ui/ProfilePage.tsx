@@ -13,7 +13,7 @@ import { getOrCreateDirectConversation } from '../../../entities/chat/api/conver
 import { ProfileHeaderCard } from '../../../widgets/profile-header/ui/ProfileHeaderCard';
 import { EditProfilePanel } from '../../../features/user/edit-profile/ui/EditProfilePanel';
 import { ProfileHeaderCardSkeleton } from "../../../widgets/profile-header/ui/ProfileHeaderCardSkeleton";
-import { getToken, clearToken } from '../../../shared/lib/auth/auth';
+import { getToken, clearToken } from '../../../shared/lib/auth/token';
 import { chatHub } from '../../../shared/lib/realtime/chatHub';
 
 type JwtPayload = { sub: string; username: string; email: string };

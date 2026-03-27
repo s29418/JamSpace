@@ -3,20 +3,20 @@ import ReactDOM from 'react-dom';
 import styles from './TeamSettingsModal.module.css';
 
 // HOOKS & TYPES
-import { useTeam } from '../../../features/team/settings/model/useTeam';
-import { useTeamInvites } from '../../../features/team/invites/model/useTeamInvites';
-import { useTeamActions } from '../../../features/team/settings/model/useTeamActions';
+import { useTeam } from '../../../features/team/manage-team/model/useTeam';
+import { useTeamInvites } from '../../../features/team/team-invites/model/useTeamInvites';
+import { useTeamActions } from '../../../features/team/manage-team/model/useTeamActions';
 import { useToast } from 'shared/lib/hooks/useToast';
 import { TeamRoleLabel, TeamInvite, TeamMember } from 'entities/team/model/types';
 import { emitTeamUpdated, emitTeamRemoved } from 'shared/lib/events/teamEvents';
 
 // UI BLOCKS
-import { TeamHeader } from './Header/TeamHeader';
-import { MembersList } from './MembersList/MembersList';
-import { InvitesList, InviteView } from './Invites/InvitesList';
-import { InviteForm } from './Invites/InviteForm';
-import MessageSlot from 'shared/ui/message/MessageSlot';
-import { AvatarUploader } from './Header/AvatarUploader';
+import { TeamHeader } from './header/TeamHeader';
+import { MembersList } from './members-list/MembersList';
+import { InvitesList, InviteView } from './invites/InvitesList';
+import { InviteForm } from './invites/InviteForm';
+import MessageBox from 'shared/ui/message/MessageBox';
+import { AvatarUploader } from './header/AvatarUploader';
 
 type Props = {
     isOpen: boolean;
@@ -221,7 +221,7 @@ export default function TeamSettingsModal({
             teamPictureUrl={team?.teamPictureUrl ?? null}
             members={team?.members ?? []}
 
-            // Header
+            // header
             canRename={canRename}
             canChangePicture={canChangePicture}
             canDeleteTeam={canDeleteTeam}
@@ -242,7 +242,7 @@ export default function TeamSettingsModal({
             canKickFn={canKick}
             membersMsg={membersMsg}
 
-            // invites
+            // team-invites
             invites={inviteViews}
             onInvite={handleInvite}
             onCancelInvite={handleCancelInvite}
@@ -271,7 +271,7 @@ type BodyProps = {
     teamPictureUrl: string | null;
     members: TeamMember[];
 
-    // Header
+    // header
     canRename: boolean;
     canChangePicture: boolean;
     canDeleteTeam: boolean;
@@ -292,7 +292,7 @@ type BodyProps = {
     canKickFn: (m: TeamMember) => boolean;
     membersMsg: { text: string; color: string } | null;
 
-    // Invites
+    // team-invites
     invites: InviteView[];
     onInvite: (username: string) => void | Promise<void>;
     onCancelInvite: (inviteId: string) => void | Promise<void>;
@@ -363,7 +363,7 @@ const ModalBody: React.FC<BodyProps> = (p) => {
                         onDeleteTeam={onDeleteTeam}
                         onLeaveTeam={onLeaveTeam}
                     />
-                    <MessageSlot message={headerMsg} className={styles.teamInfoMsg} />
+                    <MessageBox message={headerMsg} className={styles.teamInfoMsg} />
 
                     {/* LOADING/ERRORS */}
                     {(teamLoading || invitesLoading) && (
@@ -386,7 +386,7 @@ const ModalBody: React.FC<BodyProps> = (p) => {
                         canEditMusicalRole={canEditMusicalRoleFn}
                         canKick={canKickFn}
                     />
-                    <MessageSlot message={membersMsg} className={styles.teamInfoMsg} />
+                    <MessageBox message={membersMsg} className={styles.teamInfoMsg} />
 
                     <hr className={styles.lineBreak} />
 
@@ -395,7 +395,7 @@ const ModalBody: React.FC<BodyProps> = (p) => {
                     <InvitesList invites={invites} onCancel={onCancelInvite} />
                     <h3 className={styles.subtitle}>Invite User</h3>
                     <InviteForm onInvite={onInvite} />
-                    <MessageSlot message={invitesMsg} className={styles.teamInfoMsg} />
+                    <MessageBox message={invitesMsg} className={styles.teamInfoMsg} />
                 </div>
             </div>
         </div>

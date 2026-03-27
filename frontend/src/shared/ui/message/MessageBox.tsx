@@ -7,7 +7,7 @@ type Props = {
     className?: string;
 };
 
-export default function MessageSlot({ message, className }: Props) {
+export default function MessageBox({ message, className }: Props) {
     const [parent] = useAutoAnimate({ duration: 350, easing: "cubic-bezier(0.22,1,0.36,1)" });
 
     return (

@@ -1,15 +1,15 @@
 import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useMyTeams } from '../../../features/team/browse-my-teams/model/useMyTeams';
-import { useTeamInvites } from '../../../features/team/invites/model/useTeamInvites';
+import { useMyTeams } from '../../../features/team/my-teams/model/useMyTeams';
+import { useTeamInvites } from '../../../features/team/team-invites/model/useTeamInvites';
 import { useCreateTeam } from '../../../features/team/create-team/model/useCreateTeam';
 
 import TeamCard from '../../../entities/team/ui/TeamCard';
 import TeamInviteCard from '../../../entities/team/ui/TeamInviteCard';
 import TeamCardSkeleton from '../../../entities/team/ui/TeamCardSkeleton';
 import TeamSettingsModal from '../../../widgets/team-settings/ui/TeamSettingsModal';
-import { getCurrentUserId } from '../../../shared/lib/auth/auth';
+import { getCurrentUserId } from '../../../shared/lib/auth/token';
 import styles from './TeamsPage.module.css';
 
 const TeamsPage: React.FC = () => {

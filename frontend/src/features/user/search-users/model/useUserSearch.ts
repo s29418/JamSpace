@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError, isApiError } from "shared/api/base";
-import { searchUsers } from "entities/user/api/usersSearch.api";
+import { searchUsers } from "entities/user/api/userSearch.api";
 import type { PagedResult, UserSearchItem } from "entities/user/model/types";
 
 type Filters = {

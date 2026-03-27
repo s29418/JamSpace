@@ -35,13 +35,18 @@
     align-items: center;
 }
 
+.item:hover {
+    box-shadow: 0 0 5px rgba(53, 215, 255, 0.3);
+}
+
 .avatarLink {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     border-radius: 999px;
     overflow: hidden;
-    border: 1px solid #26cdd4;
+    border: 2px solid #26cdd4;
     display: block;
+    text-decoration: none;
 }
 
 .avatarLink img {
@@ -57,6 +62,8 @@
     display: grid;
     place-items: center;
     color: #26cdd4;
+    background: #142223;
+    font-size: 24px;
 }
 
 .meta {

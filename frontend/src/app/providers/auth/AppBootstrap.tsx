@@ -4,7 +4,7 @@ import {
     clearToken,
     getDecodedToken,
     getToken,
-} from "shared/lib/auth/auth";
+} from "shared/lib/auth/token";
 import { markAuthReady } from "shared/lib/auth/waitForAuthReady";
 
 export default function AppBootstrap() {

@@ -10,9 +10,9 @@ import type { UserProfile } from '../../../../entities/user/model/types';
 import { ApiError, isApiError } from 'shared/api/base';
 import { addUserGenre, deleteUserGenre } from "../../../../entities/user/api/genres.api";
 import { addUserSkill, deleteUserSkill } from "../../../../entities/user/api/skills.api";
-import { useFollowActions } from "../../follow-user/model/useFollowActions";
+import { useFollowActions } from "../../follows/model/useFollowActions";
 import { logoutAll as logoutAllApi } from "../../../../entities/user/api/auth.api";
-import { clearToken } from '../../../../shared/lib/auth/auth';
+import { clearToken } from '../../../../shared/lib/auth/token';
 
 export function useProfile(userId?: string) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -107,7 +107,7 @@ export function useProfile(userId?: string) {
     }, [userId, refresh]);
 
     const addGenre = useCallback(async (name: string) => {
-        if (!profile) throw new ApiError(400, 'Profile not loaded');
+        if (!profile) throw new ApiError(400, 'profile not loaded');
 
         try {
             const tag = await addUserGenre(profile.id, name);
@@ -118,7 +118,7 @@ export function useProfile(userId?: string) {
     }, [profile]);
 
     const removeGenre = useCallback(async (id: string) => {
-        if (!profile) throw new ApiError(400, 'Profile not loaded');
+        if (!profile) throw new ApiError(400, 'profile not loaded');
 
         try {
             await deleteUserGenre(profile.id, id);
@@ -129,7 +129,7 @@ export function useProfile(userId?: string) {
     }, [profile]);
 
     const addSkill = useCallback(async (name: string) => {
-        if (!profile) throw new ApiError(400, 'Profile not loaded');
+        if (!profile) throw new ApiError(400, 'profile not loaded');
 
         try {
             const tag = await addUserSkill(profile.id, name);
@@ -140,7 +140,7 @@ export function useProfile(userId?: string) {
     }, [profile]);
 
     const removeSkill = useCallback(async (skillId: string) => {
-        if (!profile) throw new ApiError(400, 'Profile not loaded');
+        if (!profile) throw new ApiError(400, 'profile not loaded');
 
         try {
             await deleteUserSkill(profile.id, skillId);

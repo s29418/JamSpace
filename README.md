@@ -7,7 +7,7 @@ JamSpace - Music Collaboration Platform
 <br/>
 
 <div align="center">
-<img src="assets/logo.png" width="300" >
+<img src="screenshots/logo.png" width="300" >
 </div>
 
 <br/>
@@ -30,43 +30,34 @@ The platform bridges market gaps identified during analysis, such as the lack of
 
 This project was fully designed and developed by me, including system architecture, domain modeling, backend implementation, frontend application, and infrastructure setup. The entire platform was built from scratch as part of my engineering thesis.
 
-**Note:**
-Due to engineering thesis requirements, the full implementation cannot be publicly published. However, the complete project can be shared securely upon request as part of a recruitment process.
-
 ---
 
 ## Implemented Features
 
-### Authentication & User Management
-- Registration and login (JWT-based)
+### User Account & Profile
+- Registration and login (JWT-based authentication)
 - Password hashing and verification
-- Change password
-- Change email
-- Update display name
 - Secure authorization using JWT claims and role checks
-
-<details>
-  <summary>Screenshots</summary>
-
-  <img src="screenshots/register.png" width="500"/>
-  <img src="screenshots/login.png" width="500"/>
-
-</details>
-
-### User Profile
-- Viewing user profiles
-- Editing profile fields:
+- Account management:
+  - change password
+  - change email
+  - delete account (soft delete)
+- User profile management:
+  - update display name
   - bio
   - location
   - musical skills
   - preferred genres
-  - uploading and updating profile picture
+  - upload and update profile picture
+- View user profiles
 
 
 <img src="screenshots/profile.png">
 <details>
-  <summary>More screenshots</summary>
+  <summary><b>More screenshots</b></summary>
 
+  <img src="screenshots/register.png" width="500"/>
+  <img src="screenshots/login.png" width="500"/>
   <img src="screenshots/profile-edit.png" width="500"/>
   <img src="screenshots/profile-edit-skills.png" width="500"/>
   <img src="screenshots/profile-edit-genres.png" width="500"/>
@@ -74,40 +65,64 @@ Due to engineering thesis requirements, the full implementation cannot be public
 
 </details>
 
-### Teams
+### Teams & Collaboration
+
 - Create a team
 - View all teams the user belongs to
 - Upload team picture to **Azure Blob Storage**
 - View team details with the user's role included
 - Access control via `IsUserInTeam`
 
+- Invite system:
+  - send invitation to a user
+  - accept invitation
+  - reject invitation
+  - view all pending invitations
+  - enum-based invitation status
+  - automatic assignment of team role after accepting
+
 <img src="screenshots/teams.png">
 <details>
-  <summary>More screenshots</summary>
+  <summary><b>More screenshots</b></summary>
 
   <img src="screenshots/teams-creating&invites.gif"/>
-
+  <img src="screenshots/team-settings.gif"/>
   <img src="screenshots/team-settings-teamname.png" width="500"/>
-  <img src="screenshots/team-settings-teampicture.png" width="500"/>
   <img src="screenshots/team-settings-userrole.png" width="500"/>
 
 </details>
 
-### Team Invitations
-- Send invitation to a user
-- Accept invitation
-- Reject invitation
-- View all pending invitations
-- Enum-based invitation status
-- Automatic assignment of team role after accepting
+### Search
+- Search users by username or display name
+- Filter results based on:
+  - location
+  - musical skills
+  - preferred genres
+- Designed to support finding collaborators efficiently
 
-### Infrastructure & Architecture
-- Clean Architecture structure (Domain / Application / Infrastructure / API)
-- EF Core Code First with migrations
-- Domain entities: User, Team, TeamMember, TeamInvite, Skill, UserSkill, Genre, UserGenre, UserFollows
-- Repository pattern with DI
-- Azure Blob Storage integration
-- MSSQL running in Docker
+<img src="screenshots/search.gif"/>
+<details>
+  <summary><b>More screenshots</b></summary>
+  
+  <img src="screenshots/search-nofilters.png"/>
+  <img src="screenshots/search-filters.png"/>
+
+</details>
+
+### Chat
+- Real-time messaging between users
+- One-to-one and team conversations
+- Persistent message storage
+- Backend handled via API with secure authorization
+
+<img src="screenshots/chat.png"/>
+<details>
+  <summary><b>More screenshots</b></summary>
+
+  <img src="screenshots/chat-typing.gif"/>
+  <img src="screenshots/chat-seen.png" width="1079"/>
+
+</details>
 
 ---
 
@@ -153,7 +168,7 @@ Due to engineering thesis requirements, the full implementation cannot be public
 
 ---
 
-## Additional Technical Information
+## Architecture & Technical Details
 
 - Complete **system design authored from scratch**, including domain model, entity relationships and system architecture
 

@@ -24,6 +24,9 @@ ASP.NET Core • EF Core • Clean Architecture • React • MSSQL (Docker) •
 ---
 
 ## Overview
+
+<img src="screenshots/overview.gif">
+
 **JamSpace** is a web platform designed to help musicians collaborate remotely by combining social features with project and team management tools. The system enables artists to find collaborators, exchange ideas, manage workflows, and develop music projects within one unified environment.
 
 The platform bridges market gaps identified during analysis, such as the lack of tools combining portfolio presentation, collaboration, audio file sharing, and structured team management.

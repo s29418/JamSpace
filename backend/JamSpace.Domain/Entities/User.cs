@@ -32,4 +32,6 @@ public class User
     
     public ICollection<UserGenre> UserGenres { get; set; } = new List<UserGenre>();
     public ICollection<UserSkill> UserSkills { get; set; } = new List<UserSkill>();
+
+    public ICollection<Post> Posts { get; set; } = new List<Post>();
 }

@@ -14,6 +14,9 @@ public sealed class JamSpaceDbContext : DbContext
     
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    public DbSet<Post> Posts => Set<Post>();
+    public DbSet<PostMedia> PostMedia => Set<PostMedia>();
     
     public DbSet<UserFollow> UserFollows => Set<UserFollow>();
     
@@ -38,6 +41,8 @@ public sealed class JamSpaceDbContext : DbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfiguration(new UserConfiguration());
         modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+        modelBuilder.ApplyConfiguration(new PostConfiguration());
+        modelBuilder.ApplyConfiguration(new PostMediaConfiguration());
         modelBuilder.ApplyConfiguration(new GenreConfiguration());
         modelBuilder.ApplyConfiguration(new UserGenreConfiguration());
         modelBuilder.ApplyConfiguration(new SkillConfiguration());

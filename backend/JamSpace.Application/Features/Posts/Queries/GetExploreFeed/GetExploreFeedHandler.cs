@@ -17,7 +17,7 @@ public class GetExploreFeedHandler : IRequestHandler<GetExploreFeedQuery, Cursor
 
     public async Task<CursorResult<PostDto>> Handle(GetExploreFeedQuery request, CancellationToken cancellationToken)
     {
-        var take = Math.Clamp(request.Take, 1, 100);
+        var take = Math.Clamp(request.Take, 1, 50);
         var takePlusOne = take + 1;
 
         var posts = await _post.GetExplorePostsAsync(request.Before, takePlusOne, cancellationToken);

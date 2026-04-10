@@ -6,18 +6,18 @@ using MediatR;
 
 namespace JamSpace.Application.Features.Posts.Queries.GetUserFeed;
 
-public class GetUserFeedHandler : IRequestHandler<GetUserFeedQuery, CursorResult<PostDto>>
+public class GetUserPostsHandler : IRequestHandler<GetUserPostsQuery, CursorResult<PostDto>>
 {
     private readonly IPostRepository _post;
 
-    public GetUserFeedHandler(IPostRepository post)
+    public GetUserPostsHandler(IPostRepository post)
     {
         _post = post;
     }
 
-    public async Task<CursorResult<PostDto>> Handle(GetUserFeedQuery request, CancellationToken cancellationToken)
+    public async Task<CursorResult<PostDto>> Handle(GetUserPostsQuery request, CancellationToken cancellationToken)
     {
-        var take = Math.Clamp(request.Take, 1, 100);
+        var take = Math.Clamp(request.Take, 1, 50);
         var takePlusOne = take + 1;
 
         var posts = await _post.GetPostsByAuthorAsync(request.AuthorId, request.Before, takePlusOne,

@@ -1,6 +1,9 @@
 ﻿using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
 using JamSpace.Application.Common.Exceptions;
+using JamSpace.Application.Common.Models;
+using JamSpace.Application.Features.Posts.DTOs;
+using JamSpace.Application.Features.Posts.Queries.GetUserFeed;
 using JamSpace.Application.Features.Users.Commands.ChangePassword;
 using JamSpace.Application.Features.Users.Commands.Delete;
 using JamSpace.Application.Features.Users.Commands.UpdateUserProfile;
@@ -113,6 +116,14 @@ public class UserController : ControllerBase
         
         await _mediator.Send(new DeleteUserCommand(id), ct);
         return NoContent(); 
+    }
+
+    [AllowAnonymous]
+    [HttpGet("{id:guid}/posts")]
+    public async Task<ActionResult<CursorResult<PostDto>>> GetPosts([FromRoute] Guid id, 
+        [FromQuery] DateTimeOffset? before, [FromQuery] int take = 30, CancellationToken ct = default)
+    {
+        return Ok(await _mediator.Send(new GetUserPostsQuery(id, before, take), ct));
     }
     
     [AllowAnonymous]

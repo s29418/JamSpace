@@ -17,7 +17,7 @@ public class GetFollowedFeedHandler : IRequestHandler<GetFollowedFeedQuery, Curs
 
     public async Task<CursorResult<PostDto>> Handle(GetFollowedFeedQuery request, CancellationToken cancellationToken)
     {
-        var take = Math.Clamp(request.Take, 1, 100);
+        var take = Math.Clamp(request.Take, 1, 50);
         var takePlusOne = take + 1;
 
         var posts = await _post.GetFollowedUsersPostsAsync(request.UserId, request.Before, takePlusOne,

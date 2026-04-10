@@ -8,8 +8,8 @@ public class Post
     
     public PostMedia? Media { get; set; }
     
-    public Guid UserId { get; set; }
-    public User? User { get; set; }
+    public Guid AuthorId { get; set; }
+    public User? Author { get; set; }
     
     public DateTimeOffset CreatedAt { get; set; }
 }

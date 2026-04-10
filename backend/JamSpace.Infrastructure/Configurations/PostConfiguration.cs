@@ -18,9 +18,9 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
 
         builder.Property(p => p.CreatedAt);
 
-        builder.HasOne(p => p.User)
+        builder.HasOne(p => p.Author)
             .WithMany(u => u.Posts)
-            .HasForeignKey(p => p.UserId)
+            .HasForeignKey(p => p.AuthorId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(p => p.Media)

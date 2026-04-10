@@ -1,11 +1,10 @@
 ﻿using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
-using JamSpace.Application.Common.Enums;
 using JamSpace.Application.Common.Exceptions;
-using JamSpace.Application.Features.Uploads.UploadPicture;
 using JamSpace.Application.Features.Users.Commands.ChangePassword;
 using JamSpace.Application.Features.Users.Commands.Delete;
 using JamSpace.Application.Features.Users.Commands.UpdateUserProfile;
+using JamSpace.Application.Features.Users.Commands.UpdateUserProfilePicture;
 using JamSpace.Application.Features.Users.DTOs;
 using JamSpace.Application.Features.Users.Queries.GetDetails;
 using JamSpace.Application.Features.Users.Queries.SearchUsers;
@@ -49,34 +48,43 @@ public class UserController : ControllerBase
         [FromForm] UpdateUserProfileRequest request,
         CancellationToken ct)
     {
-        if (id != User.GetUserId())
+        var currentUserId = User.GetUserId();
+
+        if (id != currentUserId)
             throw new NotFoundException("You can only modify your own profile.");
 
-        if (request.SetProfilePicture && request.File is not null)
+        UserDto? pictureUpdateResult = null;
+
+        if (request.SetProfilePicture)
         {
-            if (request.File.ContentType != "image/jpeg" && request.File.ContentType != "image/png")
-                return BadRequest("Only JPEG or PNG images are allowed.");
-    
-            if (request.File.Length > 2 * 1024 * 1024) 
-                return BadRequest("File size must not exceed 2 MB.");
+            if (request.File is null)
+                return BadRequest("Profile picture file is required.");
 
-            var command = new UploadPictureCommand(
-                request.File.ToFileUpload(),
-                PictureType.UserPicture,
-                id,
-                User.GetUserId()
-            );
+            pictureUpdateResult = await _mediator.Send(
+                new UpdateUserProfilePictureCommand(
+                    id,
+                    currentUserId,
+                    request.File.ToFileUpload()
+                ),
+                ct);
 
-            var pictureUrl = await _mediator.Send(command, ct);
-
-            request.ProfilePictureUrl = pictureUrl;
+            request.SetProfilePicture = false;
         }
+
+        var hasNonPictureUpdates =
+            request.SetDisplayName ||
+            request.SetBio ||
+            request.SetLocation ||
+            request.SetEmail;
+
+        if (!hasNonPictureUpdates)
+            return Ok(pictureUpdateResult);
 
         var result = await _mediator.Send(new UpdateUserProfileCommand(
             id,
             request.SetDisplayName, request.DisplayName,
             request.SetBio, request.Bio,
-            request.SetProfilePicture, request.ProfilePictureUrl,
+            false, null,
             request.SetLocation, request.Location,
             request.SetEmail, request.Email
         ), ct);
@@ -136,7 +144,7 @@ public class UserController : ControllerBase
             return Array.Empty<string>();
 
         return raw
-            .SelectMany(v => (v ?? string.Empty)
+            .SelectMany(v => (v)
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             .Where(v => !string.IsNullOrWhiteSpace(v))
             .ToArray();

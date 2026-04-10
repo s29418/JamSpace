@@ -38,7 +38,7 @@ public static class DependencyInjection
         services.AddScoped<IConversationParticipantRepository, ConversationParticipantRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
 
-        services.AddSingleton(sp =>
+        services.AddSingleton(_ =>
         {
             var conn = config["AzureBlobStorage:ConnectionString"];
             return new BlobServiceClient(conn);

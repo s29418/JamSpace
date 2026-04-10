@@ -2,51 +2,49 @@
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Persistence;
-using JamSpace.Domain.Enums;
+using JamSpace.Application.Features.Users.DTOs;
+using JamSpace.Application.Features.Users.Mappers;
 using MediatR;
 
-namespace JamSpace.Application.Features.Teams.Commands.UpdateTeamPicture;
+namespace JamSpace.Application.Features.Users.Commands.UpdateUserProfilePicture;
 
-public sealed class UpdateTeamPictureHandler : IRequestHandler<UpdateTeamPictureCommand, string>
+public sealed class UpdateUserProfilePictureHandler
+    : IRequestHandler<UpdateUserProfilePictureCommand, UserDto>
 {
-    private readonly ITeamRepository _teams;
-    private readonly ITeamMemberRepository _members;
+    private readonly IUserRepository _users;
     private readonly IUnitOfWork _uow;
     private readonly IFileStorageService _fileStorageService;
 
-    public UpdateTeamPictureHandler(
-        ITeamRepository teams,
-        ITeamMemberRepository members,
+    public UpdateUserProfilePictureHandler(
+        IUserRepository users,
         IUnitOfWork uow,
         IFileStorageService fileStorageService)
     {
-        _teams = teams;
-        _members = members;
+        _users = users;
         _uow = uow;
         _fileStorageService = fileStorageService;
     }
 
-    public async Task<string> Handle(UpdateTeamPictureCommand c, CancellationToken ct)
+    public async Task<UserDto> Handle(UpdateUserProfilePictureCommand c, CancellationToken ct)
     {
-        var team = await _teams.GetByIdAsync(c.TeamId, ct)
-                   ?? throw new NotFoundException("Team not found.");
+        if (c.UserId != c.RequestingUserId)
+            throw new NotFoundException("You can only modify your own profile.");
 
-        var canEdit = await _members.HasRequiredRoleAsync(c.TeamId, c.RequestingUserId, FunctionalRole.Admin, ct);
-        if (!canEdit)
-            throw new ForbiddenAccessException("Only team leader or admin can update team picture.");
+        var user = await _users.GetByIdAsync(c.UserId, ct)
+                   ?? throw new NotFoundException("User not found.");
 
-        var oldPictureUrl = team.TeamPictureUrl;
+        var oldPictureUrl = user.ProfilePictureUrl;
         string? newPictureUrl = null;
 
         try
         {
             newPictureUrl = await _fileStorageService.UploadAsync(
                 c.File,
-                PictureType.TeamPicture,
-                c.TeamId,
+                PictureType.UserPicture,
+                c.UserId,
                 ct);
 
-            team.TeamPictureUrl = newPictureUrl;
+            user.ProfilePictureUrl = newPictureUrl;
 
             await _uow.SaveChangesAsync(ct);
         }
@@ -80,6 +78,6 @@ public sealed class UpdateTeamPictureHandler : IRequestHandler<UpdateTeamPicture
             }
         }
 
-        return newPictureUrl;
+        return user.ToDto(true, false);
     }
 }

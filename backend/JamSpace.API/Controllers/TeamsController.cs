@@ -1,13 +1,12 @@
 ﻿using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
-using JamSpace.Application.Common.Enums;
 using JamSpace.Application.Features.Teams.Commands.ChangeTeamName;
 using JamSpace.Application.Features.Teams.Commands.CreateTeam;
 using JamSpace.Application.Features.Teams.Commands.DeleteTeam;
+using JamSpace.Application.Features.Teams.Commands.UpdateTeamPicture;
 using JamSpace.Application.Features.Teams.DTOs;
 using JamSpace.Application.Features.Teams.Queries.GetMyTeams;
 using JamSpace.Application.Features.Teams.Queries.GetTeamById;
-using JamSpace.Application.Features.Uploads.UploadPicture;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -64,19 +63,17 @@ public class TeamsController : ControllerBase
         [FromForm] UploadPictureRequest request,
         CancellationToken ct)
     {
-        if (request.File.Length == 0)
-            return BadRequest("No file provided.");
-
         var requestingUserId = User.GetUserId();
 
-        var command = new UploadPictureCommand(
-            request.File.ToFileUpload(),     
-            PictureType.TeamPicture,         
-            teamId,                          
-            requestingUserId                 
-        );
+        if (request.File is null)
+            return BadRequest("File is required");
 
-        var url = await _mediator.Send(command, ct);
+        var url = await _mediator.Send(new UpdateTeamPictureCommand(
+            teamId,
+            requestingUserId,
+            request.File.ToFileUpload()
+        ), ct);
+
         return Ok(new { url });
     }
 

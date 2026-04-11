@@ -16,7 +16,11 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .IsRequired(false)
             .HasMaxLength(1000);
 
-        builder.Property(p => p.CreatedAt);
+        builder.Property(p => p.CreatedAt)
+            .IsRequired();
+
+        builder.Property(p => p.OriginalPostId)
+            .IsRequired(false);
 
         builder.HasOne(p => p.Author)
             .WithMany(u => u.Posts)
@@ -27,5 +31,30 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .WithOne(pm => pm.Post)
             .HasForeignKey<PostMedia>(pm => pm.PostId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(p => p.OriginalPost)
+            .WithMany(p => p.Reposts)
+            .HasForeignKey(p => p.OriginalPostId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(p => p.Likes)
+            .WithOne(pl => pl.Post)
+            .HasForeignKey(pl => pl.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.Comments)
+            .WithOne(pc => pc.Post)
+            .HasForeignKey(pc => pc.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(p => p.AuthorId);
+
+        builder.HasIndex(p => p.CreatedAt);
+
+        builder.HasIndex(p => p.OriginalPostId);
+
+        builder.HasIndex(p => new { p.AuthorId, p.OriginalPostId })
+            .IsUnique()
+            .HasFilter("[OriginalPostId] IS NOT NULL");
     }
 }

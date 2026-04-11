@@ -17,7 +17,7 @@ public class AzureBlobStorageService : IFileStorageService
         _containerName = containerName; 
     }
 
-    public async Task<string> UploadAsync(FileUpload file, PictureType type, Guid? relatedEntityId, CancellationToken ct)
+    public async Task<string> UploadAsync(FileUpload file, StorageObjectType type, Guid? relatedEntityId, CancellationToken ct)
     {
         var container = _blobServiceClient.GetBlobContainerClient(_containerName);
         await container.CreateIfNotExistsAsync(cancellationToken: ct);
@@ -50,9 +50,9 @@ public class AzureBlobStorageService : IFileStorageService
         await blobClient.DeleteIfExistsAsync(cancellationToken: ct);
     }
 
-    private static string BuildBlobName(PictureType type, Guid? relatedEntityId, string fileName)
+    private static string BuildBlobName(StorageObjectType type, Guid? relatedEntityId, string fileName)
     {
-        var typeFolder = type.ToString().ToLowerInvariant();        
+        var typeFolder = type.ToString().ToLowerInvariant();
         var entityFolder = (relatedEntityId ?? Guid.NewGuid()).ToString("N");
         var uniqueName = $"{Guid.NewGuid():N}-{fileName}";
         return $"{typeFolder}/{entityFolder}/{uniqueName}";

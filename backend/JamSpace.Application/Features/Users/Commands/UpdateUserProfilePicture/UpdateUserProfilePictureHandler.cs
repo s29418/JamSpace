@@ -40,7 +40,7 @@ public sealed class UpdateUserProfilePictureHandler
         {
             newPictureUrl = await _fileStorageService.UploadAsync(
                 c.File,
-                PictureType.UserPicture,
+                StorageObjectType.UserPicture,
                 c.UserId,
                 ct);
 

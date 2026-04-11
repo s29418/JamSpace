@@ -32,7 +32,9 @@ public class GetFollowedFeedHandler : IRequestHandler<GetFollowedFeedQuery, Curs
 
         var nextBefore = pagePosts.Last().CreatedAt;
 
-        var dtoPosts = PostMapper.ToDto(pagePosts);
+        var dtoPosts = pagePosts
+            .Select(PostMapper.ToDto)
+            .ToList();
         
         return CursorResult<PostDto>.Create(dtoPosts, hasMore, nextBefore);
     }

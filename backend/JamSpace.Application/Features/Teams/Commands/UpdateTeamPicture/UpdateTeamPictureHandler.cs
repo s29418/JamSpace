@@ -42,7 +42,7 @@ public sealed class UpdateTeamPictureHandler : IRequestHandler<UpdateTeamPicture
         {
             newPictureUrl = await _fileStorageService.UploadAsync(
                 c.File,
-                PictureType.TeamPicture,
+                StorageObjectType.TeamPicture,
                 c.TeamId,
                 ct);
 

@@ -4,7 +4,7 @@ using JamSpace.Application.Features.Posts.DTOs;
 using JamSpace.Application.Features.Posts.Mappers;
 using MediatR;
 
-namespace JamSpace.Application.Features.Posts.Queries.GetUserFeed;
+namespace JamSpace.Application.Features.Posts.Queries.GetUserPosts;
 
 public class GetUserPostsHandler : IRequestHandler<GetUserPostsQuery, CursorResult<PostDto>>
 {
@@ -32,7 +32,9 @@ public class GetUserPostsHandler : IRequestHandler<GetUserPostsQuery, CursorResu
 
         var nextBefore = pagePosts.Last().CreatedAt;
 
-        var dtoPosts = PostMapper.ToDto(pagePosts);
+        var dtoPosts = pagePosts
+            .Select(PostMapper.ToDto)
+            .ToList();
         
         return CursorResult<PostDto>.Create(dtoPosts, hasMore, nextBefore);
     }

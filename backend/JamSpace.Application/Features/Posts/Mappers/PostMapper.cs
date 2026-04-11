@@ -5,23 +5,18 @@ namespace JamSpace.Application.Features.Posts.Mappers;
 
 public static class PostMapper
 {
-    public static List<PostDto> ToDto(IReadOnlyList<Post> posts)
+    public static PostDto ToDto(Post? post)
     {
-        var postsDto = new List<PostDto>();
-
-        foreach (var post in posts)
+        return new PostDto
         {
-            postsDto.Add(new PostDto
-            {
-                Id = post.Id,
-                Content = post.Content,
-                CreatedAt = post.CreatedAt,
-                MediaUrl = post.Media?.Url,
-                AuthorId = post.AuthorId,
-                AuthorDisplayName = post.Author?.DisplayName,
-                AuthorAvatarUrl = post.Author?.ProfilePictureUrl
-            });
-        }
-        return postsDto;
+            Id = post.Id,
+            Content = post.Content,
+            CreatedAt = post.CreatedAt,
+            MediaUrl = post.Media?.Url,
+            MediaType = post.Media?.MediaType.ToString(),
+            AuthorId = post.AuthorId,
+            AuthorDisplayName = post.Author?.DisplayName,
+            AuthorAvatarUrl = post.Author?.ProfilePictureUrl
+        };
     }
 }

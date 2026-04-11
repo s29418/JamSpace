@@ -23,6 +23,8 @@ public static class DependencyInjection
         services.AddScoped<IUserSearchRepository, UserSearchRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddScoped<IPostRepository, PostRepository>();
         
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();

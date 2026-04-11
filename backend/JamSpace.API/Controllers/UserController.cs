@@ -3,7 +3,7 @@ using JamSpace.API.Requests;
 using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Models;
 using JamSpace.Application.Features.Posts.DTOs;
-using JamSpace.Application.Features.Posts.Queries.GetUserFeed;
+using JamSpace.Application.Features.Posts.Queries.GetUserPosts;
 using JamSpace.Application.Features.Users.Commands.ChangePassword;
 using JamSpace.Application.Features.Users.Commands.Delete;
 using JamSpace.Application.Features.Users.Commands.UpdateUserProfile;

@@ -32,7 +32,7 @@ public class GetExploreFeedHandler : IRequestHandler<GetExploreFeedQuery, Cursor
         var nextBefore = pagePosts.Last().CreatedAt;
 
         var dtoPosts = pagePosts
-            .Select(PostMapper.ToDto)
+            .Select(p => PostMapper.ToDto(p,false,null))
             .ToList();
         
         return CursorResult<PostDto>.Create(dtoPosts, hasMore, nextBefore);

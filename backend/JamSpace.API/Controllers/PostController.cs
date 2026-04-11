@@ -27,7 +27,8 @@ public class PostController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<PostDto>> GetById([FromRoute] Guid id, CancellationToken ct)
     {
-        return Ok(await _mediator.Send(new GetPostByIdQuery(id), ct));
+        Guid? userId = User.TryGetUserId();
+        return Ok(await _mediator.Send(new GetPostByIdQuery(id, userId), ct));
     }
 
     [HttpGet("explore")]

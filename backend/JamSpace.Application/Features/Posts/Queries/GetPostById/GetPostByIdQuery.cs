@@ -3,4 +3,4 @@ using MediatR;
 
 namespace JamSpace.Application.Features.Posts.Queries.GetPostById;
 
-public sealed record GetPostByIdQuery(Guid Id) : IRequest<PostDto>;
+public sealed record GetPostByIdQuery(Guid Id, Guid? RequestingUserId) : IRequest<PostDto>;

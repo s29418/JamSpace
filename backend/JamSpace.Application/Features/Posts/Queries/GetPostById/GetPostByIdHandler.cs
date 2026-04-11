@@ -20,6 +20,6 @@ public class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, PostDto>
         var post = await _post.GetByIdAsync(request.Id, cancellationToken) ??
                    throw new NotFoundException("Post not found");
 
-        return PostMapper.ToDto(post);
+        return PostMapper.ToDto(post, true, request.RequestingUserId);
     }
 }

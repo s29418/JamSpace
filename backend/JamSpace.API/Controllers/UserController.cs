@@ -123,7 +123,8 @@ public class UserController : ControllerBase
     public async Task<ActionResult<CursorResult<PostDto>>> GetPosts([FromRoute] Guid id, 
         [FromQuery] DateTimeOffset? before, [FromQuery] int take = 30, CancellationToken ct = default)
     {
-        return Ok(await _mediator.Send(new GetUserPostsQuery(id, before, take), ct));
+        Guid? userId = User.TryGetUserId();
+        return Ok(await _mediator.Send(new GetUserPostsQuery(userId, id, before, take), ct));
     }
     
     [AllowAnonymous]
@@ -133,7 +134,7 @@ public class UserController : ControllerBase
         var skills = SplitMulti(request.Skills);
         var genres = SplitMulti(request.Genres);
 
-        Guid? currentUserId = User.GetUserId();
+        Guid? currentUserId = User.TryGetUserId();
 
         var query = new SearchUsersQuery(
             Q: request.Q,

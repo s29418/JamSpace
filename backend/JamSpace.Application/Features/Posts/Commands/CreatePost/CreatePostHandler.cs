@@ -87,7 +87,7 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
 
             post.Author = author;
 
-            return PostMapper.ToDto(post);
+            return PostMapper.ToDto(post, false, c.AuthorId);
         }
         catch 
         {

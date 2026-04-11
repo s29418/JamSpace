@@ -33,7 +33,7 @@ public class GetUserPostsHandler : IRequestHandler<GetUserPostsQuery, CursorResu
         var nextBefore = pagePosts.Last().CreatedAt;
 
         var dtoPosts = pagePosts
-            .Select(PostMapper.ToDto)
+            .Select(p => PostMapper.ToDto(p, false, request.RequestingUserId))
             .ToList();
         
         return CursorResult<PostDto>.Create(dtoPosts, hasMore, nextBefore);

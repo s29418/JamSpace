@@ -1,7 +1,7 @@
 ﻿using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
 using JamSpace.Application.Common.Models;
-using JamSpace.Application.Features.Posts.Commands.CreatePost;
+using JamSpace.Application.Features.Posts.Commands.Create;
 using JamSpace.Application.Features.Posts.DTOs;
 using JamSpace.Application.Features.Posts.Queries.GetExploreFeed;
 using JamSpace.Application.Features.Posts.Queries.GetFollowedFeed;

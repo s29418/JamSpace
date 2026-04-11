@@ -9,7 +9,7 @@ using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
 using MediatR;
 
-namespace JamSpace.Application.Features.Posts.Commands.CreatePost;
+namespace JamSpace.Application.Features.Posts.Commands.Create;
 
 public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
 {

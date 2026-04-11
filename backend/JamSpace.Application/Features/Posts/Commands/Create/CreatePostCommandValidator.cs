@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using JamSpace.Application.Common.Validation;
 
-namespace JamSpace.Application.Features.Posts.Commands.CreatePost;
+namespace JamSpace.Application.Features.Posts.Commands.Create;
 
 public class CreatePostCommandValidator : AbstractValidator<CreatePostCommand>
 {

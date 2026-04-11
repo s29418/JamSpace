@@ -74,5 +74,5 @@ public class PostRepository : IPostRepository
             .ToListAsync(ct);
     }
 
-    public async Task AddAsync(Post post, CancellationToken ct) => await _db.AddAsync(post, ct);
+    public async Task AddAsync(Post post, CancellationToken ct) => await _db.Posts.AddAsync(post, ct);
 }

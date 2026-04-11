@@ -17,6 +17,8 @@ public sealed class JamSpaceDbContext : DbContext
 
     public DbSet<Post> Posts => Set<Post>();
     public DbSet<PostMedia> PostMedia => Set<PostMedia>();
+    public DbSet<PostLike> PostLikes => Set<PostLike>();
+    public DbSet<PostComment> PostComments => Set<PostComment>();
     
     public DbSet<UserFollow> UserFollows => Set<UserFollow>();
     

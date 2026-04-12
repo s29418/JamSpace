@@ -20,6 +20,23 @@ public class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, PostDto>
         var post = await _post.GetByIdAsync(request.Id, cancellationToken) ??
                    throw new NotFoundException("Post not found");
 
-        return PostMapper.ToDto(post, true, request.RequestingUserId);
+        var stats = await _post.GetPostStatsAsync(
+            CollectPostIds(post),
+            request.RequestingUserId,
+            cancellationToken);
+
+        return PostMapper.ToDto(post, true, request.RequestingUserId, stats);
+    }
+
+    private static IEnumerable<Guid> CollectPostIds(PostDto? dto) => Array.Empty<Guid>();
+
+    private static IReadOnlyCollection<Guid> CollectPostIds(Domain.Entities.Post post)
+    {
+        var ids = new HashSet<Guid> { post.Id };
+
+        if (post.OriginalPost is not null)
+            ids.Add(post.OriginalPost.Id);
+
+        return ids;
     }
 }

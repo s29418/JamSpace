@@ -32,8 +32,14 @@ public class GetFollowedFeedHandler : IRequestHandler<GetFollowedFeedQuery, Curs
 
         var nextBefore = pagePosts.Last().CreatedAt;
 
+        var stats = await _post.GetPostStatsAsync(
+            pagePosts
+                .SelectMany(p => p.OriginalPost is null ? [p.Id] : new[] { p.Id, p.OriginalPost.Id }),
+            request.UserId,
+            cancellationToken);
+
         var dtoPosts = pagePosts
-            .Select(p => PostMapper.ToDto(p,false, request.UserId))
+            .Select(p => PostMapper.ToDto(p, false, request.UserId, stats))
             .ToList();
         
         return CursorResult<PostDto>.Create(dtoPosts, hasMore, nextBefore);

@@ -54,7 +54,13 @@ public class RepostPostHandler : IRequestHandler<RepostPostCommand, PostDto>
 
         repost.Author = user;
         repost.OriginalPost = originalPost;
+        originalPost.Reposts.Add(repost);
 
-        return PostMapper.ToDto(repost, false, request.UserId);
+        var stats = await _post.GetPostStatsAsync(
+            new[] { repost.Id, originalPost.Id },
+            request.UserId,
+            cancellationToken);
+
+        return PostMapper.ToDto(repost, false, request.UserId, stats);
     }
 }

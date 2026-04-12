@@ -32,8 +32,14 @@ public class GetUserPostsHandler : IRequestHandler<GetUserPostsQuery, CursorResu
 
         var nextBefore = pagePosts.Last().CreatedAt;
 
+        var stats = await _post.GetPostStatsAsync(
+            pagePosts
+                .SelectMany(p => p.OriginalPost is null ? [p.Id] : new[] { p.Id, p.OriginalPost.Id }),
+            request.RequestingUserId,
+            cancellationToken);
+
         var dtoPosts = pagePosts
-            .Select(p => PostMapper.ToDto(p, false, request.RequestingUserId))
+            .Select(p => PostMapper.ToDto(p, false, request.RequestingUserId, stats))
             .ToList();
         
         return CursorResult<PostDto>.Create(dtoPosts, hasMore, nextBefore);

@@ -31,8 +31,14 @@ public class GetExploreFeedHandler : IRequestHandler<GetExploreFeedQuery, Cursor
 
         var nextBefore = pagePosts.Last().CreatedAt;
 
+        var stats = await _post.GetPostStatsAsync(
+            pagePosts
+                .SelectMany(p => p.OriginalPost is null ? [p.Id] : new[] { p.Id, p.OriginalPost.Id }),
+            null,
+            cancellationToken);
+
         var dtoPosts = pagePosts
-            .Select(p => PostMapper.ToDto(p,false,null))
+            .Select(p => PostMapper.ToDto(p, false, null, stats))
             .ToList();
         
         return CursorResult<PostDto>.Create(dtoPosts, hasMore, nextBefore);

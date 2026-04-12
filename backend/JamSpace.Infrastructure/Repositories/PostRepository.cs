@@ -74,6 +74,22 @@ public class PostRepository : IPostRepository
             .ToListAsync(ct);
     }
 
+    public async Task<Post?> GetRepostByAuthorAndOriginalAsync(Guid authorId, Guid originalPostId, CancellationToken ct)
+    {
+        return await _db.Posts
+            .Include(p => p.Author)
+            .Include(p => p.OriginalPost)
+            .ThenInclude(op => op!.Author)
+            .Include(p => p.OriginalPost)
+            .ThenInclude(op => op!.Media)
+            .Include(p => p.Likes)
+            .Include(p => p.Comments)
+            .Include(p => p.Reposts)
+            .FirstOrDefaultAsync(
+                p => p.AuthorId == authorId && p.OriginalPostId == originalPostId,
+                ct);
+    }
+
     public async Task AddAsync(Post post, CancellationToken ct) => await _db.Posts.AddAsync(post, ct);
     public void Delete(Post post) => _db.Posts.Remove(post);
 }

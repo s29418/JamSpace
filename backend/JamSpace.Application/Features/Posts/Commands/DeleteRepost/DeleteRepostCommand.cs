@@ -1,3 +1,5 @@
-﻿namespace JamSpace.Application.Features.Posts.Commands.DeleteRepost;
+﻿using MediatR;
 
-public record DeleteRepostCommand();
+namespace JamSpace.Application.Features.Posts.Commands.DeleteRepost;
+
+public record DeleteRepostCommand(Guid UserId, Guid OriginalPostId) : IRequest<Unit>;

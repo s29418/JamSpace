@@ -24,9 +24,9 @@ function normalizePost(dto: any): Post {
                 id: String(comment.id),
                 content: comment.content ?? '',
                 createdAt: comment.createdAt,
-                authorId: String(comment.authorId),
-                authorDisplayName: comment.authorDisplayName ?? null,
-                authorAvatarUrl: comment.authorAvatarUrl ?? null,
+                authorId: String(comment.authorId ?? comment.userId),
+                authorDisplayName: comment.authorDisplayName ?? comment.userDisplayName ?? null,
+                authorAvatarUrl: comment.authorAvatarUrl ?? comment.userProfilePictureUrl ?? null,
             }))
             : [],
     };

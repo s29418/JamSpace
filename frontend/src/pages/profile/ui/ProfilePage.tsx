@@ -15,6 +15,10 @@ import { EditProfilePanel } from '../../../features/user/edit-profile/ui/EditPro
 import { ProfileHeaderCardSkeleton } from "../../../widgets/profile-header/ui/ProfileHeaderCardSkeleton";
 import { getToken, clearToken } from '../../../shared/lib/auth/token';
 import { chatHub } from '../../../shared/lib/realtime/chatHub';
+import { useUserPosts } from '../../../features/post/model/useUserPosts';
+import { PostFeed } from '../../../widgets/post-feed/ui/PostFeed';
+import { useToast } from '../../../shared/lib/hooks/useToast';
+import { isApiError } from '../../../shared/api/base';
 
 type JwtPayload = { sub: string; username: string; email: string };
 
@@ -70,6 +74,8 @@ const ProfilePage: FC = () => {
     } = useProfile(targetUserId);
 
     const [editOpen, setEditOpen] = useState(false);
+    const { posts, loading: postsLoading, error: postsError, removePost } = useUserPosts(targetUserId);
+    const { message, showSuccess, showError } = useToast();
 
     if (!params.id && !myId) {
         return (
@@ -148,6 +154,15 @@ const ProfilePage: FC = () => {
         }
     }
 
+    async function handleDeletePost(postId: string) {
+        try {
+            await removePost(postId);
+            showSuccess('Post deleted.');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to delete post.');
+        }
+    }
+
     return (
         <div>
             {error && <p className={styles.error}>{error}</p>}
@@ -155,7 +170,7 @@ const ProfilePage: FC = () => {
 
             <div className={styles.wrapper}>
                 {profile && (
-                    <>
+                    <div className={styles.profileContent}>
                         <ProfileHeaderCard
                             profile={profile}
                             isOwner={isOwner}
@@ -186,7 +201,20 @@ const ProfilePage: FC = () => {
                             onDeleteAccount={handleDeleteAccount}
                             onLogoutAll={handleLogoutAll}
                         />
-                    </>
+
+                        {message && (
+                            <p style={{ color: message.color }}>{message.text}</p>
+                        )}
+
+                        <PostFeed
+                            posts={posts}
+                            loading={postsLoading}
+                            error={postsError}
+                            emptyText="This user hasn't published any posts yet."
+                            canDelete={isOwner}
+                            onDeletePost={isOwner ? handleDeletePost : undefined}
+                        />
+                    </div>
                 )}
             </div>
         </div>

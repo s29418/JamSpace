@@ -1,10 +1,11 @@
 .wrapper {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     padding: 32px;
     color: white;
     background-color: #121212;
+    min-height: calc(100vh - 160px);
 }
 
 .loginForm {
@@ -70,4 +71,12 @@
     margin-top: 22px;
     text-align: center;
     font-size: 14px;
+}
+
+.profileContent {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }

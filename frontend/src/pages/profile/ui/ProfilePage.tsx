@@ -74,7 +74,14 @@ const ProfilePage: FC = () => {
     } = useProfile(targetUserId);
 
     const [editOpen, setEditOpen] = useState(false);
-    const { posts, loading: postsLoading, error: postsError, removePost } = useUserPosts(targetUserId);
+    const {
+        posts,
+        loading: postsLoading,
+        error: postsError,
+        removePost,
+        toggleLike,
+        toggleRepost,
+    } = useUserPosts(targetUserId);
     const { message, showSuccess, showError } = useToast();
 
     if (!params.id && !myId) {
@@ -163,6 +170,22 @@ const ProfilePage: FC = () => {
         }
     }
 
+    async function handleToggleLike(post: Parameters<typeof toggleLike>[0]) {
+        try {
+            await toggleLike(post);
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to update like.');
+        }
+    }
+
+    async function handleToggleRepost(post: Parameters<typeof toggleRepost>[0]) {
+        try {
+            await toggleRepost(post);
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to update repost.');
+        }
+    }
+
     return (
         <div>
             {error && <p className={styles.error}>{error}</p>}
@@ -213,6 +236,8 @@ const ProfilePage: FC = () => {
                             emptyText="This user hasn't published any posts yet."
                             canDelete={isOwner}
                             onDeletePost={isOwner ? handleDeletePost : undefined}
+                            onToggleLike={handleToggleLike}
+                            onToggleRepost={handleToggleRepost}
                         />
                     </div>
                 )}

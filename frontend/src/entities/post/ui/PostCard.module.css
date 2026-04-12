@@ -194,10 +194,12 @@
     justify-content: flex-start;
     gap: 6px;
     min-height: 36px;
+    padding: 0;
     border: 1px solid transparent;
     background: transparent;
     color: #d7d7d7;
     cursor: pointer;
+    transition: color 0.2s ease, opacity 0.2s ease;
 }
 
 .actionButton svg {
@@ -206,8 +208,17 @@
     color: #26cdd4;
 }
 
-.actionButton svg:hover {
-    fill: rgba(38, 205, 212, 0.29);
+.actionButton:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.actionActive {
+    color: #26cdd4;
+}
+
+.actionActive svg {
+    color: #26cdd4;
 }
 
 .actionValue {

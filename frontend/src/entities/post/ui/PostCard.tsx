@@ -13,6 +13,8 @@ type Props = {
     post: Post;
     canDelete?: boolean;
     onDelete?: (postId: string) => void | Promise<void>;
+    onToggleLike?: (post: Post) => void | Promise<void>;
+    onToggleRepost?: (post: Post) => void | Promise<void>;
     isNested?: boolean;
 };
 
@@ -57,9 +59,13 @@ export const PostCard: React.FC<Props> = ({
     post,
     canDelete = false,
     onDelete,
+    onToggleLike,
+    onToggleRepost,
     isNested = false,
 }) => {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [likeBusy, setLikeBusy] = useState(false);
+    const [repostBusy, setRepostBusy] = useState(false);
     const menuRef = useRef<HTMLDivElement | null>(null);
     const timestamp = useMemo(() => formatPostTimestamp(post.createdAt), [post.createdAt]);
     const mediaKind = useMemo(
@@ -80,6 +86,29 @@ export const PostCard: React.FC<Props> = ({
 
     const authorName = post.authorDisplayName?.trim() || 'Unknown user';
     const authorSlug = `/profile/${post.authorId}`;
+    const actionPost = post.originalPost ?? post;
+
+    async function handleLike() {
+        if (!onToggleLike || likeBusy) return;
+
+        setLikeBusy(true);
+        try {
+            await onToggleLike(actionPost);
+        } finally {
+            setLikeBusy(false);
+        }
+    }
+
+    async function handleRepost() {
+        if (!onToggleRepost || repostBusy) return;
+
+        setRepostBusy(true);
+        try {
+            await onToggleRepost(actionPost);
+        } finally {
+            setRepostBusy(false);
+        }
+    }
 
     return (
         <article className={`${styles.card} ${isNested ? styles.repostCard : ''}`}>
@@ -180,20 +209,34 @@ export const PostCard: React.FC<Props> = ({
 
             {!isNested && (
                 <div className={styles.actions}>
-                    <button type="button" className={styles.actionButton} aria-label="Likes">
+                    <button
+                        type="button"
+                        className={`${styles.actionButton} ${actionPost.isLikedByCurrentUser ? styles.actionActive : ''}`}
+                        aria-label="Likes"
+                        onClick={() => void handleLike()}
+                        disabled={likeBusy}
+                    >
                         <HeartIcon />
-                        <span className={styles.actionValue}>{post.likeCount}</span>
+                        <span className={styles.actionValue}>{actionPost.likeCount}</span>
                     </button>
 
                     <button type="button" className={styles.actionButton} aria-label="Comments">
                         <ChatBubbleOvalLeftIcon />
-                        <span className={styles.actionValue}>{post.commentCount}</span>
+                        <span className={styles.actionValue}>{actionPost.commentCount}</span>
                     </button>
 
-                    <button type="button" className={styles.actionButton} aria-label="Reposts">
-                        <ArrowPathRoundedSquareIcon />
-                        <span className={styles.actionValue}>{post.repostCount}</span>
-                    </button>
+                    {!post.originalPost && (
+                        <button
+                            type="button"
+                            className={`${styles.actionButton} ${actionPost.isRepostedByCurrentUser ? styles.actionActive : ''}`}
+                            aria-label="Reposts"
+                            onClick={() => void handleRepost()}
+                            disabled={repostBusy}
+                        >
+                            <ArrowPathRoundedSquareIcon />
+                            <span className={styles.actionValue}>{actionPost.repostCount}</span>
+                        </button>
+                    )}
                 </div>
             )}
         </article>

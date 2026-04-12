@@ -73,3 +73,20 @@ export async function getUserPosts(userId: string, before?: string) {
 export async function deletePost(postId: string) {
     await api.delete(`${ROOT}/${postId}`);
 }
+
+export async function likePost(postId: string) {
+    await api.post(`${ROOT}/${postId}/likes`);
+}
+
+export async function unlikePost(postId: string) {
+    await api.delete(`${ROOT}/${postId}/likes`);
+}
+
+export async function repostPost(postId: string) {
+    const res = await api.post<Post>(`${ROOT}/${postId}/repost`);
+    return normalizePost(res.data);
+}
+
+export async function deleteRepost(postId: string) {
+    await api.delete(`${ROOT}/${postId}/repost`);
+}

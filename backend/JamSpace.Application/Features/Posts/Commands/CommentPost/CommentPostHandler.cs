@@ -1,12 +1,14 @@
 ﻿using JamSpace.Application.Common.Exceptions;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Persistence;
+using JamSpace.Application.Features.Posts.DTOs;
+using JamSpace.Application.Features.Posts.Mappers;
 using JamSpace.Domain.Entities;
 using MediatR;
 
 namespace JamSpace.Application.Features.Posts.Commands.CommentPost;
 
-public class CommentPostHandler : IRequestHandler<CommentPostCommand, Unit>
+public class CommentPostHandler : IRequestHandler<CommentPostCommand, PostCommentDto>
 {
     private readonly IPostCommentRepository _comment;
     private readonly IPostRepository _post;
@@ -19,7 +21,7 @@ public class CommentPostHandler : IRequestHandler<CommentPostCommand, Unit>
         _uow = uow;
     }
 
-    public async Task<Unit> Handle(CommentPostCommand request, CancellationToken cancellationToken)
+    public async Task<PostCommentDto> Handle(CommentPostCommand request, CancellationToken cancellationToken)
     {
         var post = await _post.GetByIdAsync(request.PostId, cancellationToken);
 
@@ -34,10 +36,12 @@ public class CommentPostHandler : IRequestHandler<CommentPostCommand, Unit>
             Content = request.Content.Trim(),
             CreatedAt = DateTimeOffset.UtcNow
         };
-
+        
+        var commentDto = CommentMapper.ToDto(comment);
+        
         await _comment.AddAsync(comment, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
         
-        return Unit.Value;
+        return commentDto;
     }
 }

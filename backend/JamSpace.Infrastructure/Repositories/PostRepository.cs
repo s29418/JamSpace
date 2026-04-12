@@ -75,4 +75,5 @@ public class PostRepository : IPostRepository
     }
 
     public async Task AddAsync(Post post, CancellationToken ct) => await _db.Posts.AddAsync(post, ct);
+    public void Delete(Post post) => _db.Posts.Remove(post);
 }

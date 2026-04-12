@@ -34,6 +34,7 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
 
         string? uploadedUrl = null;
         PostMedia? media = null;
+        var postId = Guid.NewGuid();
 
         try
         {
@@ -59,12 +60,13 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
                     MediaCategory.Video => StorageObjectType.PostVideo,
                     _ => throw new InvalidOperationException("Unsupported media type.")
                 };
-
-                uploadedUrl = await _fileStorageService.UploadAsync(c.File, storageType, c.AuthorId, ct);
+                
+                uploadedUrl = await _fileStorageService.UploadAsync(c.File, storageType, postId, ct);
 
                 media = new PostMedia
                 {
                     Id = Guid.NewGuid(),
+                    PostId = postId,
                     Url = uploadedUrl,
                     MediaType = mediaType,
                     OriginalFileName = c.File.FileName,
@@ -75,10 +77,10 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
 
             var post = new Post
             {
-                Id = Guid.NewGuid(),
+                Id = postId,
                 AuthorId = c.AuthorId,
                 Content = string.IsNullOrWhiteSpace(c.Content) ? null : c.Content.Trim(),
-                CreatedAt = DateTimeOffset.Now,
+                CreatedAt = DateTimeOffset.UtcNow,
                 Media = media
             };
 

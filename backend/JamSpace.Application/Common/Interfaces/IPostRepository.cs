@@ -24,4 +24,5 @@ public interface IPostRepository
         CancellationToken ct);
 
     Task AddAsync(Post post, CancellationToken ct);
+    void Delete(Post post);
 }

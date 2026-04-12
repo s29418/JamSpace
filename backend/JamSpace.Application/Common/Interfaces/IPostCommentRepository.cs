@@ -4,7 +4,7 @@ namespace JamSpace.Application.Common.Interfaces;
 
 public interface IPostCommentRepository
 {
-    // Task<PostComment?> GetByIdAsync(Guid commentId, CancellationToken ct);
+    Task<PostComment?> GetByIdAsync(Guid commentId, CancellationToken ct);
     Task AddAsync(PostComment comment, CancellationToken ct);
-    Task Delete(PostComment comment, CancellationToken ct);
+    void Delete(PostComment comment);
 }

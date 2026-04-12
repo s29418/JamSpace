@@ -14,12 +14,15 @@ public class PostCommentRepository : IPostCommentRepository
         _db = db;
     }
 
+    public async Task<PostComment?> GetByIdAsync(Guid commentId, CancellationToken ct)
+    {
+        return await _db.PostComments
+            .FirstOrDefaultAsync(c => c.Id == commentId, ct);
+    }
+
     public async Task AddAsync(PostComment comment, CancellationToken ct) => 
         await _db.PostComments
             .AddAsync(comment, ct);
 
-    public async Task Delete(PostComment comment, CancellationToken ct) => 
-        await _db.PostComments
-            .Where(c => c == comment)
-            .ExecuteDeleteAsync(ct);
+    public void Delete(PostComment comment) => _db.PostComments.Remove(comment);
 }

@@ -1,3 +1,5 @@
-﻿namespace JamSpace.Application.Features.Posts.Commands.DeleteComment;
+﻿using MediatR;
 
-public record DeleteCommentCommand();
+namespace JamSpace.Application.Features.Posts.Commands.DeleteComment;
+
+public record DeleteCommentCommand(Guid CommentId, Guid RequestingUserId) : IRequest<Unit>;

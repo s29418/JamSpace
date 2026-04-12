@@ -14,7 +14,7 @@ public class PostCommentConfiguration : IEntityTypeConfiguration<PostComment>
 
         builder.Property(pc => pc.Content)
             .IsRequired()
-            .HasMaxLength(1000);
+            .HasMaxLength(500);
 
         builder.Property(pc => pc.CreatedAt)
             .IsRequired();

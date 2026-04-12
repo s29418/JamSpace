@@ -1,7 +1,28 @@
 import { api } from '../../../shared/api/base';
-import type { CursorResult, Post } from '../model/types';
+import type { CursorResult, Post, PostComment } from '../model/types';
 
 const ROOT = '/posts';
+
+function normalizeComment(comment: any): PostComment {
+    return {
+        id: String(comment.id ?? comment.Id),
+        content: comment.content ?? '',
+        createdAt: comment.createdAt ?? comment.CreatedAt,
+        authorId: String(comment.authorId ?? comment.AuthorId ?? comment.userId ?? comment.UserId),
+        authorDisplayName:
+            comment.authorDisplayName ??
+            comment.AuthorDisplayName ??
+            comment.userDisplayName ??
+            comment.UserDisplayName ??
+            null,
+        authorAvatarUrl:
+            comment.authorAvatarUrl ??
+            comment.AuthorAvatarUrl ??
+            comment.userProfilePictureUrl ??
+            comment.UserProfilePictureUrl ??
+            null,
+    };
+}
 
 function normalizePost(dto: any): Post {
     return {
@@ -20,14 +41,7 @@ function normalizePost(dto: any): Post {
         isRepostedByCurrentUser: Boolean(dto.isRepostedByCurrentUser),
         originalPost: dto.originalPost ? normalizePost(dto.originalPost) : null,
         comments: Array.isArray(dto.comments)
-            ? dto.comments.map((comment: any) => ({
-                id: String(comment.id),
-                content: comment.content ?? '',
-                createdAt: comment.createdAt,
-                authorId: String(comment.authorId ?? comment.userId),
-                authorDisplayName: comment.authorDisplayName ?? comment.userDisplayName ?? null,
-                authorAvatarUrl: comment.authorAvatarUrl ?? comment.userProfilePictureUrl ?? null,
-            }))
+            ? dto.comments.map(normalizeComment)
             : [],
     };
 }
@@ -89,4 +103,16 @@ export async function repostPost(postId: string) {
 
 export async function deleteRepost(postId: string) {
     await api.delete(`${ROOT}/${postId}/repost`);
+}
+
+export async function createComment(postId: string, content: string) {
+    const res = await api.post<PostComment>(`${ROOT}/${postId}/comments`, JSON.stringify(content), {
+        headers: { 'Content-Type': 'application/json' },
+    });
+
+    return normalizeComment(res.data);
+}
+
+export async function deleteComment(postId: string, commentId: string) {
+    await api.delete(`${ROOT}/${postId}/comments/${commentId}`);
 }

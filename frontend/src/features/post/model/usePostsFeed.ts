@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { ApiError, isApiError } from '../../../shared/api/base';
 import { getCurrentUserId, getToken } from '../../../shared/lib/auth/token';
 import {
+    createComment,
+    deleteComment,
     deletePost,
     deleteRepost,
     getExploreFeed,
@@ -105,6 +107,32 @@ export function usePostsFeed(options: Options = {}) {
         });
     }, []);
 
+    const addComment = useCallback(async (post: Post, content: string) => {
+        const createdComment = await createComment(post.id, content);
+
+        setPosts((current) =>
+            updatePostsById(current, post.id, (target) => ({
+                ...target,
+                commentCount: target.commentCount + 1,
+                comments: [createdComment, ...target.comments],
+            })),
+        );
+
+        return createdComment;
+    }, []);
+
+    const removeComment = useCallback(async (post: Post, commentId: string) => {
+        await deleteComment(post.id, commentId);
+
+        setPosts((current) =>
+            updatePostsById(current, post.id, (target) => ({
+                ...target,
+                commentCount: Math.max(0, target.commentCount - 1),
+                comments: target.comments.filter((comment) => comment.id !== commentId),
+            })),
+        );
+    }, []);
+
     return {
         posts,
         loading,
@@ -113,5 +141,7 @@ export function usePostsFeed(options: Options = {}) {
         removePost,
         toggleLike,
         toggleRepost,
+        addComment,
+        removeComment,
     };
 }

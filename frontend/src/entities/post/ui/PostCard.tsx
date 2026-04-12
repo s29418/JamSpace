@@ -4,6 +4,7 @@ import styles from './PostCard.module.css';
 import { PostHeader } from './PostHeader';
 import { PostActions } from './PostActions';
 import { PostComments } from './PostComments';
+import { PostCommentComposer } from './PostCommentComposer';
 import { inferMediaKind } from './postCard.utils';
 
 type Props = {
@@ -12,6 +13,8 @@ type Props = {
     onDelete?: (postId: string) => void | Promise<void>;
     onToggleLike?: (post: Post) => void | Promise<void>;
     onToggleRepost?: (post: Post) => void | Promise<void>;
+    onAddComment?: (post: Post, content: string) => void | Promise<void>;
+    onDeleteComment?: (post: Post, commentId: string) => void | Promise<void>;
     isNested?: boolean;
 };
 
@@ -21,8 +24,11 @@ export const PostCard: React.FC<Props> = ({
     onDelete,
     onToggleLike,
     onToggleRepost,
+    onAddComment,
+    onDeleteComment,
     isNested = false,
 }) => {
+    const [composerOpen, setComposerOpen] = React.useState(false);
     const mediaKind = useMemo(
         () => inferMediaKind(post.mediaType, post.mediaUrl),
         [post.mediaType, post.mediaUrl],
@@ -75,10 +81,30 @@ export const PostCard: React.FC<Props> = ({
                     <PostActions
                         post={actionPost}
                         showRepostAction={!post.originalPost}
+                        onToggleComments={() => setComposerOpen((current) => !current)}
                         onToggleLike={onToggleLike}
                         onToggleRepost={onToggleRepost}
                     />
-                    <PostComments comments={actionPost.comments} />
+                    <div className={styles.commentsSection}>
+                        {onAddComment && (
+                            <div
+                                className={`${styles.commentComposerShell} ${
+                                    composerOpen ? styles.commentComposerShellOpen : ''
+                                }`}
+                            >
+                                <PostCommentComposer
+                                    onSubmit={async (content) => {
+                                        await onAddComment(actionPost, content);
+                                    }}
+                                />
+                            </div>
+                        )}
+                        <PostComments
+                            post={actionPost}
+                            comments={actionPost.comments}
+                            onDeleteComment={onDeleteComment}
+                        />
+                    </div>
                 </>
             )}
         </article>

@@ -234,6 +234,95 @@
     border-top: 1px solid #343434;
 }
 
+.commentsSection {
+    overflow: hidden;
+}
+
+.commentComposerShell {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition:
+        grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 220ms ease,
+        transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+        margin 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+    margin: 0;
+}
+
+.commentComposerShellOpen {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    margin: 18px 0 14px;
+}
+
+.commentComposerShell > * {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.commentComposer {
+    margin: 0;
+}
+
+.commentComposerField {
+    position: relative;
+}
+
+.commentComposerInput {
+    width: 100%;
+    resize: none;
+    min-height: 64px;
+    border: 1px solid #3f3f3f;
+    border-radius: 16px;
+    background: #151515;
+    color: #f1f1f1;
+    padding: 14px 54px 14px 14px;
+    font: inherit;
+    outline: none;
+}
+
+.commentComposerMessage {
+    margin-top: 8px;
+    color: #ff8d8d;
+    font-size: 0.9rem;
+    min-height: 20px;
+}
+
+.commentComposerInput:focus {
+    border-color: #26cdd4;
+}
+
+.commentComposerButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 999px;
+    background: #26cdd4;
+    color: #0b1214;
+    cursor: pointer;
+}
+
+.commentComposerButton svg {
+    width: 18px;
+    height: 18px;
+}
+
+.commentComposerButton:disabled {
+    opacity: 0.65;
+    cursor: default;
+}
+
 .comment {
     display: flex;
     align-items: flex-start;
@@ -269,28 +358,57 @@
 .commentBody {
     min-width: 0;
     flex: 1;
+    position: relative;
+    padding-right: 52px;
 }
 
 .commentMeta {
     display: flex;
     align-items: baseline;
-    gap: 8px;
-    flex-wrap: wrap;
+    width: 100%;
+}
+
+.commentMetaRight {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
 }
 
 .commentAuthor {
     color: #f2f2f2;
     text-decoration: none;
     font-weight: 700;
+    min-width: 0;
 }
 
 .commentTimestamp {
-    color: #8c8c8c;
-    font-size: 0.82rem;
+    color: #9f9f9f;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    opacity: 0.95;
+    line-height: 1.2;
+}
+
+.commentMenuWrap {
+    align-self: flex-end;
+}
+
+.commentMenuButton {
+    width: 28px;
+    height: 28px;
+}
+
+.commentMenu {
+    top: calc(100% + 6px);
+    min-width: 156px;
 }
 
 .commentContent {
-    margin-top: 4px;
+    margin-top: 2px;
     color: #dcdcdc;
     line-height: 1.45;
     white-space: pre-wrap;

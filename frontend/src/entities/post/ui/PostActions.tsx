@@ -10,6 +10,7 @@ import styles from './PostCard.module.css';
 type Props = {
     post: Post;
     showRepostAction: boolean;
+    onToggleComments?: () => void;
     onToggleLike?: (post: Post) => void | Promise<void>;
     onToggleRepost?: (post: Post) => void | Promise<void>;
 };
@@ -17,6 +18,7 @@ type Props = {
 export const PostActions: React.FC<Props> = ({
     post,
     showRepostAction,
+    onToggleComments,
     onToggleLike,
     onToggleRepost,
 }) => {
@@ -58,7 +60,12 @@ export const PostActions: React.FC<Props> = ({
                 <span className={styles.actionValue}>{post.likeCount}</span>
             </button>
 
-            <button type="button" className={styles.actionButton} aria-label="Comments">
+            <button
+                type="button"
+                className={styles.actionButton}
+                aria-label="Comments"
+                onClick={onToggleComments}
+            >
                 <ChatBubbleOvalLeftIcon />
                 <span className={styles.actionValue}>{post.commentCount}</span>
             </button>

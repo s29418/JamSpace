@@ -6,7 +6,7 @@ import { useToast } from '../../../shared/lib/hooks/useToast';
 import { isApiError } from '../../../shared/api/base';
 
 const HomePage = () => {
-    const { posts, loading, error, toggleLike, toggleRepost } = usePostsFeed({ mode: 'auto' });
+    const { posts, loading, error, toggleLike, toggleRepost, addComment, removeComment } = usePostsFeed({ mode: 'auto' });
     const { message, showError } = useToast();
 
     async function handleToggleLike(post: Parameters<typeof toggleLike>[0]) {
@@ -25,6 +25,22 @@ const HomePage = () => {
         }
     }
 
+    async function handleAddComment(post: Parameters<typeof addComment>[0], content: string) {
+        try {
+            await addComment(post, content);
+        } catch (e) {
+            throw new Error(isApiError(e) ? e.message : 'Failed to add comment.');
+        }
+    }
+
+    async function handleDeleteComment(post: Parameters<typeof removeComment>[0], commentId: string) {
+        try {
+            await removeComment(post, commentId);
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to delete comment.');
+        }
+    }
+
     return (
         <main className={styles.page}>
             <div className={styles.content}>
@@ -38,6 +54,8 @@ const HomePage = () => {
                     emptyText="No posts to show yet."
                     onToggleLike={handleToggleLike}
                     onToggleRepost={handleToggleRepost}
+                    onAddComment={handleAddComment}
+                    onDeleteComment={handleDeleteComment}
                 />
             </div>
         </main>

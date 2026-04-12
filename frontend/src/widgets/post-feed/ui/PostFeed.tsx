@@ -12,6 +12,8 @@ type Props = {
     onDeletePost?: (postId: string) => void | Promise<void>;
     onToggleLike?: (post: Post) => void | Promise<void>;
     onToggleRepost?: (post: Post) => void | Promise<void>;
+    onAddComment?: (post: Post, content: string) => void | Promise<void>;
+    onDeleteComment?: (post: Post, commentId: string) => void | Promise<void>;
 };
 
 export const PostFeed: React.FC<Props> = ({
@@ -23,6 +25,8 @@ export const PostFeed: React.FC<Props> = ({
     onDeletePost,
     onToggleLike,
     onToggleRepost,
+    onAddComment,
+    onDeleteComment,
 }) => {
     if (loading) {
         return (
@@ -58,6 +62,8 @@ export const PostFeed: React.FC<Props> = ({
                     onDelete={onDeletePost}
                     onToggleLike={onToggleLike}
                     onToggleRepost={onToggleRepost}
+                    onAddComment={onAddComment}
+                    onDeleteComment={onDeleteComment}
                 />
             ))}
         </section>

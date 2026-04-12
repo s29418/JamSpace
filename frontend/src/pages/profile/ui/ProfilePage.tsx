@@ -81,6 +81,8 @@ const ProfilePage: FC = () => {
         removePost,
         toggleLike,
         toggleRepost,
+        addComment,
+        removeComment,
     } = useUserPosts(targetUserId);
     const { message, showSuccess, showError } = useToast();
 
@@ -186,6 +188,23 @@ const ProfilePage: FC = () => {
         }
     }
 
+    async function handleAddComment(post: Parameters<typeof addComment>[0], content: string) {
+        try {
+            await addComment(post, content);
+        } catch (e) {
+            throw new Error(isApiError(e) ? e.message : 'Failed to add comment.');
+        }
+    }
+
+    async function handleDeleteComment(post: Parameters<typeof removeComment>[0], commentId: string) {
+        try {
+            await removeComment(post, commentId);
+            showSuccess('Comment deleted.');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to delete comment.');
+        }
+    }
+
     return (
         <div>
             {error && <p className={styles.error}>{error}</p>}
@@ -238,6 +257,8 @@ const ProfilePage: FC = () => {
                             onDeletePost={isOwner ? handleDeletePost : undefined}
                             onToggleLike={handleToggleLike}
                             onToggleRepost={handleToggleRepost}
+                            onAddComment={handleAddComment}
+                            onDeleteComment={handleDeleteComment}
                         />
                     </div>
                 )}

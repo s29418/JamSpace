@@ -12,12 +12,14 @@ public class CommentPostHandler : IRequestHandler<CommentPostCommand, PostCommen
 {
     private readonly IPostCommentRepository _comment;
     private readonly IPostRepository _post;
+    private readonly IUserRepository _user;
     private readonly IUnitOfWork _uow;
     
-    public CommentPostHandler(IPostCommentRepository comment, IPostRepository post, IUnitOfWork uow)
+    public CommentPostHandler(IPostCommentRepository comment, IPostRepository post, IUserRepository user, IUnitOfWork uow)
     {
         _comment = comment;
         _post = post;
+        _user = user;
         _uow = uow;
     }
 
@@ -28,20 +30,22 @@ public class CommentPostHandler : IRequestHandler<CommentPostCommand, PostCommen
         if (post is null)
             throw new NotFoundException("Post not found.");
 
+        var user = await _user.GetByIdAsync(request.UserId, cancellationToken)
+                   ?? throw new NotFoundException("User not found.");
+
         var comment = new PostComment
         {
             Id = Guid.NewGuid(),
             PostId = request.PostId,
             UserId = request.UserId,
+            User = user,
             Content = request.Content.Trim(),
             CreatedAt = DateTimeOffset.UtcNow
         };
-        
-        var commentDto = CommentMapper.ToDto(comment);
-        
+
         await _comment.AddAsync(comment, cancellationToken);
         await _uow.SaveChangesAsync(cancellationToken);
-        
-        return commentDto;
+
+        return CommentMapper.ToDto(comment);
     }
 }

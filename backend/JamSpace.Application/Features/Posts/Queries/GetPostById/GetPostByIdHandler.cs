@@ -28,8 +28,6 @@ public class GetPostByIdHandler : IRequestHandler<GetPostByIdQuery, PostDto>
         return PostMapper.ToDto(post, true, request.RequestingUserId, stats);
     }
 
-    private static IEnumerable<Guid> CollectPostIds(PostDto? dto) => Array.Empty<Guid>();
-
     private static IReadOnlyCollection<Guid> CollectPostIds(Domain.Entities.Post post)
     {
         var ids = new HashSet<Guid> { post.Id };

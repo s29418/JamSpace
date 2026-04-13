@@ -152,6 +152,7 @@ public class PostRepository : IPostRepository
             .Include(p => p.Likes)
             .Include(p => p.Reposts)
             .Include(p => p.Comments)
+            .ThenInclude(p => p.User)
             .Include(p => p.OriginalPost)
             .ThenInclude(op => op!.Author)
             .Include(p => p.OriginalPost)

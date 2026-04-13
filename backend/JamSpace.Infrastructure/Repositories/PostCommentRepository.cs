@@ -17,6 +17,7 @@ public class PostCommentRepository : IPostCommentRepository
     public async Task<PostComment?> GetByIdAsync(Guid commentId, CancellationToken ct)
     {
         return await _db.PostComments
+            .Include(c => c.User)
             .FirstOrDefaultAsync(c => c.Id == commentId, ct);
     }
 

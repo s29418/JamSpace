@@ -7,12 +7,16 @@ public static class CommentMapper
 {
     public static PostCommentDto ToDto(PostComment comment)
     {
+        var userDisplayName = !string.IsNullOrWhiteSpace(comment.User?.DisplayName)
+            ? comment.User.DisplayName
+            : comment.User?.UserName ?? string.Empty;
+
         return new PostCommentDto
         {
             Id = comment.Id,
             PostId = comment.PostId,
             UserId = comment.UserId,
-            UserDisplayName = comment.User?.DisplayName ?? string.Empty,
+            UserDisplayName = userDisplayName,
             UserProfilePictureUrl = comment.User?.ProfilePictureUrl,
             Content = comment.Content,
             CreatedAt = comment.CreatedAt

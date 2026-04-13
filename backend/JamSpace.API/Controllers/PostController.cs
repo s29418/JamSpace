@@ -45,7 +45,8 @@ public class PostController : ControllerBase
     public async Task<ActionResult<CursorResult<PostDto>>> GetExploreFeed([FromQuery] DateTimeOffset? before,
         [FromQuery] int take = 30, CancellationToken ct = default)
     {
-        return Ok(await _mediator.Send(new GetExploreFeedQuery(before, take), ct));
+        var userId = User.TryGetUserId();
+        return Ok(await _mediator.Send(new GetExploreFeedQuery(userId, before, take), ct));
     }
 
     [HttpGet("feed")]

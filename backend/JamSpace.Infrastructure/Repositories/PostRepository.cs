@@ -45,8 +45,9 @@ public class PostRepository : IPostRepository
         int take,
         CancellationToken ct)
     {
-        IQueryable<Post> query = BuildPostQuery()
-            .Where(p => _db.UserFollows.Any(f => f.FollowerId == userId && f.FolloweeId == p.AuthorId));
+        var query = BuildPostQuery()
+            .Where(p => _db.UserFollows.Any(f => f.FollowerId == userId && f.FolloweeId == p.AuthorId) 
+                        || p.AuthorId == userId);
 
         if (before is not null)
             query = query.Where(p => p.CreatedAt < before);

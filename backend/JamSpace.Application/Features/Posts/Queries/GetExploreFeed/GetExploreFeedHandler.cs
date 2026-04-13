@@ -38,7 +38,7 @@ public class GetExploreFeedHandler : IRequestHandler<GetExploreFeedQuery, Cursor
             cancellationToken);
 
         var dtoPosts = pagePosts
-            .Select(p => PostMapper.ToDto(p, false, null, stats))
+            .Select(p => PostMapper.ToDto(p, false, request.UserId, stats))
             .ToList();
         
         return CursorResult<PostDto>.Create(dtoPosts, hasMore, nextBefore);

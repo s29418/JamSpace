@@ -4,4 +4,4 @@ using MediatR;
 
 namespace JamSpace.Application.Features.Posts.Queries.GetExploreFeed;
 
-public record GetExploreFeedQuery(DateTimeOffset? Before, int Take) : IRequest<CursorResult<PostDto>>;
+public record GetExploreFeedQuery(Guid? UserId, DateTimeOffset? Before, int Take) : IRequest<CursorResult<PostDto>>;

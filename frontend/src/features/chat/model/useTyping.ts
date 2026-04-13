@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { chatHub } from "shared/lib/realtime/chatHub";
-import type { ConversationTypingEvent } from "entities/chat/model/types";
-import { getCurrentUserId } from "shared/lib/auth/token";
+import {useCallback, useEffect, useRef, useState} from "react";
+import {chatHub} from "shared/lib/realtime/chatHub";
+import type {ConversationTypingEvent} from "entities/chat/model/types";
+import {getCurrentUserId} from "shared/lib/auth/token";
 
 type Params = {
     conversationId: string | null;
@@ -15,7 +15,7 @@ export function useTyping({ conversationId }: Params) {
     const lastTypingSentRef = useRef(false);
 
     useEffect(() => {
-        const unsubscribe = chatHub.onConversationTyping((event: ConversationTypingEvent) => {
+        return chatHub.onConversationTyping((event: ConversationTypingEvent) => {
             if (event.conversationId !== conversationId) return;
             if (event.userId === currentUserId) return;
 
@@ -28,8 +28,6 @@ export function useTyping({ conversationId }: Params) {
                 return prev.filter((id) => id !== event.userId);
             });
         });
-
-        return unsubscribe;
     }, [conversationId, currentUserId]);
 
     const sendTyping = useCallback(async () => {

@@ -36,9 +36,13 @@ export function usePostsFeed(options: Options = {}) {
                     ? (getToken() ? 'feed' : 'explore')
                     : mode;
 
-            const result = resolvedMode === 'feed'
+            let result = resolvedMode === 'feed'
                 ? await getFollowedFeed()
                 : await getExploreFeed();
+
+            if (mode === 'auto' && resolvedMode === 'feed' && result.items.length === 0) {
+                result = await getExploreFeed();
+            }
 
             setPosts(result.items);
         } catch (e) {

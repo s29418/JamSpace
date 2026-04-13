@@ -8,8 +8,8 @@ import { useAuthState } from '../../../shared/lib/hooks/useAuthState';
 import { PostComposer } from '../../../features/post/ui/PostComposer';
 
 const HomePage = () => {
-    const { posts, loading, error, addPost, toggleLike, toggleRepost, addComment, removeComment } = usePostsFeed({ mode: 'auto' });
-    const { isAuthenticated } = useAuthState();
+    const { posts, loading, error, addPost, removePost, toggleLike, toggleRepost, addComment, removeComment } = usePostsFeed({ mode: 'auto' });
+    const { isAuthenticated, currentUserId } = useAuthState();
     const { message, showError, showSuccess } = useToast();
 
     async function handleCreatePost(content: string, file?: File | null) {
@@ -53,11 +53,20 @@ const HomePage = () => {
         }
     }
 
+    async function handleDeletePost(postId: string) {
+        try {
+            await removePost(postId);
+            showSuccess('Post deleted.');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to delete post.');
+        }
+    }
+
     return (
         <main className={styles.page}>
             <div className={styles.content}>
                 {message && (
-                    <p style={{ color: message.color, marginBottom: 16 }}>{message.text}</p>
+                    <p style={{ color: message.color, marginBottom: 16, justifySelf: "center" }}>{message.text}</p>
                 )}
                 {isAuthenticated && <PostComposer onSubmit={handleCreatePost} />}
                 <PostFeed
@@ -65,6 +74,8 @@ const HomePage = () => {
                     loading={loading}
                     error={error}
                     emptyText="No posts to show yet."
+                    currentUserId={currentUserId}
+                    onDeletePost={handleDeletePost}
                     onToggleLike={handleToggleLike}
                     onToggleRepost={handleToggleRepost}
                     onAddComment={handleAddComment}

@@ -8,7 +8,7 @@ type Props = {
     loading: boolean;
     error?: string | null;
     emptyText: string;
-    canDelete?: boolean;
+    currentUserId?: string | null;
     onDeletePost?: (postId: string) => void | Promise<void>;
     onToggleLike?: (post: Post) => void | Promise<void>;
     onToggleRepost?: (post: Post) => void | Promise<void>;
@@ -21,7 +21,7 @@ export const PostFeed: React.FC<Props> = ({
     loading,
     error,
     emptyText,
-    canDelete = false,
+    currentUserId,
     onDeletePost,
     onToggleLike,
     onToggleRepost,
@@ -58,7 +58,7 @@ export const PostFeed: React.FC<Props> = ({
                 <PostCard
                     key={post.id}
                     post={post}
-                    canDelete={canDelete}
+                    canDelete={Boolean(currentUserId && post.authorId === currentUserId)}
                     onDelete={onDeletePost}
                     onToggleLike={onToggleLike}
                     onToggleRepost={onToggleRepost}

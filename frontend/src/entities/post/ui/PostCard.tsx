@@ -39,8 +39,7 @@ export const PostCard: React.FC<Props> = ({
         () => inferMediaKind(post.mediaType, post.mediaUrl),
         [post.mediaType, post.mediaUrl],
     );
-    const actionPost = post.originalPost ?? post;
-    const detailsHref = `/posts/${actionPost.id}`;
+    const detailsHref = `/posts/${post.id}`;
     const isCardClickable = enableDetailsNavigation && !isNested;
 
     return (
@@ -97,7 +96,7 @@ export const PostCard: React.FC<Props> = ({
             {!isNested && (
                 <>
                     <PostActions
-                        post={actionPost}
+                        post={post}
                         showRepostAction={!post.originalPost}
                         onToggleComments={() => setComposerOpen((current) => !current)}
                         onToggleLike={onToggleLike}
@@ -112,14 +111,14 @@ export const PostCard: React.FC<Props> = ({
                             >
                                 <PostCommentComposer
                                     onSubmit={async (content) => {
-                                        await onAddComment(actionPost, content);
+                                        await onAddComment(post, content);
                                     }}
                                 />
                             </div>
                         )}
                         <PostComments
-                            post={actionPost}
-                            comments={actionPost.comments}
+                            post={post}
+                            comments={post.comments}
                             onDeleteComment={onDeleteComment}
                             maxVisibleComments={maxVisibleComments}
                             viewAllHref={isCardClickable ? detailsHref : undefined}

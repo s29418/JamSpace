@@ -266,7 +266,7 @@ const ProfilePage: FC = () => {
                             loading={postsLoading}
                             error={postsError}
                             emptyText="This user hasn't published any posts yet."
-                            canDelete={isOwner}
+                            currentUserId={myId}
                             onDeletePost={isOwner ? handleDeletePost : undefined}
                             onToggleLike={handleToggleLike}
                             onToggleRepost={handleToggleRepost}

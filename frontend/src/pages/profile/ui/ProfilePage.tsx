@@ -19,6 +19,7 @@ import { useUserPosts } from '../../../features/post/model/useUserPosts';
 import { PostFeed } from '../../../widgets/post-feed/ui/PostFeed';
 import { useToast } from '../../../shared/lib/hooks/useToast';
 import { isApiError } from '../../../shared/api/base';
+import { PostComposer } from '../../../features/post/ui/PostComposer';
 
 type JwtPayload = { sub: string; username: string; email: string };
 
@@ -78,6 +79,7 @@ const ProfilePage: FC = () => {
         posts,
         loading: postsLoading,
         error: postsError,
+        addPost,
         removePost,
         toggleLike,
         toggleRepost,
@@ -172,6 +174,15 @@ const ProfilePage: FC = () => {
         }
     }
 
+    async function handleCreatePost(content: string, file?: File | null) {
+        try {
+            await addPost(content, file);
+            showSuccess('Post published.');
+        } catch (e) {
+            throw new Error(isApiError(e) ? e.message : 'Failed to publish post.');
+        }
+    }
+
     async function handleToggleLike(post: Parameters<typeof toggleLike>[0]) {
         try {
             await toggleLike(post);
@@ -247,6 +258,8 @@ const ProfilePage: FC = () => {
                         {message && (
                             <p style={{ color: message.color }}>{message.text}</p>
                         )}
+
+                        {isOwner && <PostComposer onSubmit={handleCreatePost} />}
 
                         <PostFeed
                             posts={posts}

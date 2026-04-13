@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ApiError, isApiError } from '../../../shared/api/base';
 import { getCurrentUserId } from '../../../shared/lib/auth/token';
 import {
+    createPost,
     createComment,
     deleteComment,
     deletePost,
@@ -47,6 +48,12 @@ export function useUserPosts(userId?: string) {
     const removePost = useCallback(async (postId: string) => {
         await deletePost(postId);
         setPosts((current) => current.filter((post) => post.id !== postId));
+    }, []);
+
+    const addPost = useCallback(async (content: string, file?: File | null) => {
+        const createdPost = await createPost(content, file);
+        setPosts((current) => [createdPost, ...current]);
+        return createdPost;
     }, []);
 
     const toggleLike = useCallback(async (post: Post) => {
@@ -131,6 +138,7 @@ export function useUserPosts(userId?: string) {
         loading,
         error,
         refresh: loadPosts,
+        addPost,
         removePost,
         toggleLike,
         toggleRepost,

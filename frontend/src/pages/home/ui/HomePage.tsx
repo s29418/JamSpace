@@ -4,10 +4,22 @@ import { PostFeed } from '../../../widgets/post-feed/ui/PostFeed';
 import styles from './HomePage.module.css';
 import { useToast } from '../../../shared/lib/hooks/useToast';
 import { isApiError } from '../../../shared/api/base';
+import { useAuthState } from '../../../shared/lib/hooks/useAuthState';
+import { PostComposer } from '../../../features/post/ui/PostComposer';
 
 const HomePage = () => {
-    const { posts, loading, error, toggleLike, toggleRepost, addComment, removeComment } = usePostsFeed({ mode: 'auto' });
-    const { message, showError } = useToast();
+    const { posts, loading, error, addPost, toggleLike, toggleRepost, addComment, removeComment } = usePostsFeed({ mode: 'auto' });
+    const { isAuthenticated } = useAuthState();
+    const { message, showError, showSuccess } = useToast();
+
+    async function handleCreatePost(content: string, file?: File | null) {
+        try {
+            await addPost(content, file);
+            showSuccess('Post published.');
+        } catch (e) {
+            throw new Error(isApiError(e) ? e.message : 'Failed to publish post.');
+        }
+    }
 
     async function handleToggleLike(post: Parameters<typeof toggleLike>[0]) {
         try {
@@ -47,6 +59,7 @@ const HomePage = () => {
                 {message && (
                     <p style={{ color: message.color, marginBottom: 16 }}>{message.text}</p>
                 )}
+                {isAuthenticated && <PostComposer onSubmit={handleCreatePost} />}
                 <PostFeed
                     posts={posts}
                     loading={loading}

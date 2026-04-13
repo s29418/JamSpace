@@ -89,6 +89,24 @@ export async function getPost(postId: string) {
     return normalizePost(res.data);
 }
 
+export async function createPost(content: string, file?: File | null) {
+    const formData = new FormData();
+
+    if (content.trim()) {
+        formData.append('content', content.trim());
+    }
+
+    if (file) {
+        formData.append('file', file);
+    }
+
+    const res = await api.post<Post>(ROOT, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    return normalizePost(res.data);
+}
+
 export async function deletePost(postId: string) {
     await api.delete(`${ROOT}/${postId}`);
 }

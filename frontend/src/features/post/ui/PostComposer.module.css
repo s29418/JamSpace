@@ -1,0 +1,140 @@
+.card {
+    width: min(100%, 680px);
+    border: 1px solid #4a4a4a;
+    border-radius: 28px;
+    background: #1d1d1d;
+    padding: 18px;
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.22);
+    margin: 0 auto 18px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.title {
+    color: #f5f5f5;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.textarea {
+    width: 100%;
+    min-height: 112px;
+    max-height: 412px;
+    resize: vertical;
+    border: 1px solid #3f3f3f;
+    border-radius: 18px;
+    background: #151515;
+    color: #f1f1f1;
+    padding: 14px 16px;
+    font: inherit;
+    outline: none;
+}
+
+.textarea:focus {
+    border-color: #26cdd4;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.fileInput {
+    display: none;
+}
+
+.fileButton,
+.submitButton,
+.removeFileButton {
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font: inherit;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.fileButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(38, 205, 212, 0.12);
+    color: #26cdd4;
+    font-weight: 600;
+}
+
+.fileMeta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: #d8d8d8;
+    font-size: 0.92rem;
+}
+
+.fileName {
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.removeFileButton {
+    padding: 6px 10px;
+    background: rgba(255, 130, 130, 0.12);
+    color: #ff9b9b;
+}
+
+.submitButton {
+    padding: 10px 18px;
+    background: #26cdd4;
+    color: #0b1214;
+    font-weight: 700;
+}
+
+.submitButton:disabled,
+.fileButton:disabled,
+.removeFileButton:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.hint {
+    color: #909090;
+    font-size: 0.88rem;
+}
+
+.error {
+    color: #ff8d8d;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .card {
+        border-radius: 22px;
+        padding: 16px;
+    }
+
+    .toolbar {
+        align-items: stretch;
+    }
+
+    .submitButton {
+        width: 100%;
+        justify-content: center;
+    }
+}

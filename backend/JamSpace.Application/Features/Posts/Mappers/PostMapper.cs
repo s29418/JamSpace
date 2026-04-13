@@ -36,11 +36,11 @@ public static class PostMapper
 
             Comments = passAllComments
                 ? post.Comments
-                    .OrderBy(c => c.CreatedAt)
+                    .OrderByDescending(c => c.CreatedAt)
                     .Select(CommentMapper.ToDto)
                     .ToList()
                 : post.Comments
-                    .OrderBy(c => c.CreatedAt)
+                    .OrderByDescending(c => c.CreatedAt)
                     .Take(2)
                     .Select(CommentMapper.ToDto)
                     .ToList()

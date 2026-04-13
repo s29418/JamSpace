@@ -166,6 +166,10 @@
     background: #000;
 }
 
+.previewableMedia {
+    cursor: zoom-in;
+}
+
 .audio {
     width: 100%;
     border-radius: 18px;
@@ -433,6 +437,57 @@
     text-decoration: underline;
 }
 
+.mediaViewerBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    background: rgba(5, 8, 10, 0.78);
+    backdrop-filter: blur(4px);
+}
+
+.mediaViewerContent {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: min(92vw, 1200px);
+    max-height: min(88vh, 900px);
+}
+
+.mediaViewerImage,
+.mediaViewerVideo {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 22px;
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.4);
+    background: #000;
+}
+
+.mediaViewerClose {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(15, 18, 20, 0.82);
+    color: #f5f5f5;
+    cursor: pointer;
+}
+
+.mediaViewerClose:hover {
+    background: rgba(25, 29, 31, 0.92);
+}
+
 .repostLabel {
     display: inline-flex;
     align-items: center;
@@ -454,5 +509,14 @@
 
     .actionValue {
         font-size: 0.88rem;
+    }
+
+    .mediaViewerBackdrop {
+        padding: 18px;
+    }
+
+    .mediaViewerClose {
+        top: 12px;
+        right: 12px;
     }
 }

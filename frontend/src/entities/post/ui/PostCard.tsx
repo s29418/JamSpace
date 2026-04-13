@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import type { Post } from '../model/types';
 import styles from './PostCard.module.css';
@@ -34,6 +35,7 @@ export const PostCard: React.FC<Props> = ({
     isNested = false,
 }) => {
     const [composerOpen, setComposerOpen] = React.useState(false);
+    const [mediaViewerOpen, setMediaViewerOpen] = React.useState(false);
     const navigate = useNavigate();
     const mediaKind = useMemo(
         () => inferMediaKind(post.mediaType, post.mediaUrl),
@@ -41,6 +43,22 @@ export const PostCard: React.FC<Props> = ({
     );
     const detailsHref = `/posts/${post.id}`;
     const isCardClickable = enableDetailsNavigation && !isNested;
+    const canPreviewMedia = mediaKind === 'image' || mediaKind === 'video';
+
+    useEffect(() => {
+        if (!mediaViewerOpen) {
+            return;
+        }
+
+        function handleKeyDown(event: KeyboardEvent) {
+            if (event.key === 'Escape') {
+                setMediaViewerOpen(false);
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [mediaViewerOpen]);
 
     return (
         <article
@@ -64,13 +82,36 @@ export const PostCard: React.FC<Props> = ({
             {post.mediaUrl && (
                 <div className={styles.mediaWrap}>
                     {mediaKind === 'image' && (
-                        <img className={styles.image} src={post.mediaUrl} alt="Post attachment" />
+                        <img
+                            className={`${styles.image} ${canPreviewMedia ? styles.previewableMedia : ''}`}
+                            src={post.mediaUrl}
+                            alt="Post attachment"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setMediaViewerOpen(true);
+                            }}
+                        />
                     )}
                     {mediaKind === 'video' && (
-                        <video className={styles.video} src={post.mediaUrl} controls preload="metadata" />
+                        <video
+                            className={`${styles.video} ${canPreviewMedia ? styles.previewableMedia : ''}`}
+                            src={post.mediaUrl}
+                            controls
+                            preload="metadata"
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setMediaViewerOpen(true);
+                            }}
+                        />
                     )}
                     {mediaKind === 'audio' && (
-                        <audio className={styles.audio} src={post.mediaUrl} controls preload="metadata" />
+                        <audio
+                            className={styles.audio}
+                            src={post.mediaUrl}
+                            controls
+                            preload="metadata"
+                            onClick={(event) => event.stopPropagation()}
+                        />
                     )}
                     {mediaKind === 'file' && (
                         <a
@@ -125,6 +166,53 @@ export const PostCard: React.FC<Props> = ({
                         />
                     </div>
                 </>
+            )}
+
+            {mediaViewerOpen && post.mediaUrl && canPreviewMedia && (
+                <div
+                    className={styles.mediaViewerBackdrop}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Media viewer"
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        setMediaViewerOpen(false);
+                    }}
+                >
+                    <button
+                        type="button"
+                        className={styles.mediaViewerClose}
+                        aria-label="Close media viewer"
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setMediaViewerOpen(false);
+                        }}
+                    >
+                        <XMarkIcon width={24} height={24} />
+                    </button>
+
+                    <div
+                        className={styles.mediaViewerContent}
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        {mediaKind === 'image' && (
+                            <img
+                                className={styles.mediaViewerImage}
+                                src={post.mediaUrl}
+                                alt="Post attachment preview"
+                            />
+                        )}
+                        {mediaKind === 'video' && (
+                            <video
+                                className={styles.mediaViewerVideo}
+                                src={post.mediaUrl}
+                                controls
+                                autoPlay
+                                preload="metadata"
+                            />
+                        )}
+                    </div>
+                </div>
             )}
         </article>
     );

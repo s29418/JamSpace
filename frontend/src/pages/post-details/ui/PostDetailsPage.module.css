@@ -1,0 +1,26 @@
+.page {
+    min-height: calc(100vh - 160px);
+    padding: 48px 20px 48px;
+}
+
+.content {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.message {
+    color: #d8d8d8;
+    text-align: center;
+    padding: 48px 0;
+}
+
+.error {
+    color: #ff8d8d;
+}
+
+@media (max-width: 768px) {
+    .page {
+        padding: 8px 14px 36px;
+    }
+}

@@ -10,6 +10,8 @@ type Props = {
     post: Post;
     comments: PostComment[];
     onDeleteComment?: (post: Post, commentId: string) => void | Promise<void>;
+    maxVisibleComments?: number;
+    viewAllHref?: string;
 };
 
 type CommentMenuProps = {
@@ -43,7 +45,10 @@ const CommentMenu: React.FC<CommentMenuProps> = ({ post, comment, onDeleteCommen
                 type="button"
                 className={`${styles.menuButton} ${styles.commentMenuButton}`}
                 aria-label="More comment options"
-                onClick={() => setMenuOpen((current) => !current)}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    setMenuOpen((current) => !current);
+                }}
             >
                 <EllipsisHorizontalIcon width={18} height={18} />
             </button>
@@ -53,7 +58,8 @@ const CommentMenu: React.FC<CommentMenuProps> = ({ post, comment, onDeleteCommen
                     <button
                         type="button"
                         className={styles.menuItem}
-                        onClick={() => {
+                        onClick={(event) => {
+                            event.stopPropagation();
                             setMenuOpen(false);
                             void onDeleteComment(post, comment.id);
                         }}
@@ -66,23 +72,37 @@ const CommentMenu: React.FC<CommentMenuProps> = ({ post, comment, onDeleteCommen
     );
 };
 
-export const PostComments: React.FC<Props> = ({ post, comments, onDeleteComment }) => {
+export const PostComments: React.FC<Props> = ({
+    post,
+    comments,
+    onDeleteComment,
+    maxVisibleComments,
+    viewAllHref,
+}) => {
     const currentUserId = useMemo(() => getCurrentUserId(), []);
+    const visibleComments = typeof maxVisibleComments === 'number'
+        ? comments.slice(0, maxVisibleComments)
+        : comments;
+    const hasHiddenComments = Boolean(viewAllHref) && post.commentCount > visibleComments.length;
 
-    if (!comments.length) {
+    if (!visibleComments.length && !hasHiddenComments) {
         return null;
     }
 
     return (
         <div className={styles.comments}>
-            {comments.map((comment) => {
+            {visibleComments.map((comment) => {
                 const commentAuthorName = comment.authorDisplayName?.trim() || 'Unknown user';
                 const commentTimestamp = formatPostTimestampSafe(comment.createdAt);
                 const canDeleteComment = currentUserId === comment.authorId;
 
                 return (
                     <div key={comment.id} className={styles.comment}>
-                        <Link to={`/profile/${comment.authorId}`} className={styles.commentAvatarLink}>
+                        <Link
+                            to={`/profile/${comment.authorId}`}
+                            className={styles.commentAvatarLink}
+                            onClick={(event) => event.stopPropagation()}
+                        >
                             {comment.authorAvatarUrl ? (
                                 <img
                                     className={styles.commentAvatar}
@@ -98,7 +118,11 @@ export const PostComments: React.FC<Props> = ({ post, comments, onDeleteComment 
 
                         <div className={styles.commentBody}>
                             <div className={styles.commentMeta}>
-                                <Link to={`/profile/${comment.authorId}`} className={styles.commentAuthor}>
+                                <Link
+                                    to={`/profile/${comment.authorId}`}
+                                    className={styles.commentAuthor}
+                                    onClick={(event) => event.stopPropagation()}
+                                >
                                     {commentAuthorName}
                                 </Link>
 
@@ -123,6 +147,16 @@ export const PostComments: React.FC<Props> = ({ post, comments, onDeleteComment 
                     </div>
                 );
             })}
+
+            {hasHiddenComments && viewAllHref && (
+                <Link
+                    to={viewAllHref}
+                    className={styles.viewAllCommentsLink}
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    Display all comments
+                </Link>
+            )}
         </div>
     );
 };

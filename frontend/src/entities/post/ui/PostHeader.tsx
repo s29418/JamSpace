@@ -44,7 +44,11 @@ export const PostHeader: React.FC<Props> = ({
 
             <div className={styles.header}>
                 <div className={styles.authorBlock}>
-                    <Link to={authorSlug} className={styles.authorLink}>
+                    <Link
+                        to={authorSlug}
+                        className={styles.authorLink}
+                        onClick={(event) => event.stopPropagation()}
+                    >
                         {post.authorAvatarUrl ? (
                             <img
                                 className={styles.avatar}
@@ -59,7 +63,11 @@ export const PostHeader: React.FC<Props> = ({
                     </Link>
 
                     <div className={styles.authorMeta}>
-                        <Link to={authorSlug} className={styles.authorLink}>
+                        <Link
+                            to={authorSlug}
+                            className={styles.authorLink}
+                            onClick={(event) => event.stopPropagation()}
+                        >
                             <div className={styles.displayNameRow}>
                                 <span className={styles.displayName}>{authorName}</span>
                                 {timestamp && <span className={styles.timestamp}>{timestamp}</span>}
@@ -74,7 +82,10 @@ export const PostHeader: React.FC<Props> = ({
                             type="button"
                             className={styles.menuButton}
                             aria-label="More options"
-                            onClick={() => setMenuOpen((current) => !current)}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setMenuOpen((current) => !current);
+                            }}
                         >
                             <EllipsisHorizontalIcon width={20} height={20} />
                         </button>
@@ -84,7 +95,8 @@ export const PostHeader: React.FC<Props> = ({
                                 <button
                                     type="button"
                                     className={styles.menuItem}
-                                    onClick={() => {
+                                    onClick={(event) => {
+                                        event.stopPropagation();
                                         setMenuOpen(false);
                                         void onDelete(post.id);
                                     }}

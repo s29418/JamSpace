@@ -53,7 +53,10 @@ export const PostActions: React.FC<Props> = ({
                 type="button"
                 className={`${styles.actionButton} ${post.isLikedByCurrentUser ? styles.actionActive : ''}`}
                 aria-label="Likes"
-                onClick={() => void handleLike()}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    void handleLike();
+                }}
                 disabled={likeBusy}
             >
                 <HeartIcon />
@@ -64,7 +67,10 @@ export const PostActions: React.FC<Props> = ({
                 type="button"
                 className={styles.actionButton}
                 aria-label="Comments"
-                onClick={onToggleComments}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onToggleComments?.();
+                }}
             >
                 <ChatBubbleOvalLeftIcon />
                 <span className={styles.actionValue}>{post.commentCount}</span>
@@ -75,7 +81,10 @@ export const PostActions: React.FC<Props> = ({
                     type="button"
                     className={`${styles.actionButton} ${post.isRepostedByCurrentUser ? styles.actionActive : ''}`}
                     aria-label="Reposts"
-                    onClick={() => void handleRepost()}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        void handleRepost();
+                    }}
                     disabled={repostBusy}
                 >
                     <ArrowPathRoundedSquareIcon />

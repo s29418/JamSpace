@@ -64,6 +64,8 @@ export const PostFeed: React.FC<Props> = ({
                     onToggleRepost={onToggleRepost}
                     onAddComment={onAddComment}
                     onDeleteComment={onDeleteComment}
+                    enableDetailsNavigation
+                    maxVisibleComments={2}
                 />
             ))}
         </section>

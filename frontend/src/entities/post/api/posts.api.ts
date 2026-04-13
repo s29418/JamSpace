@@ -84,6 +84,11 @@ export async function getUserPosts(userId: string, before?: string) {
     return normalizeCursorResult(res.data);
 }
 
+export async function getPost(postId: string) {
+    const res = await api.get<Post>(`${ROOT}/${postId}`);
+    return normalizePost(res.data);
+}
+
 export async function deletePost(postId: string) {
     await api.delete(`${ROOT}/${postId}`);
 }

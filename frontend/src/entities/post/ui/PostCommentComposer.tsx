@@ -50,7 +50,11 @@ export const PostCommentComposer: React.FC<Props> = ({ onSubmit }) => {
     }
 
     return (
-        <form className={styles.commentComposer} onSubmit={handleSubmit}>
+        <form
+            className={styles.commentComposer}
+            onSubmit={handleSubmit}
+            onClick={(event) => event.stopPropagation()}
+        >
             <div className={styles.commentComposerField}>
                 <textarea
                     className={styles.commentComposerInput}

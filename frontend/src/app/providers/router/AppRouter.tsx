@@ -8,6 +8,7 @@ import TeamsPage from "../../../pages/teams/ui/TeamsPage";
 import TeamDetailsPage from "../../../pages/team-details/ui/TeamDetailsPage";
 import SearchPage from "../../../pages/search/ui/SearchPage";
 import ChatPage from "../../../pages/chat/ui/ChatPage";
+import PostDetailsPage from "../../../pages/post-details/ui/PostDetailsPage";
 
 function AppRouter() {
     return (
@@ -34,6 +35,7 @@ function AppRouter() {
                 <Route path="/search" element={<SearchPage />} />
 
                 <Route path="/chat" element={<ChatPage />} />
+                <Route path="/posts/:id" element={<PostDetailsPage />} />
 
                 {/* <Route path="/notifications" element={< />} /> */}
             </Routes>

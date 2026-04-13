@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Post } from '../model/types';
 import styles from './PostCard.module.css';
 import { PostHeader } from './PostHeader';
@@ -15,6 +16,8 @@ type Props = {
     onToggleRepost?: (post: Post) => void | Promise<void>;
     onAddComment?: (post: Post, content: string) => void | Promise<void>;
     onDeleteComment?: (post: Post, commentId: string) => void | Promise<void>;
+    enableDetailsNavigation?: boolean;
+    maxVisibleComments?: number;
     isNested?: boolean;
 };
 
@@ -26,17 +29,31 @@ export const PostCard: React.FC<Props> = ({
     onToggleRepost,
     onAddComment,
     onDeleteComment,
+    enableDetailsNavigation = false,
+    maxVisibleComments,
     isNested = false,
 }) => {
     const [composerOpen, setComposerOpen] = React.useState(false);
+    const navigate = useNavigate();
     const mediaKind = useMemo(
         () => inferMediaKind(post.mediaType, post.mediaUrl),
         [post.mediaType, post.mediaUrl],
     );
     const actionPost = post.originalPost ?? post;
+    const detailsHref = `/posts/${actionPost.id}`;
+    const isCardClickable = enableDetailsNavigation && !isNested;
 
     return (
-        <article className={`${styles.card} ${isNested ? styles.repostCard : ''}`}>
+        <article
+            className={`${styles.card} ${isNested ? styles.repostCard : ''} ${
+                isCardClickable ? styles.cardClickable : ''
+            }`}
+            onClick={() => {
+                if (isCardClickable) {
+                    navigate(detailsHref);
+                }
+            }}
+        >
             <PostHeader
                 post={post}
                 canDelete={canDelete}
@@ -62,6 +79,7 @@ export const PostCard: React.FC<Props> = ({
                             href={post.mediaUrl}
                             target="_blank"
                             rel="noreferrer"
+                            onClick={(event) => event.stopPropagation()}
                         >
                             Open attachment
                         </a>
@@ -103,6 +121,8 @@ export const PostCard: React.FC<Props> = ({
                             post={actionPost}
                             comments={actionPost.comments}
                             onDeleteComment={onDeleteComment}
+                            maxVisibleComments={maxVisibleComments}
+                            viewAllHref={isCardClickable ? detailsHref : undefined}
                         />
                     </div>
                 </>

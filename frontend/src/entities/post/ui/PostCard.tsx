@@ -42,7 +42,7 @@ export const PostCard: React.FC<Props> = ({
         [post.mediaType, post.mediaUrl],
     );
     const detailsHref = `/posts/${post.id}`;
-    const isCardClickable = enableDetailsNavigation && !isNested;
+    const isCardClickable = enableDetailsNavigation;
     const canPreviewMedia = mediaKind === 'image' || mediaKind === 'video';
 
     useEffect(() => {
@@ -65,8 +65,9 @@ export const PostCard: React.FC<Props> = ({
             className={`${styles.card} ${isNested ? styles.repostCard : ''} ${
                 isCardClickable ? styles.cardClickable : ''
             }`}
-            onClick={() => {
+            onClick={(event) => {
                 if (isCardClickable) {
+                    event.stopPropagation();
                     navigate(detailsHref);
                 }
             }}
@@ -130,6 +131,7 @@ export const PostCard: React.FC<Props> = ({
             {post.originalPost && (
                 <PostCard
                     post={post.originalPost}
+                    enableDetailsNavigation={enableDetailsNavigation}
                     isNested
                 />
             )}

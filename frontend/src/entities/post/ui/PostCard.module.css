@@ -45,6 +45,7 @@
     height: 50px;
     border-radius: 50%;
     flex-shrink: 0;
+    border: 1px solid #26cdd4;
 }
 
 .avatar {
@@ -55,8 +56,9 @@
 .avatarFallback {
     display: grid;
     place-items: center;
-    background: linear-gradient(145deg, #26cdd4, #15979d);
-    color: #091214;
+    background: #142223;
+    color: #26cdd4;
+    font-size: 24px;
     font-weight: 700;
 }
 
@@ -401,8 +403,7 @@
 }
 
 .commentComposerButton:hover{
-    background: #26cdd4;
-    color: #0b1214;
+    background: rgba(38, 205, 212, 0.13);
 }
 
 .comment {
@@ -421,6 +422,7 @@
     height: 34px;
     border-radius: 50%;
     flex-shrink: 0;
+    border: 1px solid #26cdd4;
 }
 
 .commentAvatar {
@@ -431,9 +433,9 @@
 .commentAvatarFallback {
     display: grid;
     place-items: center;
-    background: linear-gradient(145deg, #26cdd4, #15979d);
-    color: #091214;
-    font-size: 0.82rem;
+    background: #142223;
+    color: #26cdd4;
+    font-size: 16px;
     font-weight: 700;
 }
 

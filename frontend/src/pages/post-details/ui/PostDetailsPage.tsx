@@ -4,7 +4,10 @@ import { isApiError } from '../../../shared/api/base';
 import { useToast } from '../../../shared/lib/hooks/useToast';
 import { PostCard } from '../../../entities/post/ui/PostCard';
 import { usePostDetails } from '../../../features/post/model/usePostDetails';
+import { usePostsFeed } from "../../../features/post/model/usePostsFeed";
 import styles from './PostDetailsPage.module.css';
+import {useAuthState} from "../../../shared/lib/hooks/useAuthState";
+import {useNavigate} from "react-router-dom";
 
 const PostDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -18,6 +21,20 @@ const PostDetailsPage = () => {
         addComment,
         removeComment,
     } = usePostDetails(id);
+    const { removePost } = usePostsFeed({ mode: 'auto' });
+
+    const { currentUserId } = useAuthState();
+    const navigate = useNavigate();
+
+    async function handleDeletePost(postId: string) {
+        try {
+            await removePost(postId);
+            showSuccess('Post deleted.');
+            navigate('/');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to delete post.');
+        }
+    }
 
     async function handleToggleLike(targetPost: Parameters<typeof toggleLike>[0]) {
         try {
@@ -65,10 +82,13 @@ const PostDetailsPage = () => {
                 {!loading && !error && post && (
                     <PostCard
                         post={post}
+                        enableDetailsNavigation
                         onToggleLike={handleToggleLike}
                         onToggleRepost={handleToggleRepost}
                         onAddComment={handleAddComment}
                         onDeleteComment={handleDeleteComment}
+                        canDelete={Boolean(currentUserId && post.authorId === currentUserId)}
+                        onDelete={handleDeletePost}
                     />
                 )}
             </div>

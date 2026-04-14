@@ -1,5 +1,9 @@
 import React, { useId, useState } from 'react';
-import { PhotoIcon } from '@heroicons/react/24/outline';
+import {
+    PhotoIcon,
+    TrashIcon,
+    PaperAirplaneIcon
+} from '@heroicons/react/24/outline';
 import styles from './PostComposer.module.css';
 
 type Props = {
@@ -79,6 +83,7 @@ export const PostComposer: React.FC<Props> = ({ onSubmit }) => {
                                     onClick={() => setFile(null)}
                                     disabled={busy}
                                 >
+                                    <TrashIcon width={18} height={18} />
                                     Remove
                                 </button>
                             </div>
@@ -91,6 +96,7 @@ export const PostComposer: React.FC<Props> = ({ onSubmit }) => {
                         disabled={!canSubmit || busy}
                     >
                         {busy ? 'Posting...' : 'Post'}
+                        <PaperAirplaneIcon width={18} height={18} />
                     </button>
                 </div>
 

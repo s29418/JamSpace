@@ -140,6 +140,7 @@
 
 .content {
     margin-top: 16px;
+    margin-left: 8px;
     color: #ededed;
     font-size: 1.05rem;
     line-height: 1.5;
@@ -192,26 +193,37 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 32px;
-    margin-top: 16px;
-    padding: 0 6px;
+    gap: 24px;
+    min-height: 36px;
+    margin-top: 12px;
+    /*padding: 0 6px;*/
 }
 
-.actionButton {
+.actionButton, .repostButton {
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
     gap: 6px;
+    height: 36px;
     min-height: 36px;
+    min-width: 52px;
+    flex: 0 0 auto;
     padding: 0;
     border: 1px solid transparent;
     background: transparent;
     color: #d7d7d7;
     cursor: pointer;
     transition: color 0.2s ease, opacity 0.2s ease;
+    line-height: 1;
 }
 
 .actionButton svg {
+    width: 20px;
+    height: 20px;
+    color: #26cdd4;
+}
+
+.repostButton svg {
     width: 20px;
     height: 20px;
     color: #26cdd4;
@@ -222,20 +234,58 @@
     cursor: default;
 }
 
+.hoverEffect {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    line-height: 0;
+    overflow: hidden;
+    transition: background-color 0.2s ease;
+}
+
+.hoverEffect:hover{
+    background: rgba(38, 205, 212, 0.08);
+}
+
+.actionIcon {
+    display: block;
+    flex-shrink: 0;
+    transition: color 0.2s ease, fill 0.2s ease, stroke 0.2s ease;
+}
+
+.likeIconActive {
+    color: #26cdd4;
+    fill: #26cdd4;
+}
+
 .actionActive {
     color: #26cdd4;
 }
 
-.actionActive svg {
+.repostActive {
     color: #26cdd4;
+    stroke: #26cdd4;
+    stroke-width: 2px;
+    vector-effect: non-scaling-stroke;
 }
 
 .actionValue {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    min-height: 32px;
+    min-width: 2ch;
     font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
 }
 
 .comments {
-    margin-top: 18px;
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
     gap: 14px;

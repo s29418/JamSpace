@@ -51,7 +51,7 @@ export const PostActions: React.FC<Props> = ({
         <div className={styles.actions}>
             <button
                 type="button"
-                className={`${styles.actionButton} ${post.isLikedByCurrentUser ? styles.actionActive : ''}`}
+                className={styles.actionButton}
                 aria-label="Likes"
                 onClick={(event) => {
                     event.stopPropagation();
@@ -59,8 +59,10 @@ export const PostActions: React.FC<Props> = ({
                 }}
                 disabled={likeBusy}
             >
-                <HeartIcon />
-                <span className={styles.actionValue}>{post.likeCount}</span>
+                <span className={styles.hoverEffect}>
+                    <HeartIcon className={`${styles.actionIcon} ${post.isLikedByCurrentUser ? styles.likeIconActive : ''}`}/>
+                </span>
+                <span className={`${styles.actionValue} ${post.isLikedByCurrentUser ? styles.actionActive : ''}`}>{post.likeCount}</span>
             </button>
 
             <button
@@ -72,14 +74,16 @@ export const PostActions: React.FC<Props> = ({
                     onToggleComments?.();
                 }}
             >
-                <ChatBubbleOvalLeftIcon />
+                <span className={styles.hoverEffect}>
+                    <ChatBubbleOvalLeftIcon className={styles.actionIcon} />
+                </span>
                 <span className={styles.actionValue}>{post.commentCount}</span>
             </button>
 
             {showRepostAction && (
                 <button
                     type="button"
-                    className={`${styles.actionButton} ${post.isRepostedByCurrentUser ? styles.actionActive : ''}`}
+                    className={styles.repostButton}
                     aria-label="Reposts"
                     onClick={(event) => {
                         event.stopPropagation();
@@ -87,8 +91,10 @@ export const PostActions: React.FC<Props> = ({
                     }}
                     disabled={repostBusy}
                 >
-                    <ArrowPathRoundedSquareIcon />
-                    <span className={styles.actionValue}>{post.repostCount}</span>
+                    <span className={styles.hoverEffect}>
+                        <ArrowPathRoundedSquareIcon className={`${styles.actionIcon} ${post.isRepostedByCurrentUser ? styles.repostActive : ''}`} />
+                    </span>
+                    <span className={`${styles.actionValue} ${post.isRepostedByCurrentUser ? styles.actionActive : ''}`}>{post.repostCount}</span>
                 </button>
             )}
         </div>

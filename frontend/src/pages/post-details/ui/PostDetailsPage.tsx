@@ -1,5 +1,5 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigationType, useParams } from 'react-router-dom';
 import { isApiError } from '../../../shared/api/base';
 import { useToast } from '../../../shared/lib/hooks/useToast';
 import { PostCard } from '../../../entities/post/ui/PostCard';
@@ -25,6 +25,13 @@ const PostDetailsPage = () => {
 
     const { currentUserId } = useAuthState();
     const navigate = useNavigate();
+    const navigationType = useNavigationType();
+
+    useEffect(() => {
+        if (navigationType === 'PUSH') {
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        }
+    }, [id, navigationType]);
 
     async function handleDeletePost(postId: string) {
         try {

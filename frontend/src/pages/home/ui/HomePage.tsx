@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigationType } from 'react-router-dom';
 import { usePostsFeed } from '../../../features/post/model/usePostsFeed';
 import { PostFeed } from '../../../widgets/post-feed/ui/PostFeed';
 import styles from './HomePage.module.css';
@@ -6,11 +7,20 @@ import { useToast } from '../../../shared/lib/hooks/useToast';
 import { isApiError } from '../../../shared/api/base';
 import { useAuthState } from '../../../shared/lib/hooks/useAuthState';
 import { PostComposer } from '../../../features/post/ui/PostComposer';
+import { restoreScrollPosition } from '../../../shared/lib/scroll/postDetailsScroll';
 
 const HomePage = () => {
     const { posts, loading, error, addPost, removePost, toggleLike, toggleRepost, addComment, removeComment } = usePostsFeed({ mode: 'auto' });
     const { isAuthenticated, currentUserId } = useAuthState();
     const { message, showError, showSuccess } = useToast();
+    const location = useLocation();
+    const navigationType = useNavigationType();
+
+    useEffect(() => {
+        if (navigationType === 'POP' && !loading) {
+            restoreScrollPosition(`${location.pathname}${location.search}`);
+        }
+    }, [loading, location.pathname, location.search, navigationType]);
 
     async function handleCreatePost(content: string, file?: File | null) {
         try {

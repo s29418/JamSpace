@@ -3,8 +3,9 @@ import {
     EllipsisHorizontalIcon,
     TrashIcon
 } from '@heroicons/react/24/outline';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { getCurrentUserId } from '../../../shared/lib/auth/token';
+import { saveScrollPosition } from '../../../shared/lib/scroll/postDetailsScroll';
 import type { Post, PostComment } from '../model/types';
 import { formatPostTimestampSafe } from './postCard.utils';
 import styles from './PostCard.module.css';
@@ -84,6 +85,7 @@ export const PostComments: React.FC<Props> = ({
     viewAllHref,
 }) => {
     const currentUserId = useMemo(() => getCurrentUserId(), []);
+    const location = useLocation();
     const visibleComments = typeof maxVisibleComments === 'number'
         ? comments.slice(0, maxVisibleComments)
         : comments;
@@ -156,7 +158,10 @@ export const PostComments: React.FC<Props> = ({
                 <Link
                     to={viewAllHref}
                     className={styles.viewAllCommentsLink}
-                    onClick={(event) => event.stopPropagation()}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        saveScrollPosition(`${location.pathname}${location.search}`);
+                    }}
                 >
                     Display all comments
                 </Link>

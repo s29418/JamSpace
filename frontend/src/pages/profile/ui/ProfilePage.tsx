@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useNavigationType, useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 import styles from './ProfilePage.module.css';
@@ -20,12 +20,15 @@ import { PostFeed } from '../../../widgets/post-feed/ui/PostFeed';
 import { useToast } from '../../../shared/lib/hooks/useToast';
 import { isApiError } from '../../../shared/api/base';
 import { PostComposer } from '../../../features/post/ui/PostComposer';
+import { restoreScrollPosition } from '../../../shared/lib/scroll/postDetailsScroll';
 
 type JwtPayload = { sub: string; username: string; email: string };
 
 const ProfilePage: FC = () => {
     const params = useParams<{ id?: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
+    const navigationType = useNavigationType();
 
     const [isLoginView, setIsLoginView] = useState(true);
     const [myId, setMyId] = useState<string | null>(null);
@@ -87,6 +90,12 @@ const ProfilePage: FC = () => {
         removeComment,
     } = useUserPosts(targetUserId);
     const { message, showSuccess, showError } = useToast();
+
+    useEffect(() => {
+        if (navigationType === 'POP' && !loading && !postsLoading) {
+            restoreScrollPosition(`${location.pathname}${location.search}`);
+        }
+    }, [loading, postsLoading, location.pathname, location.search, navigationType]);
 
     if (!params.id && !myId) {
         return (

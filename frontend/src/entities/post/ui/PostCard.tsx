@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { Post } from '../model/types';
 import styles from './PostCard.module.css';
 import { PostHeader } from './PostHeader';
@@ -9,6 +9,7 @@ import { PostComments } from './PostComments';
 import { PostCommentComposer } from './PostCommentComposer';
 import { PostVideoPlayer } from './PostVideoPlayer';
 import { inferMediaKind } from './postCard.utils';
+import { saveScrollPosition } from '../../../shared/lib/scroll/postDetailsScroll';
 
 type Props = {
     post: Post;
@@ -38,6 +39,7 @@ export const PostCard: React.FC<Props> = ({
     const [composerOpen, setComposerOpen] = React.useState(false);
     const [mediaViewerOpen, setMediaViewerOpen] = React.useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const mediaKind = useMemo(
         () => inferMediaKind(post.mediaType, post.mediaUrl),
         [post.mediaType, post.mediaUrl],
@@ -69,6 +71,7 @@ export const PostCard: React.FC<Props> = ({
             onClick={(event) => {
                 if (isCardClickable) {
                     event.stopPropagation();
+                    saveScrollPosition(`${location.pathname}${location.search}`);
                     navigate(detailsHref);
                 }
             }}

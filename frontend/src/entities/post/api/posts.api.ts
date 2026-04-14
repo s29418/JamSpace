@@ -136,6 +136,6 @@ export async function createComment(postId: string, content: string) {
     return normalizeComment(res.data);
 }
 
-export async function deleteComment(postId: string, commentId: string) {
-    await api.delete(`${ROOT}/${postId}/comments/${commentId}`);
+export async function deleteComment(_postId: string, commentId: string) {
+    await api.delete(`${ROOT}/comments/${commentId}`);
 }

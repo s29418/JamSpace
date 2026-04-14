@@ -89,21 +89,14 @@ export function useUserPosts(userId?: string) {
             return;
         }
 
-        const createdRepost = await repostPost(post.id);
-        const currentUserId = getCurrentUserId();
+        await repostPost(post.id);
 
         setPosts((current) => {
-            const updated = updatePostsById(current, post.id, (target) => ({
+            return updatePostsById(current, post.id, (target) => ({
                 ...target,
                 isRepostedByCurrentUser: true,
                 repostCount: target.repostCount + 1,
             }));
-
-            if (!currentUserId || currentUserId !== userId || updated.some((item) => item.id === createdRepost.id)) {
-                return updated;
-            }
-
-            return [createdRepost, ...updated];
         });
     }, [userId]);
 

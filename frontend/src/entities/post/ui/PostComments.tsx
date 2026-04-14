@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
+import {
+    EllipsisHorizontalIcon,
+    TrashIcon
+} from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { getCurrentUserId } from '../../../shared/lib/auth/token';
 import type { Post, PostComment } from '../model/types';
@@ -64,6 +67,7 @@ const CommentMenu: React.FC<CommentMenuProps> = ({ post, comment, onDeleteCommen
                             void onDeleteComment(post, comment.id);
                         }}
                     >
+                        <TrashIcon className={styles.trashIcon}/>
                         Delete comment
                     </button>
                 </div>

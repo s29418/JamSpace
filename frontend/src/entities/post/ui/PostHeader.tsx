@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowPathRoundedSquareIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
+import {
+    ArrowPathRoundedSquareIcon,
+    EllipsisHorizontalIcon,
+    TrashIcon,
+} from '@heroicons/react/24/outline';
 import type { Post } from '../model/types';
 import { formatPostTimestamp } from './postCard.utils';
 import styles from './PostCard.module.css';
@@ -101,6 +105,7 @@ export const PostHeader: React.FC<Props> = ({
                                         void onDelete(post.id);
                                     }}
                                 >
+                                    <TrashIcon className={styles.trashIcon}/>
                                     Delete post
                                 </button>
                             </div>

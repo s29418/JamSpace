@@ -115,7 +115,7 @@
     top: calc(100% + 8px);
     right: 0;
     z-index: 10;
-    min-width: 140px;
+    min-width: 150px;
     padding: 8px;
     border: 1px solid #4a4a4a;
     border-radius: 14px;
@@ -132,10 +132,19 @@
     text-align: left;
     padding: 10px 12px;
     font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .menuItem:hover {
     background: rgba(255, 130, 130, 0.08);
+}
+
+.trashIcon {
+    width: 18px;
+    height: 18px;
+    color: #ff8282;
 }
 
 .content {
@@ -200,13 +209,14 @@
 }
 
 .actionButton, .repostButton {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: 32px minmax(2ch, auto);
     align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
+    justify-content: start;
+    column-gap: 6px;
     height: 36px;
     min-height: 36px;
-    min-width: 52px;
+    min-width: 56px;
     flex: 0 0 auto;
     padding: 0;
     border: 1px solid transparent;
@@ -243,7 +253,7 @@
     flex-shrink: 0;
     border-radius: 50%;
     line-height: 0;
-    overflow: hidden;
+    overflow: clip;
     transition: background-color 0.2s ease;
 }
 
@@ -271,30 +281,35 @@
     stroke: #26cdd4;
     stroke-width: 2px;
     vector-effect: non-scaling-stroke;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .actionValue {
     display: inline-flex;
     align-items: center;
+    justify-content: flex-start;
     height: 32px;
     min-height: 32px;
     min-width: 2ch;
     font-size: 0.95rem;
     font-variant-numeric: tabular-nums;
     line-height: 1;
+    text-align: left;
 }
 
 .comments {
     margin-top: 12px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
     padding-top: 14px;
     border-top: 1px solid #343434;
 }
 
 .commentsSection {
-    overflow: hidden;
+    overflow: visible;
 }
 
 .commentComposerShell {
@@ -367,14 +382,17 @@
     height: 36px;
     border: none;
     border-radius: 999px;
-    background: #26cdd4;
-    color: #0b1214;
+    /*background: #26cdd4;*/
+    /*color: #0b1214;*/
     cursor: pointer;
+
+    background: transparent;
+    color: #26cdd4;
 }
 
 .commentComposerButton svg {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
 }
 
 .commentComposerButton:disabled {
@@ -382,10 +400,15 @@
     cursor: default;
 }
 
+.commentComposerButton:hover{
+    background: #26cdd4;
+    color: #0b1214;
+}
+
 .comment {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 12px;
 }
 
 .commentAvatarLink {
@@ -461,9 +484,13 @@
     height: 28px;
 }
 
+.commentsSection {
+    overflow: visible;
+}
+
 .commentMenu {
     top: calc(100% + 6px);
-    min-width: 156px;
+    min-width: 185px;
 }
 
 .commentContent {
@@ -476,11 +503,13 @@
 
 .viewAllCommentsLink {
     display: inline-flex;
+    align-self: center;
     width: fit-content;
     color: #26cdd4;
     text-decoration: none;
     font-size: 0.95rem;
-    font-weight: 600;
+    margin-top: 6px;
+    /*font-weight: 600;*/
 }
 
 .viewAllCommentsLink:hover {

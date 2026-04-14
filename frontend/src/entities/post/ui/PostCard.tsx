@@ -7,6 +7,7 @@ import { PostHeader } from './PostHeader';
 import { PostActions } from './PostActions';
 import { PostComments } from './PostComments';
 import { PostCommentComposer } from './PostCommentComposer';
+import { PostVideoPlayer } from './PostVideoPlayer';
 import { inferMediaKind } from './postCard.utils';
 
 type Props = {
@@ -94,15 +95,9 @@ export const PostCard: React.FC<Props> = ({
                         />
                     )}
                     {mediaKind === 'video' && (
-                        <video
-                            className={`${styles.video} ${canPreviewMedia ? styles.previewableMedia : ''}`}
+                        <PostVideoPlayer
                             src={post.mediaUrl}
-                            controls
-                            preload="metadata"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                setMediaViewerOpen(true);
-                            }}
+                            onOpenPreview={() => setMediaViewerOpen(true)}
                         />
                     )}
                     {mediaKind === 'audio' && (
@@ -205,12 +200,10 @@ export const PostCard: React.FC<Props> = ({
                             />
                         )}
                         {mediaKind === 'video' && (
-                            <video
-                                className={styles.mediaViewerVideo}
+                            <PostVideoPlayer
                                 src={post.mediaUrl}
-                                controls
                                 autoPlay
-                                preload="metadata"
+                                variant="viewer"
                             />
                         )}
                     </div>

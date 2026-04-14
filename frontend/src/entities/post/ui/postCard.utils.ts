@@ -63,10 +63,29 @@ export function formatPostTimestampSafe(createdAt?: string | null) {
 }
 
 export function inferMediaKind(mediaType?: string | null, mediaUrl?: string | null) {
-    const source = `${mediaType ?? ''} ${mediaUrl ?? ''}`.toLowerCase();
+    const mediaTypeValue = String(mediaType ?? '').trim().toLowerCase();
+    const mediaUrlValue = String(mediaUrl ?? '').trim().toLowerCase();
+    const source = `${mediaTypeValue} ${mediaUrlValue}`;
+
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.avif'];
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.m4v', '.ogg', '.ogv', '.mkv'];
+    const audioExtensions = ['.mp3', '.wav', '.aac', '.m4a', '.flac', '.oga', '.ogg'];
+
+    if (mediaTypeValue === '0') return 'image';
+    if (mediaTypeValue === '1') return 'video';
+    if (mediaTypeValue === '2') return 'audio';
 
     if (source.includes('image')) return 'image';
     if (source.includes('video')) return 'video';
     if (source.includes('audio')) return 'audio';
+
+    if (videoExtensions.some((extension) => mediaUrlValue.includes(extension))) return 'video';
+    if (audioExtensions.some((extension) => mediaUrlValue.includes(extension))) return 'audio';
+    if (imageExtensions.some((extension) => mediaUrlValue.includes(extension))) return 'image';
+
+    if (mediaUrlValue.includes('/postvideo/')) return 'video';
+    if (mediaUrlValue.includes('/postaudio/')) return 'audio';
+    if (mediaUrlValue.includes('/postimage/')) return 'image';
+
     return 'file';
 }

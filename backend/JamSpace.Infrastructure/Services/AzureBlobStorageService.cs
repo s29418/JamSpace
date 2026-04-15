@@ -1,10 +1,10 @@
-﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using JamSpace.Application.Common.Enums;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Models;
 
 namespace JamSpace.Infrastructure.Services;
-
 
 public class AzureBlobStorageService : IFileStorageService
 {
@@ -14,7 +14,7 @@ public class AzureBlobStorageService : IFileStorageService
     public AzureBlobStorageService(BlobServiceClient blobServiceClient, string containerName)
     {
         _blobServiceClient = blobServiceClient;
-        _containerName = containerName; 
+        _containerName = containerName;
     }
 
     public async Task<string> UploadAsync(FileUpload file, StorageObjectType type, Guid? relatedEntityId, CancellationToken ct)
@@ -24,20 +24,31 @@ public class AzureBlobStorageService : IFileStorageService
 
         var blobName = BuildBlobName(type, relatedEntityId, file.FileName);
         var blobClient = container.GetBlobClient(blobName);
-        
-        await blobClient.UploadAsync(file.Content, overwrite: true, cancellationToken: ct);
+
+        await blobClient.UploadAsync(
+            file.Content,
+            new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = string.IsNullOrWhiteSpace(file.ContentType)
+                        ? "application/octet-stream"
+                        : file.ContentType
+                }
+            },
+            cancellationToken: ct);
 
         return blobClient.Uri.ToString();
     }
-    
+
     public async Task DeleteAsync(string fileUrl, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(fileUrl))
             return;
-        
+
         var uri = new Uri(fileUrl);
         var absolutePath = uri.AbsolutePath.TrimStart('/');
-        
+
         var prefix = _containerName.Trim('/') + "/";
         if (!absolutePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             return;

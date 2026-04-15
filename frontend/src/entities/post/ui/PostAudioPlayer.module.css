@@ -1,0 +1,101 @@
+.player {
+    padding: 14px 16px 12px;
+    border: 1px solid #314446;
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at top left, rgba(38, 205, 212, 0.12), transparent 75%),
+        linear-gradient(180deg, #131819 0%, #101314 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.mainRow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.playButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    border: none;
+    border-radius: 999px;
+    background: #26cdd4;
+    color: #0a1517;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 10px 24px rgba(38, 205, 212, 0.18);
+}
+
+.playButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(38, 205, 212, 0.24);
+}
+
+.playButton:disabled {
+    opacity: 0.72;
+    cursor: default;
+}
+
+.waveformBlock {
+    min-width: 0;
+    flex: 1;
+}
+
+.waveform {
+    width: 100%;
+    min-height: 78px;
+    cursor: pointer;
+}
+
+.waveform :global(canvas) {
+    border-radius: 14px;
+}
+
+.metaRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: #d7e6e7;
+    font-size: 0.9rem;
+}
+
+.timeValue {
+    font-variant-numeric: tabular-nums;
+    color: #f2fafa;
+}
+
+.timeDivider,
+.timeValueMuted {
+    font-variant-numeric: tabular-nums;
+    color: #8ea5a7;
+}
+
+.error {
+    margin: 10px 0 0;
+    color: #ff8d8d;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .player {
+        padding: 12px 14px 10px;
+    }
+
+    .mainRow {
+        gap: 12px;
+    }
+
+    .playButton {
+        width: 44px;
+        height: 44px;
+    }
+
+    .waveform {
+        min-height: 68px;
+    }
+}

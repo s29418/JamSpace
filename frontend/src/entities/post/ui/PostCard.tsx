@@ -7,6 +7,7 @@ import { PostHeader } from './PostHeader';
 import { PostActions } from './PostActions';
 import { PostComments } from './PostComments';
 import { PostCommentComposer } from './PostCommentComposer';
+import { PostAudioPlayer } from './PostAudioPlayer';
 import { PostVideoPlayer } from './PostVideoPlayer';
 import { inferMediaKind } from './postCard.utils';
 import { saveScrollPosition } from '../../../shared/lib/scroll/postDetailsScroll';
@@ -104,12 +105,8 @@ export const PostCard: React.FC<Props> = ({
                         />
                     )}
                     {mediaKind === 'audio' && (
-                        <audio
-                            className={styles.audio}
+                        <PostAudioPlayer
                             src={post.mediaUrl}
-                            controls
-                            preload="metadata"
-                            onClick={(event) => event.stopPropagation()}
                         />
                     )}
                     {mediaKind === 'file' && (

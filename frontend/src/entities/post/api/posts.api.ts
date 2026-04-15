@@ -1,7 +1,21 @@
-import { api } from '../../../shared/api/base';
+import { api, API_BASE_URL } from '../../../shared/api/base';
 import type { CursorResult, Post, PostComment } from '../model/types';
 
 const ROOT = '/posts';
+
+function buildMediaUrl(mediaUrl?: string | null, mediaType?: string | null) {
+    if (!mediaUrl) {
+        return null;
+    }
+
+    const normalizedType = String(mediaType ?? '').trim().toLowerCase();
+
+    if (normalizedType === 'audio' || normalizedType === '2') {
+        return `${API_BASE_URL}/api/media?url=${encodeURIComponent(mediaUrl)}`;
+    }
+
+    return mediaUrl;
+}
 
 function normalizeComment(comment: any): PostComment {
     return {
@@ -29,7 +43,7 @@ function normalizePost(dto: any): Post {
         id: String(dto.id),
         content: dto.content ?? null,
         createdAt: dto.createdAt,
-        mediaUrl: dto.mediaUrl ?? null,
+        mediaUrl: buildMediaUrl(dto.mediaUrl ?? null, dto.mediaType ?? null),
         mediaType: dto.mediaType ?? null,
         authorId: String(dto.authorId),
         authorDisplayName: dto.authorDisplayName ?? null,

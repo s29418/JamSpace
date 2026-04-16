@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { ArrowsPointingOutIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { Post } from '../model/types';
 import styles from './PostCard.module.css';
@@ -88,15 +88,28 @@ export const PostCard: React.FC<Props> = ({
             {post.mediaUrl && (
                 <div className={styles.mediaWrap}>
                     {mediaKind === 'image' && (
-                        <img
-                            className={`${styles.image} ${canPreviewMedia ? styles.previewableMedia : ''}`}
-                            src={post.mediaUrl}
-                            alt="Post attachment"
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                setMediaViewerOpen(true);
-                            }}
-                        />
+                        <div
+                            className={styles.imageShell}
+                            onClick={(event) => event.stopPropagation()}
+                        >
+                            <img
+                                className={styles.image}
+                                src={post.mediaUrl}
+                                alt="Post attachment"
+                            />
+
+                            <button
+                                type="button"
+                                className={styles.imagePreviewButton}
+                                aria-label="Open image preview"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    setMediaViewerOpen(true);
+                                }}
+                            >
+                                <ArrowsPointingOutIcon width={18} height={18} />
+                            </button>
+                        </div>
                     )}
                     {mediaKind === 'video' && (
                         <PostVideoPlayer

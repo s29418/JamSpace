@@ -75,12 +75,15 @@ public class AzureBlobStorageService : IFileStorageService
 
         try
         {
-            var response = await blobClient.DownloadStreamingAsync(cancellationToken: ct);
-            var contentType = response.Value.Details.ContentType;
+            var properties = await blobClient.GetPropertiesAsync(cancellationToken: ct);
+            var content = await blobClient.OpenReadAsync(
+                new BlobOpenReadOptions(false),
+                cancellationToken: ct);
+            var contentType = properties.Value.ContentType;
 
             return new StoredFileDownload
             {
-                Content = response.Value.Content,
+                Content = content,
                 ContentType = string.IsNullOrWhiteSpace(contentType)
                     ? "application/octet-stream"
                     : contentType,

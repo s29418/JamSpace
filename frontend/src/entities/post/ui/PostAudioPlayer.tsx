@@ -1,5 +1,12 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { PauseIcon, PlayIcon } from '@heroicons/react/24/solid';
+import {
+    PauseIcon,
+    PlayIcon,
+    SpeakerWaveIcon,
+    SpeakerXMarkIcon,
+    ArrowPathRoundedSquareIcon,
+    ArrowDownTrayIcon,
+} from '@heroicons/react/24/solid';
 import WaveSurfer from 'wavesurfer.js';
 import styles from './PostAudioPlayer.module.css';
 
@@ -8,6 +15,7 @@ type Props = {
 };
 
 const AUDIO_PLAY_EVENT = 'jamspace:audio-player:play';
+const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 function formatAudioTime(seconds: number) {
     if (!Number.isFinite(seconds) || seconds < 0) {
@@ -21,14 +29,24 @@ function formatAudioTime(seconds: number) {
     return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
 }
 
+function formatPlaybackRate(rate: number) {
+    return `${Number(rate.toFixed(2)).toString()}x`;
+}
+
 export const PostAudioPlayer: React.FC<Props> = ({ src }) => {
     const waveformRef = useRef<HTMLDivElement | null>(null);
     const wavesurferRef = useRef<WaveSurfer | null>(null);
+    const rateMenuRef = useRef<HTMLDivElement | null>(null);
     const playerId = useId();
     const [isReady, setIsReady] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(0.9);
+    const [isMuted, setIsMuted] = useState(false);
+    const [playbackRate, setPlaybackRate] = useState(1);
+    const [isRateMenuOpen, setIsRateMenuOpen] = useState(false);
+    const [isLoopEnabled, setIsLoopEnabled] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -41,6 +59,11 @@ export const PostAudioPlayer: React.FC<Props> = ({ src }) => {
         setCurrentTime(0);
         setDuration(0);
         setError(null);
+        setVolume(0.9);
+        setIsMuted(false);
+        setPlaybackRate(1);
+        setIsRateMenuOpen(false);
+        setIsLoopEnabled(false);
 
         const wavesurfer = WaveSurfer.create({
             container: waveformRef.current,
@@ -63,6 +86,9 @@ export const PostAudioPlayer: React.FC<Props> = ({ src }) => {
         });
 
         wavesurferRef.current = wavesurfer;
+        wavesurfer.setVolume(0.9);
+        wavesurfer.setPlaybackRate(1);
+        wavesurfer.getMediaElement().loop = false;
 
         const unsubscribeReady = wavesurfer.on('ready', (audioDuration) => {
             setIsReady(true);
@@ -118,6 +144,17 @@ export const PostAudioPlayer: React.FC<Props> = ({ src }) => {
         };
     }, [playerId, src]);
 
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (!rateMenuRef.current?.contains(event.target as Node)) {
+                setIsRateMenuOpen(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     async function handleTogglePlayback(event: React.MouseEvent<HTMLButtonElement>) {
         event.stopPropagation();
 
@@ -132,6 +169,74 @@ export const PostAudioPlayer: React.FC<Props> = ({ src }) => {
         } catch {
             setError('Failed to control audio playback.');
         }
+    }
+
+    function handleVolumeChange(event: React.ChangeEvent<HTMLInputElement>) {
+        event.stopPropagation();
+
+        const nextVolume = Number(event.target.value);
+        const wavesurfer = wavesurferRef.current;
+
+        setVolume(nextVolume);
+
+        if (!wavesurfer) {
+            return;
+        }
+
+        wavesurfer.setVolume(nextVolume);
+        const muted = nextVolume === 0;
+        wavesurfer.setMuted(muted);
+        setIsMuted(muted);
+    }
+
+    function handleToggleMute(event: React.MouseEvent<HTMLButtonElement>) {
+        event.stopPropagation();
+
+        const wavesurfer = wavesurferRef.current;
+
+        if (!wavesurfer || !isReady) {
+            return;
+        }
+
+        const nextMuted = !isMuted;
+        wavesurfer.setMuted(nextMuted);
+        setIsMuted(nextMuted);
+    }
+
+    function updatePlaybackRate(nextRate: number) {
+        const wavesurfer = wavesurferRef.current;
+
+        if (!wavesurfer || !isReady) {
+            return;
+        }
+
+        wavesurfer.setPlaybackRate(nextRate);
+        setPlaybackRate(nextRate);
+    }
+
+    function handlePlaybackRateSliderChange(event: React.ChangeEvent<HTMLInputElement>) {
+        event.stopPropagation();
+        updatePlaybackRate(Number(event.target.value));
+    }
+
+    function handlePlaybackRatePresetChange(event: React.ChangeEvent<HTMLInputElement>) {
+        event.stopPropagation();
+        updatePlaybackRate(Number(event.target.value));
+        setIsRateMenuOpen(false);
+    }
+
+    function handleToggleLoop(event: React.MouseEvent<HTMLButtonElement>) {
+        event.stopPropagation();
+
+        const wavesurfer = wavesurferRef.current;
+
+        if (!wavesurfer || !isReady) {
+            return;
+        }
+
+        const nextLoopState = !isLoopEnabled;
+        wavesurfer.getMediaElement().loop = nextLoopState;
+        setIsLoopEnabled(nextLoopState);
     }
 
     return (
@@ -160,6 +265,120 @@ export const PostAudioPlayer: React.FC<Props> = ({ src }) => {
                             {isReady ? formatAudioTime(duration) : '--:--'}
                         </span>
                     </div>
+                </div>
+            </div>
+
+            <div className={styles.controlsRow}>
+                <div className={styles.volumeGroup}>
+                    <button
+                        type="button"
+                        className={`${styles.secondaryButton} ${isMuted ? styles.secondaryButtonActive : ''}`}
+                        aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
+                        onClick={handleToggleMute}
+                        disabled={!isReady}
+                    >
+                        {isMuted || volume === 0 ? (
+                            <SpeakerXMarkIcon width={18} height={18} />
+                        ) : (
+                            <SpeakerWaveIcon width={18} height={18} />
+                        )}
+                    </button>
+
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={isMuted ? 0 : volume}
+                        className={styles.volumeSlider}
+                        aria-label="Audio volume"
+                        onChange={handleVolumeChange}
+                        onClick={(event) => event.stopPropagation()}
+                        disabled={!isReady}
+                    />
+                </div>
+
+                <div className={styles.utilityGroup}>
+                    <div
+                        className={styles.rateMenuWrap}
+                        ref={rateMenuRef}
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            className={`${styles.rateMenuButton} ${isRateMenuOpen ? styles.rateMenuButtonOpen : ''}`}
+                            aria-haspopup="dialog"
+                            aria-expanded={isRateMenuOpen}
+                            onClick={() => setIsRateMenuOpen((current) => !current)}
+                            disabled={!isReady}
+                        >
+                            {formatPlaybackRate(playbackRate)}
+                        </button>
+
+                        {isRateMenuOpen && (
+                            <div className={styles.rateMenu}>
+                                <div className={styles.rateSliderBlock}>
+                                    <div className={styles.rateMenuLabel}>Tempo</div>
+                                    <input
+                                        type="range"
+                                        min="0.5"
+                                        max="2"
+                                        step="0.05"
+                                        value={playbackRate}
+                                        className={styles.rateSlider}
+                                        aria-label="Playback speed slider"
+                                        onChange={handlePlaybackRateSliderChange}
+                                    />
+                                    <div className={styles.rateSliderLabels}>
+                                        <span>0.5x</span>
+                                        <span>{formatPlaybackRate(playbackRate)}</span>
+                                        <span>2x</span>
+                                    </div>
+                                </div>
+
+                                <div className={styles.ratePresetGrid} role="radiogroup" aria-label="Playback speed presets">
+                                    {PLAYBACK_RATES.map((rate) => (
+                                        <label
+                                            key={rate}
+                                            className={`${styles.ratePresetLabel} ${
+                                                playbackRate === rate ? styles.ratePresetLabelActive : ''
+                                            }`}
+                                        >
+                                            <input
+                                                type="radio"
+                                                name={`playback-rate-${playerId}`}
+                                                value={rate}
+                                                checked={playbackRate === rate}
+                                                className={styles.ratePresetInput}
+                                                onChange={handlePlaybackRatePresetChange}
+                                            />
+                                            <span>{formatPlaybackRate(rate)}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <button
+                        type="button"
+                        className={`${styles.secondaryButton} ${isLoopEnabled ? styles.secondaryButtonActive : ''}`}
+                        aria-label={isLoopEnabled ? 'Disable loop' : 'Enable loop'}
+                        onClick={handleToggleLoop}
+                        disabled={!isReady}
+                    >
+                        <ArrowPathRoundedSquareIcon width={18} height={18} />
+                    </button>
+
+                    <a
+                        href={src}
+                        download
+                        className={styles.secondaryLinkButton}
+                        aria-label="Download audio"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <ArrowDownTrayIcon width={18} height={18} />
+                    </a>
                 </div>
             </div>
 

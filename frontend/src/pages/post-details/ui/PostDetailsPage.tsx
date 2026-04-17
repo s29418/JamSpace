@@ -1,0 +1,106 @@
+import React, { useEffect } from 'react';
+import { useNavigationType, useParams } from 'react-router-dom';
+import { isApiError } from '../../../shared/api/base';
+import { useToast } from '../../../shared/lib/hooks/useToast';
+import { PostCard } from '../../../entities/post/ui/PostCard';
+import { usePostDetails } from '../../../features/post/model/usePostDetails';
+import { usePostsFeed } from "../../../features/post/model/usePostsFeed";
+import styles from './PostDetailsPage.module.css';
+import {useAuthState} from "../../../shared/lib/hooks/useAuthState";
+import {useNavigate} from "react-router-dom";
+
+const PostDetailsPage = () => {
+    const { id } = useParams<{ id: string }>();
+    const { message, showError, showSuccess } = useToast();
+    const {
+        post,
+        loading,
+        error,
+        toggleLike,
+        toggleRepost,
+        addComment,
+        removeComment,
+    } = usePostDetails(id);
+    const { removePost } = usePostsFeed({ mode: 'auto' });
+
+    const { currentUserId } = useAuthState();
+    const navigate = useNavigate();
+    const navigationType = useNavigationType();
+
+    useEffect(() => {
+        if (navigationType === 'PUSH') {
+            window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        }
+    }, [id, navigationType]);
+
+    async function handleDeletePost(postId: string) {
+        try {
+            await removePost(postId);
+            showSuccess('Post deleted.');
+            navigate('/');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to delete post.');
+        }
+    }
+
+    async function handleToggleLike(targetPost: Parameters<typeof toggleLike>[0]) {
+        try {
+            await toggleLike(targetPost);
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to update like.');
+        }
+    }
+
+    async function handleToggleRepost(targetPost: Parameters<typeof toggleRepost>[0]) {
+        try {
+            await toggleRepost(targetPost);
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to update repost.');
+        }
+    }
+
+    async function handleAddComment(targetPost: Parameters<typeof addComment>[0], content: string) {
+        try {
+            await addComment(targetPost, content);
+        } catch (e) {
+            throw new Error(isApiError(e) ? e.message : 'Failed to add comment.');
+        }
+    }
+
+    async function handleDeleteComment(targetPost: Parameters<typeof removeComment>[0], commentId: string) {
+        try {
+            await removeComment(targetPost, commentId);
+            showSuccess('Comment deleted.');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to delete comment.');
+        }
+    }
+
+    return (
+        <main className={styles.page}>
+            <div className={styles.content}>
+                {message && (
+                    <p style={{ color: message.color, marginBottom: 16 }}>{message.text}</p>
+                )}
+
+                {loading && <div className={styles.message}>Loading post...</div>}
+                {!loading && error && <div className={`${styles.message} ${styles.error}`}>{error}</div>}
+
+                {!loading && !error && post && (
+                    <PostCard
+                        post={post}
+                        enableDetailsNavigation
+                        onToggleLike={handleToggleLike}
+                        onToggleRepost={handleToggleRepost}
+                        onAddComment={handleAddComment}
+                        onDeleteComment={handleDeleteComment}
+                        canDelete={Boolean(currentUserId && post.authorId === currentUserId)}
+                        onDelete={handleDeletePost}
+                    />
+                )}
+            </div>
+        </main>
+    );
+};
+
+export default PostDetailsPage;

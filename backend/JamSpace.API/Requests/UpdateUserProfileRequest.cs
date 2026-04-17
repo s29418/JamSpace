@@ -9,7 +9,6 @@ public class UpdateUserProfileRequest
     public bool SetBio { get; set; }
     public string? Bio { get; set; }
     public bool SetProfilePicture { get; set; }
-    public string? ProfilePictureUrl { get; set; }
     public bool SetLocation { get; set; }
     public LocationDto? Location { get; set; }
     public bool SetEmail { get; set; }

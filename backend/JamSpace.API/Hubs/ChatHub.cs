@@ -39,7 +39,7 @@ public sealed class ChatHub : Hub
             if (!allowed)
                 throw new HubException("FORBIDDEN");
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, ConversationGroup(conversationId));
+            await Groups.AddToGroupAsync(Context.ConnectionId, ConversationGroup(conversationId), ct);
         }
         catch (HubException)
         {

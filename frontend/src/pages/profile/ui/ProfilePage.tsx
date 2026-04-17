@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useNavigationType, useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 import styles from './ProfilePage.module.css';
@@ -15,12 +15,20 @@ import { EditProfilePanel } from '../../../features/user/edit-profile/ui/EditPro
 import { ProfileHeaderCardSkeleton } from "../../../widgets/profile-header/ui/ProfileHeaderCardSkeleton";
 import { getToken, clearToken } from '../../../shared/lib/auth/token';
 import { chatHub } from '../../../shared/lib/realtime/chatHub';
+import { useUserPosts } from '../../../features/post/model/useUserPosts';
+import { PostFeed } from '../../../widgets/post-feed/ui/PostFeed';
+import { useToast } from '../../../shared/lib/hooks/useToast';
+import { isApiError } from '../../../shared/api/base';
+import { PostComposer } from '../../../features/post/ui/PostComposer';
+import { restoreScrollPosition } from '../../../shared/lib/scroll/postDetailsScroll';
 
 type JwtPayload = { sub: string; username: string; email: string };
 
 const ProfilePage: FC = () => {
     const params = useParams<{ id?: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
+    const navigationType = useNavigationType();
 
     const [isLoginView, setIsLoginView] = useState(true);
     const [myId, setMyId] = useState<string | null>(null);
@@ -70,6 +78,24 @@ const ProfilePage: FC = () => {
     } = useProfile(targetUserId);
 
     const [editOpen, setEditOpen] = useState(false);
+    const {
+        posts,
+        loading: postsLoading,
+        error: postsError,
+        addPost,
+        removePost,
+        toggleLike,
+        toggleRepost,
+        addComment,
+        removeComment,
+    } = useUserPosts(targetUserId);
+    const { message, showSuccess, showError } = useToast();
+
+    useEffect(() => {
+        if (navigationType === 'POP' && !loading && !postsLoading) {
+            restoreScrollPosition(`${location.pathname}${location.search}`);
+        }
+    }, [loading, postsLoading, location.pathname, location.search, navigationType]);
 
     if (!params.id && !myId) {
         return (
@@ -148,6 +174,57 @@ const ProfilePage: FC = () => {
         }
     }
 
+    async function handleDeletePost(postId: string) {
+        try {
+            await removePost(postId);
+            showSuccess('Post deleted.');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to delete post.');
+        }
+    }
+
+    async function handleCreatePost(content: string, file?: File | null) {
+        try {
+            await addPost(content, file);
+            showSuccess('Post published.');
+        } catch (e) {
+            throw new Error(isApiError(e) ? e.message : 'Failed to publish post.');
+        }
+    }
+
+    async function handleToggleLike(post: Parameters<typeof toggleLike>[0]) {
+        try {
+            await toggleLike(post);
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to update like.');
+        }
+    }
+
+    async function handleToggleRepost(post: Parameters<typeof toggleRepost>[0]) {
+        try {
+            await toggleRepost(post);
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to update repost.');
+        }
+    }
+
+    async function handleAddComment(post: Parameters<typeof addComment>[0], content: string) {
+        try {
+            await addComment(post, content);
+        } catch (e) {
+            throw new Error(isApiError(e) ? e.message : 'Failed to add comment.');
+        }
+    }
+
+    async function handleDeleteComment(post: Parameters<typeof removeComment>[0], commentId: string) {
+        try {
+            await removeComment(post, commentId);
+            showSuccess('Comment deleted.');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to delete comment.');
+        }
+    }
+
     return (
         <div>
             {error && <p className={styles.error}>{error}</p>}
@@ -155,7 +232,7 @@ const ProfilePage: FC = () => {
 
             <div className={styles.wrapper}>
                 {profile && (
-                    <>
+                    <div className={styles.profileContent}>
                         <ProfileHeaderCard
                             profile={profile}
                             isOwner={isOwner}
@@ -186,7 +263,26 @@ const ProfilePage: FC = () => {
                             onDeleteAccount={handleDeleteAccount}
                             onLogoutAll={handleLogoutAll}
                         />
-                    </>
+
+                        {message && (
+                            <p style={{ color: message.color }}>{message.text}</p>
+                        )}
+
+                        {isOwner && <PostComposer onSubmit={handleCreatePost} />}
+
+                        <PostFeed
+                            posts={posts}
+                            loading={postsLoading}
+                            error={postsError}
+                            emptyText="This user hasn't published any posts yet."
+                            currentUserId={myId}
+                            onDeletePost={isOwner ? handleDeletePost : undefined}
+                            onToggleLike={handleToggleLike}
+                            onToggleRepost={handleToggleRepost}
+                            onAddComment={handleAddComment}
+                            onDeleteComment={handleDeleteComment}
+                        />
+                    </div>
                 )}
             </div>
         </div>

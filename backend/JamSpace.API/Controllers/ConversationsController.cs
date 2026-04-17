@@ -1,4 +1,5 @@
 ﻿using JamSpace.API.Extensions;
+using JamSpace.API.Requests;
 using JamSpace.API.Responses;
 using JamSpace.Application.Common.Models;
 using JamSpace.Application.Features.Conversations.Commands.GetOrCreateDirectConversation;

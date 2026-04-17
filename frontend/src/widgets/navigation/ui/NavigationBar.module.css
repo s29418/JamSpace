@@ -37,6 +37,10 @@
     transition: transform 0.3s;
 }
 
+.specialIcon {
+    /*fill: #26cdd4;*/
+}
+
 .navIcon:hover, .logo:hover {
     transform: scale(1.1);
 }

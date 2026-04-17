@@ -1,3 +1,3 @@
-﻿namespace JamSpace.API.Responses;
+﻿namespace JamSpace.API.Requests;
 
 public sealed record GetOrCreateDirectConversationRequest(Guid OtherUserId);

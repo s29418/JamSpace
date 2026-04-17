@@ -15,8 +15,8 @@ import {
     HomeIcon as HomeSolid,
     UserIcon as UserSolid,
     UsersIcon as UsersSolid,
-    ChatBubbleOvalLeftEllipsisIcon as ChatSolid,
     MagnifyingGlassIcon as SearchSolid,
+    ChatBubbleOvalLeftEllipsisIcon as ChatSolid,
     BellIcon as BellSolid
 } from '@heroicons/react/24/solid';
 
@@ -27,6 +27,7 @@ const NavigationBar = () => {
     const navigate = useNavigate();
 
     const isActive = (path: string) => location.pathname === path;
+
 
     return (
         <nav className={styles.navbar}>
@@ -63,7 +64,7 @@ const NavigationBar = () => {
                 iconSolid={ChatSolid}
                 iconOutline={ChatOutline}
                 path="/chat"
-                active={isActive('/chat-layout')}
+                active={isActive('/chat')}
                 navigate={navigate}
             />
             <NavButton
@@ -97,13 +98,21 @@ const NavButton = ({
     active: boolean;
     navigate: (path: string) => void;
 }) => {
+
     const Icon = active ? Solid : Outline;
+
+    const isSpecialIcon = Solid === SearchSolid
+
     return (
-
         <button onClick={() => navigate(path)} className={styles.navIcon}>
-            <Icon className={styles.navIcon} />
+            <Icon
+                className={`
+                    ${styles.navIcon}
+                    ${isSpecialIcon ? styles.specialIcon : ""}
+                    ${active ? styles.activeIcon : ""}
+                `}
+            />
         </button>
-
     );
 };
 

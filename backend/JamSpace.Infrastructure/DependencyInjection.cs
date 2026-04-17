@@ -23,6 +23,10 @@ public static class DependencyInjection
         services.AddScoped<IUserSearchRepository, UserSearchRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<IPostLikeRepository, PostLikeRepository>();
+        services.AddScoped<IPostCommentRepository, PostCommentRepository>();
         
         services.AddScoped<ITeamRepository, TeamRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
@@ -38,7 +42,7 @@ public static class DependencyInjection
         services.AddScoped<IConversationParticipantRepository, ConversationParticipantRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
 
-        services.AddSingleton(sp =>
+        services.AddSingleton(_ =>
         {
             var conn = config["AzureBlobStorage:ConnectionString"];
             return new BlobServiceClient(conn);

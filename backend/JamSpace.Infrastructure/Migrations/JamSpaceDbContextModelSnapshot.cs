@@ -39,8 +39,8 @@ namespace JamSpace.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LastMessagePreview")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<Guid?>("TeamId")
                         .HasColumnType("uniqueidentifier");
@@ -139,6 +139,129 @@ namespace JamSpace.Infrastructure.Migrations
                     b.HasIndex("ConversationId", "CreatedAt");
 
                     b.ToTable("Message", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.Post", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("OriginalPostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("OriginalPostId");
+
+                    b.HasIndex("AuthorId", "OriginalPostId")
+                        .IsUnique()
+                        .HasFilter("[OriginalPostId] IS NOT NULL");
+
+                    b.ToTable("Post", (string)null);
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.PostComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PostComments");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.PostLike", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PostLikes");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.PostMedia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<long>("Length")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("MediaType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId")
+                        .IsUnique();
+
+                    b.ToTable("PostMedia", (string)null);
                 });
 
             modelBuilder.Entity("JamSpace.Domain.Entities.RefreshToken", b =>
@@ -477,6 +600,73 @@ namespace JamSpace.Infrastructure.Migrations
                     b.Navigation("SenderUser");
                 });
 
+            modelBuilder.Entity("JamSpace.Domain.Entities.Post", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.User", "Author")
+                        .WithMany("Posts")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("JamSpace.Domain.Entities.Post", "OriginalPost")
+                        .WithMany("Reposts")
+                        .HasForeignKey("OriginalPostId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Author");
+
+                    b.Navigation("OriginalPost");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.PostComment", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.Post", "Post")
+                        .WithMany("Comments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JamSpace.Domain.Entities.User", "User")
+                        .WithMany("PostComments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.PostLike", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.Post", "Post")
+                        .WithMany("Likes")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JamSpace.Domain.Entities.User", "User")
+                        .WithMany("PostLikes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("JamSpace.Domain.Entities.PostMedia", b =>
+                {
+                    b.HasOne("JamSpace.Domain.Entities.Post", "Post")
+                        .WithOne("Media")
+                        .HasForeignKey("JamSpace.Domain.Entities.PostMedia", "PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+                });
+
             modelBuilder.Entity("JamSpace.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("JamSpace.Domain.Entities.User", "User")
@@ -653,6 +843,17 @@ namespace JamSpace.Infrastructure.Migrations
                     b.Navigation("UserGenres");
                 });
 
+            modelBuilder.Entity("JamSpace.Domain.Entities.Post", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Likes");
+
+                    b.Navigation("Media");
+
+                    b.Navigation("Reposts");
+                });
+
             modelBuilder.Entity("JamSpace.Domain.Entities.Skill", b =>
                 {
                     b.Navigation("UserSkills");
@@ -670,6 +871,12 @@ namespace JamSpace.Infrastructure.Migrations
                     b.Navigation("Followers");
 
                     b.Navigation("Following");
+
+                    b.Navigation("PostComments");
+
+                    b.Navigation("PostLikes");
+
+                    b.Navigation("Posts");
 
                     b.Navigation("RefreshTokens");
 

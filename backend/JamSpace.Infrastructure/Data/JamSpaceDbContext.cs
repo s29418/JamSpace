@@ -34,6 +34,7 @@ public sealed class JamSpaceDbContext : DbContext
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
     public DbSet<TeamInvite> TeamInvites => Set<TeamInvite>();
+    public DbSet<TeamEvent> TeamEvents => Set<TeamEvent>();
     
     
     public new async Task SaveChangesAsync(CancellationToken ct) => await base.SaveChangesAsync(ct);
@@ -56,6 +57,7 @@ public sealed class JamSpaceDbContext : DbContext
         modelBuilder.ApplyConfiguration(new TeamConfiguration());
         modelBuilder.ApplyConfiguration(new TeamMemberConfiguration());
         modelBuilder.ApplyConfiguration(new TeamInviteConfiguration());
+        modelBuilder.ApplyConfiguration(new TeamEventConfiguration());
     }
     
 }

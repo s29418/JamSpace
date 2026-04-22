@@ -46,7 +46,7 @@ public class CreateTeamEventHandler : IRequestHandler<CreateTeamEventCommand, Te
         await _events.AddAsync(teamEvent, ct);
         await _uow.SaveChangesAsync(ct);
 
-        var teamEventDb = await _events.GetById(eventId, ct);
+        var teamEventDb = await _events.GetByIdAsync(eventId, ct);
 
         return TeamEventMapper.ToDto(teamEventDb!);
     }

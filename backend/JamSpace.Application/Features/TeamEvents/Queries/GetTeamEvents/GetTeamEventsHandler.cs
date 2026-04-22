@@ -7,7 +7,7 @@ using MediatR;
 
 namespace JamSpace.Application.Features.TeamEvents.Queries.GetTeamEvents;
 
-public class GetTeamEventsHandler : IRequestHandler<GetTeamEventsQuery, List<TeamEventDto>>
+public class GetTeamEventsHandler : IRequestHandler<GetTeamEventsQuery, IReadOnlyList<TeamEventDto>>
 {
     private readonly ITeamEventRepository _events;
     private readonly ITeamMemberRepository _members;
@@ -18,7 +18,7 @@ public class GetTeamEventsHandler : IRequestHandler<GetTeamEventsQuery, List<Tea
         _members = members;
     }
 
-    public async Task<List<TeamEventDto>> Handle(GetTeamEventsQuery request, CancellationToken ct)
+    public async Task<IReadOnlyList<TeamEventDto>> Handle(GetTeamEventsQuery request, CancellationToken ct)
     {
         var isParticipant =
             await _members.HasRequiredRoleAsync(request.TeamId, request.RequestingUserId, FunctionalRole.Member, ct);
@@ -26,11 +26,8 @@ public class GetTeamEventsHandler : IRequestHandler<GetTeamEventsQuery, List<Tea
         if (!isParticipant)
             throw new ForbiddenAccessException("You are not part of this team");
 
-        var events = await _events.GetTeamEvents(request.TeamId, request.From, request.To, ct);
-
-        if (events.Count == 0)
-            return new List<TeamEventDto>();
-
+        var events = await _events.GetTeamEventsAsync(request.TeamId, request.From, request.To, ct);
+        
         return events
             .Select(TeamEventMapper.ToDto)
             .ToList();

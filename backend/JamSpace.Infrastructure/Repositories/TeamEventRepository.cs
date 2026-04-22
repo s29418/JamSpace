@@ -14,17 +14,18 @@ public class TeamEventRepository : ITeamEventRepository
         _db = db;
     }
     
-    public async Task<TeamEvent?> GetById(Guid eventId, CancellationToken ct)
+    public async Task<TeamEvent?> GetByIdAsync(Guid eventId, CancellationToken ct)
     {
         return await _db.TeamEvents
             .Include(e => e.CreatedBy)
             .FirstOrDefaultAsync(e => e.Id == eventId, ct);
     }
 
-    public async Task<IReadOnlyList<TeamEvent>> GetTeamEvents(Guid teamId, DateTimeOffset from, DateTimeOffset to, 
+    public async Task<IReadOnlyList<TeamEvent>> GetTeamEventsAsync(Guid teamId, DateTimeOffset from, DateTimeOffset to, 
         CancellationToken ct)
     {
         return await _db.TeamEvents
+            .Include(e => e.CreatedBy)
             .Where(e => e.TeamId == teamId &&
                         e.StartDateTime >= from &&
                         e.StartDateTime < to)
@@ -32,7 +33,7 @@ public class TeamEventRepository : ITeamEventRepository
             .ToListAsync(ct);
     }
 
-    public async Task<bool> WasEventCreatedByUser(Guid eventId, Guid userId, CancellationToken ct)
+    public async Task<bool> WasEventCreatedByUserAsync(Guid eventId, Guid userId, CancellationToken ct)
     {
         return await _db.TeamEvents
             .AnyAsync(e => e.Id == eventId && e.CreatedById == userId, ct);

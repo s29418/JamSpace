@@ -21,16 +21,16 @@ public class DeleteTeamEventHandler : IRequestHandler<DeleteTeamEventCommand, Un
 
     public async Task<Unit> Handle(DeleteTeamEventCommand request, CancellationToken ct)
     {
+        var teamEvent = await _events.GetByIdAsync(request.EventId, ct);
+        if (teamEvent is null || teamEvent.TeamId != request.TeamId)
+            throw new NotFoundException("Event not found.");
+        
         var isParticipant =
             await _members.HasRequiredRoleAsync(request.TeamId, request.RequestingUserId, FunctionalRole.Member, ct);
         if (!isParticipant)
             throw new ForbiddenAccessException("You are not part of this team.");
 
-        var teamEvent = await _events.GetById(request.EventId, ct);
-        if (teamEvent is null)
-            throw new NotFoundException("Event not found.");
-
-        var canDelete = await _events.WasEventCreatedByUser(request.EventId, request.RequestingUserId, ct) ||
+        var canDelete = await _events.WasEventCreatedByUserAsync(request.EventId, request.RequestingUserId, ct) ||
                         await _members.HasRequiredRoleAsync(request.TeamId, request.RequestingUserId,
                             FunctionalRole.Admin, ct);
         if (!canDelete)

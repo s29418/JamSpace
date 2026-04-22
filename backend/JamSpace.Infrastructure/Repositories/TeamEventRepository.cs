@@ -17,6 +17,7 @@ public class TeamEventRepository : ITeamEventRepository
     public async Task<TeamEvent?> GetById(Guid eventId, CancellationToken ct)
     {
         return await _db.TeamEvents
+            .Include(e => e.CreatedBy)
             .FirstOrDefaultAsync(e => e.Id == eventId, ct);
     }
 
@@ -26,7 +27,7 @@ public class TeamEventRepository : ITeamEventRepository
         return await _db.TeamEvents
             .Where(e => e.TeamId == teamId &&
                         e.StartDateTime >= from &&
-                        e.StartDateTime <= to)
+                        e.StartDateTime < to)
             .OrderBy(e => e.StartDateTime)
             .ToListAsync(ct);
     }

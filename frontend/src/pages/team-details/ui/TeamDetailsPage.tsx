@@ -6,6 +6,7 @@ import { getCurrentUserId } from '../../../shared/lib/auth/token';
 import TeamSettingsModal from '../../../widgets/team-settings/ui/TeamSettingsModal';
 import { CogIcon as SettingsIcon } from '@heroicons/react/24/outline';
 import { useTeam } from '../../../features/team/manage-team/model/useTeam';
+import TeamCalendar from '../../../widgets/team-calendar/ui/TeamCalendar';
 
 const TeamDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -42,6 +43,8 @@ const TeamDetailsPage = () => {
                     </button>
                 </div>
             </div>
+
+            <TeamCalendar teamId={team.id} />
 
             {showModal && (
                 <TeamSettingsModal

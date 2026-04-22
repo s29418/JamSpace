@@ -328,3 +328,9 @@
     padding-bottom: 16px;
     font-style: italic;
 }
+
+@media (max-width: 900px) {
+    .wrapper {
+        padding: 32px 24px;
+    }
+}

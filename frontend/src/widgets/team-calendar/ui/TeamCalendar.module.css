@@ -1,0 +1,273 @@
+.calendarPanel {
+    width: min(100%, 980px);
+    margin-top: 40px;
+    padding: 24px 18px 26px;
+    border: 1px solid #5f5f5f;
+    border-radius: 24px;
+    background: #1b1b1b;
+}
+
+.calendarTopBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 36px;
+}
+
+.calendarTitle {
+    color: #f5f5f5;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.addEventButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 1px solid #26cdd4;
+    border-radius: 8px;
+    background: transparent;
+    color: #26cdd4;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.addEventButton:hover {
+    background-color: rgba(38, 205, 212, 0.12);
+}
+
+.buttonIcon {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+}
+
+.weekHeader {
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.weekTitle {
+    color: #f3f3f3;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+}
+
+.weekNavButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #26cdd4;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.weekNavButton:hover {
+    background-color: rgba(38, 205, 212, 0.12);
+}
+
+.weekNavIcon {
+    width: 34px;
+    height: 34px;
+    stroke-width: 1.8;
+}
+
+.daysGrid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.dayButton {
+    display: flex;
+    min-width: 0;
+    height: 78px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0 8px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #f4f4f4;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.dayButton:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.dayButtonActive .dayNumber,
+.dayButtonToday:not(.dayButtonActive) .dayNumber {
+    background: rgba(38, 205, 212, 0.42);
+    color: #26cdd4;
+}
+
+.dayName {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.dayNumber {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    height: 30px;
+    padding: 0 9px;
+    border-radius: 12px;
+    color: #f3f3f3;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.eventsList {
+    display: flex;
+    min-height: 72px;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.eventCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 72px;
+    padding: 10px 14px 10px 18px;
+    border: 1px solid #26cdd4;
+    border-radius: 8px;
+    background: rgba(38, 205, 212, 0.46);
+    color: #f7f7f7;
+}
+
+.eventDetails {
+    min-width: 0;
+}
+
+.eventTitle {
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.eventTime {
+    margin-top: 6px;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 22px;
+    line-height: 1.1;
+}
+
+.eventActions {
+    display: flex;
+    width: 96px;
+    flex: 0 0 96px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.eventActionButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 26px;
+    border: 1px solid #26cdd4;
+    border-radius: 10px;
+    background: rgba(18, 18, 18, 0.16);
+    color: #26cdd4;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.eventActionButton:hover {
+    background: rgba(18, 18, 18, 0.34);
+}
+
+.eventActionIcon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+}
+
+.calendarNote,
+.calendarError {
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 18px;
+}
+
+.calendarError {
+    border-color: rgba(255, 102, 102, 0.45);
+    color: #ff9b9b;
+}
+
+@media (max-width: 900px) {
+    .calendarPanel {
+        padding: 22px 14px;
+    }
+
+    .calendarTopBar {
+        align-items: flex-start;
+        flex-direction: column;
+        margin-bottom: 28px;
+    }
+
+    .daysGrid {
+        gap: 4px;
+    }
+
+    .dayName {
+        font-size: 15px;
+    }
+
+    .dayNumber {
+        min-width: 32px;
+        height: 28px;
+        font-size: 18px;
+    }
+
+    .eventCard {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .eventActions {
+        width: 100%;
+        flex-direction: row;
+        flex-basis: auto;
+    }
+
+    .eventActionButton {
+        flex: 1;
+    }
+}

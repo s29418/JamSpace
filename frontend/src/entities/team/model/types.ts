@@ -17,6 +17,33 @@ export interface Team {
     members: TeamMember[];
 }
 
+export interface TeamEvent {
+    id: string;
+    teamId: string;
+    createdById: string;
+    createdByDisplayName: string;
+    createdByAvatarUrl?: string | null;
+    title: string;
+    description?: string | null;
+    startDateTime: string;
+    durationMinutes: number;
+    createdAt: string;
+}
+
+export interface CreateTeamEventRequest {
+    title: string;
+    description?: string | null;
+    startDateTime: string;
+    durationMinutes: number;
+}
+
+export interface EditTeamEventRequest {
+    title?: string | null;
+    description?: string | null;
+    startDateTime?: string | null;
+    durationMinutes?: number | null;
+}
+
 export type InviteStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Cancelled';
 
 export interface TeamInvite {

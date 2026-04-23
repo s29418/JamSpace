@@ -1,7 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import styles from '../TeamSettingsModal.module.css';
 import { EditableTeamName } from './EditableTeamName';
 import {TrashIcon, ArrowRightStartOnRectangleIcon} from '@heroicons/react/24/outline';
+import ConfirmDialog from 'shared/ui/confirm-dialog/ConfirmDialog';
 
 type Props = {
     teamName: string;
@@ -31,13 +32,6 @@ export const TeamHeader: React.FC<Props> = ({
                                                 className,
                                             }) => {
     const [confirm, setConfirm] = useState<null | { type: 'delete' | 'leave' }>(null);
-
-    useEffect(() => {
-        if (!confirm) return;
-        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setConfirm(null); };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [confirm]);
 
     return (
         <header className={className}>
@@ -70,50 +64,20 @@ export const TeamHeader: React.FC<Props> = ({
             />
 
 
-            {confirm && (
-                <div
-                    id="confirm-dialog"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label={confirm.type === 'delete' ? 'Confirm delete team' : 'Confirm leave team'}
-                    className={styles.confirmBackdrop}
-                    onClick={() => setConfirm(null)}
-                >
-                    <div
-                        className={styles.confirmBody}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <p className={styles.confirmContent}>
-                            {confirm.type === 'delete'
-                                ? 'Are you sure you want to delete this team?'
-                                : 'Are you sure you want to leave this team?'}
-                        </p>
-
-                        <div className={styles.editButtonsRow}>
-                            <button
-                                type="button"
-                                className={styles.nameActionButton}
-                                onClick={async () => {
-                                    if (confirm.type === 'delete') await onDeleteTeam?.();
-                                    if (confirm.type === 'leave') await onLeaveTeam?.();
-                                    setConfirm(null);
-                                }}
-                                aria-label="Confirm action"
-                            >
-                                Confirm
-                            </button>
-                            <button
-                                type="button"
-                                className={styles.nameActionButton}
-                                onClick={() => setConfirm(null)}
-                                aria-label="Cancel action"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmDialog
+                isOpen={!!confirm}
+                message={
+                    confirm?.type === 'delete'
+                        ? 'Are you sure you want to delete this team?'
+                        : 'Are you sure you want to leave this team?'
+                }
+                onConfirm={async () => {
+                    if (confirm?.type === 'delete') await onDeleteTeam?.();
+                    if (confirm?.type === 'leave') await onLeaveTeam?.();
+                    setConfirm(null);
+                }}
+                onCancel={() => setConfirm(null)}
+            />
         </header>
     );
 };

@@ -1,0 +1,58 @@
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.body {
+    width: min(400px, 92vw);
+    padding: 16px;
+    border-radius: 16px;
+    background: #0c0c0c;
+    color: #ffffff;
+}
+
+.title {
+    margin: 0 0 8px;
+    color: #ffffff;
+    font-size: 22px;
+    line-height: 1.15;
+}
+
+.content {
+    margin-bottom: 16px;
+    color: #aaaaaa;
+    font-size: 16px;
+    line-height: 1.35;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.actionButton {
+    align-self: flex-start;
+    padding: 4px 12px;
+    border: 1px solid #26cdd4;
+    border-radius: 12px;
+    background-color: transparent;
+    color: #26cdd4;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.actionButton:hover {
+    background-color: #26cdd41f;
+}
+
+.actionButton:disabled {
+    cursor: default;
+    opacity: 0.62;
+}

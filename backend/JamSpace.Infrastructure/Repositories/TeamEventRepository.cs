@@ -24,13 +24,19 @@ public class TeamEventRepository : ITeamEventRepository
     public async Task<IReadOnlyList<TeamEvent>> GetTeamEventsAsync(Guid teamId, DateTimeOffset from, DateTimeOffset to, 
         CancellationToken ct)
     {
-        return await _db.TeamEvents
+        var earliestPossibleStart = from.AddHours(-24);
+        
+        var candidates = await _db.TeamEvents
             .Include(e => e.CreatedBy)
             .Where(e => e.TeamId == teamId &&
-                        e.StartDateTime >= from &&
-                        e.StartDateTime < to)
+                        e.StartDateTime < to &&
+                        e.StartDateTime > earliestPossibleStart)
             .OrderBy(e => e.StartDateTime)
             .ToListAsync(ct);
+
+        return candidates
+            .Where(e => e.StartDateTime.AddMinutes(e.DurationMinutes) > from)
+            .ToList();
     }
 
     public async Task<bool> WasEventCreatedByUserAsync(Guid eventId, Guid userId, CancellationToken ct)

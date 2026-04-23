@@ -44,7 +44,9 @@ const TeamDetailsPage = () => {
                 </div>
             </div>
 
-            <TeamCalendar teamId={team.id} />
+            <TeamCalendar
+                teamId={team.id}
+            />
 
             {showModal && (
                 <TeamSettingsModal

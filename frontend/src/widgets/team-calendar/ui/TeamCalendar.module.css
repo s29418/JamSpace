@@ -231,6 +231,284 @@
     color: #ff9b9b;
 }
 
+.formOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(10, 10, 10, 0.68);
+}
+
+.eventForm {
+    width: min(100%, 760px);
+    padding: 22px;
+    border: 1px solid #5f5f5f;
+    border-radius: 18px;
+    background: #202020;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+}
+
+.formHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.formTitle {
+    color: #f5f5f5;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.closeButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #26cdd4;
+    border-radius: 50%;
+    background: transparent;
+    color: #26cdd4;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+    background: rgba(38, 205, 212, 0.12);
+}
+
+.closeIcon {
+    width: 20px;
+    height: 20px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.fieldLabel {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.input,
+.textarea,
+.select {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 10px;
+    background: #161616;
+    color: #f8f8f8;
+    font: inherit;
+    font-size: 18px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input {
+    min-height: 44px;
+    padding: 0 12px;
+}
+
+.select {
+    min-height: 44px;
+    padding: 0 12px;
+    cursor: pointer;
+}
+
+.textarea {
+    min-height: 108px;
+    resize: vertical;
+    padding: 10px 12px;
+    line-height: 1.35;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+    border-color: #26cdd4;
+    box-shadow: 0 0 0 3px rgba(38, 205, 212, 0.14);
+}
+
+.dateTimePicker {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(190px, 0.65fr);
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.datePickerPanel,
+.timePickerPanel {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 14px;
+    background: #181818;
+}
+
+.datePickerPanel {
+    padding: 14px;
+}
+
+.timePickerPanel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px;
+}
+
+.monthHeader {
+    display: grid;
+    grid-template-columns: 36px 1fr 36px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.monthLabel {
+    color: #f5f5f5;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.monthNavButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #26cdd4;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.monthNavButton:hover {
+    background: rgba(38, 205, 212, 0.12);
+}
+
+.monthNavIcon {
+    width: 22px;
+    height: 22px;
+}
+
+.monthWeekdays,
+.monthGrid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.monthWeekdays {
+    margin-bottom: 6px;
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.monthGrid {
+    gap: 5px;
+}
+
+.monthDayButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    min-width: 0;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.monthDayButton:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.monthDayButtonSelected {
+    border-color: #26cdd4;
+    background: rgba(38, 205, 212, 0.28);
+    color: #26cdd4;
+}
+
+.monthDayButtonToday:not(.monthDayButtonSelected) {
+    border-color: rgba(38, 205, 212, 0.45);
+}
+
+.monthDayButtonMuted {
+    color: rgba(255, 255, 255, 0.34);
+}
+
+.formError {
+    margin: 2px 0 14px;
+    color: #ff9b9b;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.primaryButton,
+.secondaryButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.primaryButton {
+    border: 1px solid #26cdd4;
+    background: rgba(38, 205, 212, 0.22);
+    color: #26cdd4;
+}
+
+.secondaryButton {
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.primaryButton:hover {
+    background: rgba(38, 205, 212, 0.32);
+}
+
+.secondaryButton:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+    cursor: default;
+    opacity: 0.62;
+}
+
 @media (max-width: 900px) {
     .calendarPanel {
         padding: 22px 14px;
@@ -269,5 +547,36 @@
 
     .eventActionButton {
         flex: 1;
+    }
+
+    .eventForm {
+        padding: 18px;
+    }
+
+    .dateTimePicker {
+        grid-template-columns: 1fr;
+    }
+
+    .timePickerPanel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding-bottom: 0;
+    }
+
+    .formActions {
+        flex-direction: column-reverse;
+    }
+
+    .primaryButton,
+    .secondaryButton {
+        width: 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    .timePickerPanel {
+        display: block;
+        padding-bottom: 0;
     }
 }

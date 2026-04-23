@@ -1,15 +1,15 @@
-﻿using FluentValidation;
+using FluentValidation;
 
-namespace JamSpace.Application.Features.TeamEvents.Commands.Create;
+namespace JamSpace.Application.Features.TeamEvents.Commands.Edit;
 
-public class CreateTeamEventCommandValidator : AbstractValidator<CreateTeamEventCommand>
+public class EditTeamEventCommandValidator : AbstractValidator<EditTeamEventCommand>
 {
-    public CreateTeamEventCommandValidator()
+    public EditTeamEventCommandValidator()
     {
         RuleFor(x => x.Title)
-            .NotEmpty()
             .MinimumLength(2)
             .MaximumLength(50)
+            .When(x => !string.IsNullOrWhiteSpace(x.Title))
             .WithMessage("Title must be between 2 and 50 characters long.");
 
         RuleFor(x => x.Description)
@@ -18,14 +18,17 @@ public class CreateTeamEventCommandValidator : AbstractValidator<CreateTeamEvent
 
         RuleFor(x => x.DurationMinutes)
             .GreaterThanOrEqualTo(5)
+            .When(x => x.DurationMinutes is not null)
             .WithMessage("Duration of an event must be at least 5 minutes long.");
-        
+
         RuleFor(x => x.DurationMinutes)
             .LessThanOrEqualTo(1440)
+            .When(x => x.DurationMinutes is not null)
             .WithMessage("Duration of an event cannot exceed 24 hours.");
 
         RuleFor(x => x.StartDateTime)
             .GreaterThan(DateTimeOffset.UtcNow)
+            .When(x => x.StartDateTime is not null)
             .WithMessage("Event must take place in the future.");
     }
 }

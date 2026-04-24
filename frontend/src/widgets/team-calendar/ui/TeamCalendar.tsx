@@ -269,7 +269,8 @@ const TeamCalendar = ({ teamId }: Props) => {
     return (
         <section className={styles.calendarPanel}>
             <div className={styles.calendarTopBar}>
-                <h2 className={styles.calendarTitle}>Calendar</h2>
+                {/*<h2 className={styles.calendarTitle}>Calendar</h2>*/}
+                <h2 className={styles.calendarTitle}></h2>
                 <button type="button" className={styles.addEventButton} onClick={openCreateForm}>
                     <PlusIcon className={styles.buttonIcon} />
                     Add Event

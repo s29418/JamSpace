@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
     ChevronLeftIcon,
     ChevronRightIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
     CogIcon as SettingsIcon,
     PlusIcon,
     XMarkIcon,
@@ -95,6 +98,9 @@ const getDefaultEventStart = (selectedDay: Date | null, visibleWeekStart: Date) 
 const getErrorMessage = (error: unknown, fallback: string) =>
     isApiError(error) ? (error as ApiError).message : fallback;
 
+const getAvatarFallback = (displayName: string) =>
+    displayName.trim().charAt(0).toUpperCase() || '?';
+
 const TeamCalendar = ({ teamId }: Props) => {
     const today = useMemo(() => new Date(), []);
     const [visibleWeekStart, setVisibleWeekStart] = useState(() => startOfWeek(today));
@@ -110,6 +116,7 @@ const TeamCalendar = ({ teamId }: Props) => {
     const [saving, setSaving] = useState(false);
     const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
     const [eventToDelete, setEventToDelete] = useState<TeamEvent | null>(null);
+    const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
     const {
         events,
         loading: eventsLoading,
@@ -269,8 +276,7 @@ const TeamCalendar = ({ teamId }: Props) => {
     return (
         <section className={styles.calendarPanel}>
             <div className={styles.calendarTopBar}>
-                {/*<h2 className={styles.calendarTitle}>Calendar</h2>*/}
-                <h2 className={styles.calendarTitle}></h2>
+                <div className={styles.calendarTitleSpacer} aria-hidden="true" />
                 <button type="button" className={styles.addEventButton} onClick={openCreateForm}>
                     <PlusIcon className={styles.buttonIcon} />
                     Add Event
@@ -397,34 +403,100 @@ const TeamCalendar = ({ teamId }: Props) => {
                     <p className={styles.calendarNote}>No events in this range.</p>
                 )}
                 {!eventsLoading && !eventsError && events.map(event => (
-                    <article className={styles.eventCard} key={event.id}>
-                        <div className={styles.eventDetails}>
-                            <h4 className={styles.eventTitle}>{event.title}</h4>
-                            <p className={styles.eventTime}>
-                                {formatEventTimeRange(event, selectedDay)}
-                            </p>
+                    <article
+                        className={[
+                            styles.eventCard,
+                            expandedEventId === event.id ? styles.eventCardExpanded : '',
+                        ].filter(Boolean).join(' ')}
+                        key={event.id}
+                    >
+                        <div className={styles.eventRow}>
+                            <div className={styles.eventDetails}>
+                                <h4 className={styles.eventTitle}>{event.title}</h4>
+                                <p className={styles.eventTime}>
+                                    {formatEventTimeRange(event, selectedDay)}
+                                </p>
+                            </div>
+
+                            <div className={styles.eventActions}>
+                                <button
+                                    type="button"
+                                    className={styles.eventActionButton}
+                                    onClick={() => openEditForm(event)}
+                                    disabled={deletingEventId === event.id}
+                                >
+                                    <SettingsIcon className={styles.eventActionIcon} />
+                                    Edit
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.eventActionButton}
+                                    onClick={() => setEventToDelete(event)}
+                                    disabled={deletingEventId === event.id}
+                                >
+                                    <XMarkIcon className={styles.eventActionIcon} />
+                                    {deletingEventId === event.id ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
                         </div>
 
-                        <div className={styles.eventActions}>
-                            <button
-                                type="button"
-                                className={styles.eventActionButton}
-                                onClick={() => openEditForm(event)}
-                                disabled={deletingEventId === event.id}
-                            >
-                                <SettingsIcon className={styles.eventActionIcon} />
-                                Edit
-                            </button>
-                            <button
-                                type="button"
-                                className={styles.eventActionButton}
-                                onClick={() => setEventToDelete(event)}
-                                disabled={deletingEventId === event.id}
-                            >
-                                <XMarkIcon className={styles.eventActionIcon} />
-                                {deletingEventId === event.id ? 'Deleting...' : 'Delete'}
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            className={styles.eventExpandButton}
+                            onClick={() => setExpandedEventId(prev => prev === event.id ? null : event.id)}
+                            aria-expanded={expandedEventId === event.id}
+                            aria-label={expandedEventId === event.id ? 'Hide event details' : 'Show event details'}
+                        >
+                            {expandedEventId === event.id
+                                ? <ChevronUpIcon className={styles.eventExpandIcon} />
+                                : <ChevronDownIcon className={styles.eventExpandIcon} />}
+                        </button>
+
+                        {expandedEventId === event.id && (
+                            <div className={styles.eventMeta}>
+                                <div className={styles.eventMetaMain}>
+                                    <div className={styles.eventCreator}>
+                                        <Link
+                                            to={`/profile/${event.createdById}`}
+                                            className={styles.eventCreatorLink}
+                                            aria-label={`Open ${event.createdByDisplayName} profile`}
+                                        >
+                                            {event.createdByAvatarUrl ? (
+                                                <img
+                                                    src={event.createdByAvatarUrl}
+                                                    alt={event.createdByDisplayName}
+                                                    className={styles.eventCreatorAvatar}
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                />
+                                            ) : (
+                                                <div className={styles.eventCreatorFallback}>
+                                                    {getAvatarFallback(event.createdByDisplayName)}
+                                                </div>
+                                            )}
+                                        </Link>
+
+                                        <div className={styles.eventCreatorText}>
+                                            <span className={styles.eventCreatorLabel}>Created by</span>
+                                            <Link
+                                                to={`/profile/${event.createdById}`}
+                                                className={styles.eventCreatorNameLink}
+                                            >
+                                                <span className={styles.eventCreatorName}>{event.createdByDisplayName}</span>
+                                            </Link>
+                                        </div>
+                                    </div>
+
+
+                                    {event.description && (
+                                        <div className={styles.eventDescriptionBox}>
+                                            <p className={styles.eventCreatorLabel}>Description:</p>
+                                            <p className={styles.eventDescription}>{event.description}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </article>
                 ))}
             </div>

@@ -7,6 +7,7 @@ import TeamSettingsModal from '../../../widgets/team-settings/ui/TeamSettingsMod
 import { CogIcon as SettingsIcon } from '@heroicons/react/24/outline';
 import { useTeam } from '../../../features/team/manage-team/model/useTeam';
 import TeamCalendar from '../../../widgets/team-calendar/ui/TeamCalendar';
+import TeamChat from '../../../widgets/team-chat/ui/TeamChat';
 
 const TeamDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -47,6 +48,8 @@ const TeamDetailsPage = () => {
             <TeamCalendar
                 teamId={team.id}
             />
+
+            <TeamChat teamId={team.id} />
 
             {showModal && (
                 <TeamSettingsModal

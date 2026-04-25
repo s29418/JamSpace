@@ -1,0 +1,58 @@
+.section {
+    width: min(100%, 980px);
+    margin-top: 40px;
+}
+
+.title {
+    margin: 0 0 18px;
+    color: #f5f5f5;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.1;
+}
+
+.chatSurface {
+    min-height: 680px;
+}
+
+.chatSurface :global(section) {
+    min-height: 680px;
+}
+
+.note,
+.error {
+    display: grid;
+    min-height: 680px;
+    place-items: center;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 34px;
+    background: rgba(255, 255, 255, 0.01);
+    font-size: 20px;
+    text-align: center;
+}
+
+.note {
+    color: rgba(255, 255, 255, 0.56);
+}
+
+.error {
+    color: #ff9b9b;
+}
+
+@media (max-width: 900px) {
+    .section {
+        margin-top: 32px;
+    }
+
+    .title {
+        font-size: 24px;
+    }
+
+    .chatSurface,
+    .chatSurface :global(section),
+    .note,
+    .error {
+        min-height: 560px;
+    }
+}

@@ -8,9 +8,10 @@ import {
     CogIcon as SettingsIcon,
     PlusIcon,
     XMarkIcon,
+    TrashIcon,
 } from '@heroicons/react/24/outline';
 import { useTeamEvents } from 'features/team/team-events/model/useTeamEvents';
-import type { TeamEvent } from 'entities/team/model/types';
+import type { TeamEvent, TeamRoleLabel } from 'entities/team/model/types';
 import { ApiError, isApiError } from 'shared/api/base';
 import ConfirmDialog from 'shared/ui/confirm-dialog/ConfirmDialog';
 import styles from './TeamCalendar.module.css';
@@ -18,6 +19,8 @@ import DateTimeRangePicker from './DateTimeRangePicker';
 
 type Props = {
     teamId: string;
+    currentUserId: string;
+    currentUserRole: TeamRoleLabel;
 };
 
 const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -101,7 +104,7 @@ const getErrorMessage = (error: unknown, fallback: string) =>
 const getAvatarFallback = (displayName: string) =>
     displayName.trim().charAt(0).toUpperCase() || '?';
 
-const TeamCalendar = ({ teamId }: Props) => {
+const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
     const today = useMemo(() => new Date(), []);
     const [visibleWeekStart, setVisibleWeekStart] = useState(() => startOfWeek(today));
     const [selectedDay, setSelectedDay] = useState<Date | null>(() => startOfDay(today));
@@ -273,6 +276,13 @@ const TeamCalendar = ({ teamId }: Props) => {
         }
     };
 
+    const canEditEvent = (teamEvent: TeamEvent) => teamEvent.createdById === currentUserId;
+
+    const canDeleteEvent = (teamEvent: TeamEvent) =>
+        teamEvent.createdById === currentUserId ||
+        currentUserRole === 'Admin' ||
+        currentUserRole === 'Leader';
+
     return (
         <section className={styles.calendarPanel}>
             <div className={styles.calendarTopBar}>
@@ -284,8 +294,16 @@ const TeamCalendar = ({ teamId }: Props) => {
             </div>
 
             {isFormOpen && (
-                <div className={styles.formOverlay} role="presentation">
-                    <form className={styles.eventForm} onSubmit={handleEventSubmit}>
+                <div
+                    className={styles.formOverlay}
+                    role="presentation"
+                    onClick={closeEventForm}
+                >
+                    <form
+                        className={styles.eventForm}
+                        onSubmit={handleEventSubmit}
+                        onClick={(event) => event.stopPropagation()}
+                    >
                         <div className={styles.formHeader}>
                             <h3 className={styles.formTitle}>{editingEvent ? 'Edit Event' : 'Add Event'}</h3>
                             <button
@@ -321,7 +339,7 @@ const TeamCalendar = ({ teamId }: Props) => {
                         )}
 
                         <label className={styles.field}>
-                            <span className={styles.fieldLabel}>Description</span>
+                            <span className={styles.fieldLabel}>Description  (optional)</span>
                             <textarea
                                 className={styles.textarea}
                                 value={description}
@@ -402,7 +420,12 @@ const TeamCalendar = ({ teamId }: Props) => {
                 {!eventsLoading && !eventsError && events.length === 0 && (
                     <p className={styles.calendarNote}>No events in this range.</p>
                 )}
-                {!eventsLoading && !eventsError && events.map(event => (
+                {!eventsLoading && !eventsError && events.map(event => {
+                    const canEdit = canEditEvent(event);
+                    const canDelete = canDeleteEvent(event);
+                    const showActions = canEdit || canDelete;
+
+                    return (
                     <article
                         className={[
                             styles.eventCard,
@@ -418,26 +441,32 @@ const TeamCalendar = ({ teamId }: Props) => {
                                 </p>
                             </div>
 
-                            <div className={styles.eventActions}>
-                                <button
-                                    type="button"
-                                    className={styles.eventActionButton}
-                                    onClick={() => openEditForm(event)}
-                                    disabled={deletingEventId === event.id}
-                                >
-                                    <SettingsIcon className={styles.eventActionIcon} />
-                                    Edit
-                                </button>
-                                <button
-                                    type="button"
-                                    className={styles.eventActionButton}
-                                    onClick={() => setEventToDelete(event)}
-                                    disabled={deletingEventId === event.id}
-                                >
-                                    <XMarkIcon className={styles.eventActionIcon} />
-                                    {deletingEventId === event.id ? 'Deleting...' : 'Delete'}
-                                </button>
-                            </div>
+                            {showActions && (
+                                <div className={styles.eventActions}>
+                                    {canEdit && (
+                                        <button
+                                            type="button"
+                                            className={styles.eventActionButton}
+                                            onClick={() => openEditForm(event)}
+                                            disabled={deletingEventId === event.id}
+                                        >
+                                            <SettingsIcon className={styles.eventActionIcon} />
+                                            Edit
+                                        </button>
+                                    )}
+                                    {canDelete && (
+                                        <button
+                                            type="button"
+                                            className={styles.deleteButton}
+                                            onClick={() => setEventToDelete(event)}
+                                            disabled={deletingEventId === event.id}
+                                        >
+                                            <TrashIcon className={styles.eventActionIcon} />
+                                            {deletingEventId === event.id ? 'Deleting...' : 'Delete'}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <button
@@ -498,7 +527,8 @@ const TeamCalendar = ({ teamId }: Props) => {
                             </div>
                         )}
                     </article>
-                ))}
+                    );
+                })}
             </div>
 
             <ConfirmDialog

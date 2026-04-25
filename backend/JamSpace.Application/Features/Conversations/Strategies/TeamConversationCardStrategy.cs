@@ -17,6 +17,7 @@ public sealed class TeamConversationCardStrategy : IConversationCardStrategy
         {
             Id = conversation.Id,
             Type = ChatType.Team,
+            TeamId = conversation.TeamId,
             DisplayName = conversation.Team.Name,
             DisplayPictureUrl = conversation.Team.TeamPictureUrl,
             LastMessagePreview = conversation.LastMessagePreview,

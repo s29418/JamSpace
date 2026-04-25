@@ -47,6 +47,8 @@ const TeamDetailsPage = () => {
 
             <TeamCalendar
                 teamId={team.id}
+                currentUserId={currentUserId ?? ''}
+                currentUserRole={team.currentUserRole}
             />
 
             <TeamChat teamId={team.id} />

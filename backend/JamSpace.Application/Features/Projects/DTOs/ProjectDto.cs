@@ -1,14 +1,10 @@
-﻿namespace JamSpace.Domain.Entities;
+﻿namespace JamSpace.Application.Features.Projects.DTOs;
 
-public class Project
+public class ProjectDto
 {
     public Guid Id { get; set; }
-    
     public Guid TeamId { get; set; }
-    public Team Team { get; set; } = null!;
-    
     public string Name { get; set; } = null!;
-    public string? PictureUrl { get; set; }
-    
+    public string PictureUrl { get; set; } = null!;
     public DateTimeOffset CreatedAt { get; set; }
 }

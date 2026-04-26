@@ -20,13 +20,15 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .HasMaxLength(25);
 
         builder.Property(p => p.PictureUrl)
-            .IsRequired(false);
+            .IsRequired(false)
+            .HasMaxLength(1000);
 
         builder.Property(p => p.CreatedAt)
             .IsRequired();
 
         builder.HasOne(p => p.Team)
             .WithMany(t => t.Projects)
-            .HasForeignKey(p => p.TeamId);
+            .HasForeignKey(p => p.TeamId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

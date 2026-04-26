@@ -29,10 +29,8 @@ public class GetTeamProjectsHandler : IRequestHandler<GetTeamProjectsQuery, IRea
         
         var projects = await _projects.GetByTeamIdAsync(request.TeamId, ct);
 
-        var projectDtos = projects
+        return projects
             .Select(ProjectMapper.ToDto)
             .ToList();
-        
-        return projectDtos;
     }
 }

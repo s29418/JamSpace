@@ -32,8 +32,9 @@ public class ProjectController : ControllerBase
     public async Task<ActionResult<ProjectDto>> CreateProject([FromRoute] Guid teamId, [FromBody] string name,
         CancellationToken ct = default)
     {
-        var result = await _mediator.Send(new CreateProjectCommand(teamId, name), ct);
-        return Ok(result);
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(new CreateProjectCommand(userId, teamId, name), ct);
+        return StatusCode(StatusCodes.Status201Created, result);
     }
 
     [HttpPatch("{projectId}/picture")]

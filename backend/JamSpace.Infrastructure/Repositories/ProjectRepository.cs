@@ -24,6 +24,7 @@ public class ProjectRepository : IProjectRepository
     {
         return await _db.Projects
             .Where(p => p.TeamId == teamId)
+            .OrderByDescending(p => p.CreatedAt)
             .ToListAsync(ct);
     }
 

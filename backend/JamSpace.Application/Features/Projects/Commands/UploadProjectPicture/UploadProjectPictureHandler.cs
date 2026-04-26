@@ -30,8 +30,10 @@ public class UploadProjectPictureHandler : IRequestHandler<UploadProjectPictureC
         _ = await _teams.GetByIdAsync(c.TeamId, ct)
             ?? throw new NotFoundException("Team not found.");
 
-        var project = await _projects.GetByIdAsync(c.ProjectId, ct)
-                      ?? throw new NotFoundException("Project not found.");
+        var project = await _projects.GetByIdAsync(c.ProjectId, ct);
+        
+        if (project is null || project.TeamId != c.TeamId)
+            throw new NotFoundException("Project not found.");
 
         var isParticipant =
             await _members.HasRequiredRoleAsync(c.TeamId, c.RequestingUserId, FunctionalRole.Member, ct);

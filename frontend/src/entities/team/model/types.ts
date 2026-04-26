@@ -30,6 +30,18 @@ export interface TeamEvent {
     createdAt: string;
 }
 
+export interface TeamProject {
+    id: string;
+    teamId: string;
+    name: string;
+    pictureUrl: string;
+    createdAt: string;
+}
+
+export interface CreateTeamProjectRequest {
+    name: string;
+}
+
 export interface CreateTeamEventRequest {
     title: string;
     description?: string | null;

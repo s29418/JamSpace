@@ -1,0 +1,206 @@
+.panel {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 24px 20px;
+    border: 1px solid #5f5f5f;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.title {
+    margin: 0 0 22px;
+    color: #26cdd4;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.createButton,
+.openButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    border: 1px solid #26cdd4;
+    border-radius: 10px;
+    background: rgba(38, 205, 212, 0.07);
+    color: #26cdd4;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.createButton {
+    width: 100%;
+    margin-bottom: 36px;
+    padding: 0 16px;
+}
+
+.openButton {
+    min-width: 66px;
+    padding: 0 14px;
+    align-self: flex-start;
+}
+
+.createButton:disabled,
+.openButton:disabled {
+    cursor: default;
+    opacity: 1;
+}
+
+.buttonIcon {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+}
+
+.projectsList {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    gap: 26px;
+    overflow-y: auto;
+    margin-right: -12px;
+    padding-right: 0;
+    padding-left: 2px;
+}
+
+.projectsList::-webkit-scrollbar {
+    width: 8px;
+}
+
+.projectsList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.projectsList::-webkit-scrollbar-thumb {
+    background: rgba(38, 205, 212, 0.42);
+    border-radius: 999px;
+}
+
+.projectsList::-webkit-scrollbar-thumb:hover {
+    background: rgba(38, 205, 212, 0.7);
+}
+
+.projectCard {
+    padding: 18px 12px;
+    margin-right: 12px;
+    border: 1px solid #5f5f5f;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.projectCardRow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.projectImage,
+.projectFallback {
+    width: 102px;
+    height: 102px;
+    flex: 0 0 102px;
+    border-radius: 8px;
+}
+
+.projectImage {
+    object-fit: cover;
+    object-position: center;
+}
+
+.projectFallback {
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(38, 205, 212, 0.45);
+    background: rgba(38, 205, 212, 0.08);
+    color: #26cdd4;
+    font-size: 34px;
+    font-weight: 700;
+}
+
+.projectContent {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+}
+
+.projectName {
+    margin: 0;
+    color: #f3f3f3;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.25;
+    word-break: break-word;
+}
+
+.note,
+.error {
+    margin: 0;
+    padding: 18px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.note {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.error {
+    color: #ff9b9b;
+    border-color: rgba(255, 102, 102, 0.45);
+}
+
+@media (max-width: 1200px) {
+    .projectCardRow {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .projectImage,
+    .projectFallback {
+        width: 100%;
+        max-width: 180px;
+        height: auto;
+        aspect-ratio: 1;
+    }
+}
+
+@media (max-width: 900px) {
+    .panel {
+        display: block;
+        padding: 22px 16px;
+    }
+
+    .title {
+        font-size: 24px;
+    }
+
+    .createButton {
+        margin-bottom: 24px;
+    }
+
+    .projectsList {
+        gap: 18px;
+        overflow: visible;
+        margin-right: 0;
+        padding-left: 0;
+    }
+
+    .projectCard {
+        margin-right: 0;
+        padding: 16px 12px;
+    }
+}

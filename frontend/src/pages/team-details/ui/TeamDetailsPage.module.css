@@ -1,5 +1,40 @@
 .wrapper {
-    padding: 48px 128px;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 38px 92px;
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(390px, 430px);
+    grid-template-areas:
+        "calendar projects"
+        "chat projects";
+    align-items: stretch;
+    gap: 0 96px;
+}
+
+.calendarArea,
+.projectsArea,
+.chatArea {
+    min-width: 0;
+}
+
+.calendarArea {
+    grid-area: calendar;
+    align-self: start;
+}
+
+.projectsArea {
+    grid-area: projects;
+    display: flex;
+    align-self: stretch;
+    padding-top: 40px;
+}
+
+.chatArea {
+    grid-area: chat;
+    align-self: start;
 }
 
 .teamInfo {
@@ -17,7 +52,7 @@
 }
 
 .title {
-    font-size: 32px;
+    font-size: 64px;
     margin: 0 0 16px;
     color: white;
 
@@ -37,9 +72,9 @@
 
 .avatarWrapper {
     position: relative;
-    width: 144px;
-    height: 144px;
-    flex: 0 0 144px;
+    width: 192px;
+    height: 192px;
+    flex: 0 0 192px;
     border-radius: 100%;
     overflow: hidden;
     border: 2px solid #26cdd4;
@@ -196,8 +231,9 @@
 }
 
 .icon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
+    stroke-width: 2px;
     color: #26cdd4;
     background: none;
     border: none;
@@ -222,12 +258,13 @@
     background-color: transparent;
     border: 1px solid #26cdd4;
     color: #26cdd4;
-    padding: 4px 8px;
+    padding: 8px 10px;
     border-radius: 12px;
     cursor: pointer;
     transition: background-color 0.2s;
     margin-right: 8px;
-    font-size: 14px;
+    font-size: 22px;
+    font-weight: 700;
     /*margin-top: 8px;*/
 }
 
@@ -332,5 +369,18 @@
 @media (max-width: 900px) {
     .wrapper {
         padding: 32px 24px;
+    }
+
+    .contentGrid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "calendar"
+            "projects"
+            "chat";
+        gap: 0;
+    }
+
+    .projectsArea {
+        padding-top: 32px;
     }
 }

@@ -8,7 +8,7 @@ import { CogIcon as SettingsIcon } from '@heroicons/react/24/outline';
 import { useTeam } from '../../../features/team/manage-team/model/useTeam';
 import TeamCalendar from '../../../widgets/team-calendar/ui/TeamCalendar';
 import TeamChat from '../../../widgets/team-chat/ui/TeamChat';
-
+import TeamProjects from '../../../widgets/team-projects/ui/TeamProjects';
 const TeamDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
     const { team, loading, error } = useTeam(id);
@@ -45,13 +45,23 @@ const TeamDetailsPage = () => {
                 </div>
             </div>
 
-            <TeamCalendar
-                teamId={team.id}
-                currentUserId={currentUserId ?? ''}
-                currentUserRole={team.currentUserRole}
-            />
+            <div className={styles.contentGrid}>
+                <div className={styles.calendarArea}>
+                    <TeamCalendar
+                        teamId={team.id}
+                        currentUserId={currentUserId ?? ''}
+                        currentUserRole={team.currentUserRole}
+                    />
+                </div>
 
-            <TeamChat teamId={team.id} />
+                <div className={styles.projectsArea}>
+                    <TeamProjects teamId={team.id} />
+                </div>
+
+                <div className={styles.chatArea}>
+                    <TeamChat teamId={team.id} />
+                </div>
+            </div>
 
             {showModal && (
                 <TeamSettingsModal

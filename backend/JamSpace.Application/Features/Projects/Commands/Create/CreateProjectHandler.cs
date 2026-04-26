@@ -12,7 +12,6 @@ public class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Projec
     private readonly IProjectRepository _project;
     private readonly IUnitOfWork _uow;
 
-
     public CreateProjectHandler(IProjectRepository project, IUnitOfWork uow)
     {
         _project = project;

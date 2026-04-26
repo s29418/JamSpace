@@ -14,7 +14,13 @@ public class ProjectRepository : IProjectRepository
         _db = db;
     }
 
-    public async Task<IReadOnlyList<Project>> GetByTeamId(Guid teamId, CancellationToken ct)
+    public async Task<Project?> GetByIdAsync(Guid projectId, CancellationToken ct)
+    {
+        return await _db.Projects
+            .FirstOrDefaultAsync(p => p.Id == projectId, ct);
+    }
+
+    public async Task<IReadOnlyList<Project>> GetByTeamIdAsync(Guid teamId, CancellationToken ct)
     {
         return await _db.Projects
             .Where(p => p.TeamId == teamId)

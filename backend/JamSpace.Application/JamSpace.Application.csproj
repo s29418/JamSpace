@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <Folder Include="Features\Authentication\Commands\" />
-    <Folder Include="Features\Projects\Queries\" />
   </ItemGroup>
 
   <PropertyGroup>

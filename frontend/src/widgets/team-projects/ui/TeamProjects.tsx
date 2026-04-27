@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import {
+    PlusIcon,
+    XMarkIcon,
+    PhotoIcon,
+    ArrowTopRightOnSquareIcon,
+    PencilSquareIcon
+} from '@heroicons/react/24/outline';
 import { useTeamProjects } from 'features/team/team-projects/model/useTeamProjects';
 import { ApiError, isApiError } from 'shared/api/base';
 import styles from './TeamProjects.module.css';
@@ -197,10 +203,11 @@ const TeamProjects = ({ teamId }: Props) => {
 
                             <button
                                 type="button"
-                                className={styles.secondaryButton}
+                                className={styles.imageButton+ ' ' + styles.secondaryButton }
                                 onClick={() => fileInputRef.current?.click()}
                                 disabled={saving}
                             >
+                                <PhotoIcon className={styles.buttonPhotoIcon} />
                                 {projectImage ? 'Change image' : 'Choose image'}
                             </button>
 
@@ -251,8 +258,13 @@ const TeamProjects = ({ teamId }: Props) => {
                 )}
 
                 {!loading && !error && projects.map((project) => (
-                    <article key={project.id} className={styles.projectCard}>
+                    <article
+                        key={project.id}
+                        className={styles.projectCard}
+                    >
+
                         <div className={styles.projectCardRow}>
+
                             {project.pictureUrl ? (
                                 <img
                                     src={project.pictureUrl}
@@ -268,15 +280,35 @@ const TeamProjects = ({ teamId }: Props) => {
                             )}
 
                             <div className={styles.projectContent}>
-                                <h3 className={styles.projectName}>{project.name}</h3>
-                                <button
-                                    type="button"
-                                    className={styles.openButton}
-                                    disabled
-                                    aria-disabled="true"
-                                >
-                                    Open
-                                </button>
+                                <h3 className={styles.projectName} title={project.name}>
+                                    {project.name}
+                                </h3>
+
+                                <div className={styles.projectButtons}>
+                                    <button
+                                        type="button"
+                                        className={styles.openButton}
+                                        disabled
+                                        aria-disabled="true"
+                                    >
+                                        <span className={styles.projectButtonIconBox} aria-hidden="true">
+                                            <ArrowTopRightOnSquareIcon className={styles.projectButtonIcon} />
+                                        </span>
+                                        Open
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className={styles.editButton}
+                                        disabled
+                                        aria-disabled="true"
+                                    >
+                                        <span className={styles.projectButtonIconBox} aria-hidden="true">
+                                            <PencilSquareIcon className={`${styles.projectButtonIcon} ${styles.projectButtonIconEdit}`} />
+                                        </span>
+                                        Edit
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </article>

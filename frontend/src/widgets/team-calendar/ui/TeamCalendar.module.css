@@ -69,6 +69,17 @@
     text-align: center;
 }
 
+.weekTitleButton {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.weekTitleActive {
+    color: #26cdd4;
+}
+
 .weekNavButton {
     display: inline-flex;
     align-items: center;

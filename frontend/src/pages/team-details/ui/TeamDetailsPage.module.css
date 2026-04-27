@@ -77,7 +77,7 @@
     flex: 0 0 192px;
     border-radius: 100%;
     overflow: hidden;
-    border: 2px solid #26cdd4;
+    border: 3px solid #26cdd4;
 }
 
 .avatarModal {
@@ -256,7 +256,7 @@
     gap: 6px;
 
     background-color: transparent;
-    border: 1px solid #26cdd4;
+    border: 2px solid #26cdd4;
     color: #26cdd4;
     padding: 8px 10px;
     border-radius: 12px;

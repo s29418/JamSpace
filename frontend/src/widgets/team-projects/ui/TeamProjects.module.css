@@ -167,15 +167,28 @@
     text-align: center;
 }
 
+.projectButtons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+}
+
+.createButton,
+.primaryButton,
+.secondaryButton{
+    min-height: 40px;
+}
+
 .createButton,
 .openButton,
+.editButton,
 .primaryButton,
 .secondaryButton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    min-height: 40px;
     border: 1px solid #26cdd4;
     border-radius: 10px;
     background: rgba(38, 205, 212, 0.07);
@@ -189,18 +202,51 @@
     width: 100%;
     margin-bottom: 36px;
     padding: 0 16px;
+    font-size: 20px;
 }
 
-.openButton {
-    min-width: 66px;
-    padding: 0 14px;
-    align-self: flex-start;
+.openButton,
+.editButton{
+    width: 100%;
+    min-width: 0;
+    padding: 8px 0;
+    gap: 6px;
+    line-height: 1;
 }
 
 .buttonIcon {
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    stroke-width: 3px;
+}
+
+.projectButtonIcon {
+    display: block;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    stroke-width: 2px;
+}
+
+.projectButtonIconBox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+}
+
+.projectButtonIconEdit {
+    transform: translateY(1px);
+}
+
+.buttonPhotoIcon{
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    stroke-width: 2px;
 }
 
 .primaryButton,
@@ -210,22 +256,36 @@
 
 .primaryButton:hover,
 .createButton:hover,
-.openButton:hover {
+.openButton:hover,
+.editButton:hover {
     background: rgba(38, 205, 212, 0.18);
 }
 
-.secondaryButton {
+.imageButton, .secondaryButton {
     border-color: rgba(255, 255, 255, 0.24);
-    background: transparent;
-    color: rgba(255, 255, 255, 0.78);
+    background-color: rgba(0, 0, 0, 0.19);
+    color: rgb(255, 255, 255);
+
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.imageButton{
+    font-size: 20px;
+    justify-self: center;
+}
+
+.imageButton:hover {
+    background: rgba(38, 205, 212, 0.7) !important;
+    color: rgb(255, 255, 255);
 }
 
 .secondaryButton:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .createButton:disabled,
-.openButton:disabled,
+/*.openButton:disabled,*/
+/*.editButton:disabled,*/
 .primaryButton:disabled,
 .secondaryButton:disabled {
     cursor: default;
@@ -280,6 +340,7 @@
     height: 102px;
     flex: 0 0 102px;
     border-radius: 8px;
+    border: 1px solid rgb(38, 205, 212);
 }
 
 .projectImage {
@@ -290,16 +351,16 @@
 .projectFallback {
     display: grid;
     place-items: center;
-    border: 1px solid rgba(38, 205, 212, 0.45);
     background: rgba(38, 205, 212, 0.08);
     color: #26cdd4;
-    font-size: 34px;
+    font-size: 42px;
     font-weight: 700;
 }
 
 .projectContent {
     display: flex;
     min-width: 0;
+    width: 100%;
     flex: 1;
     flex-direction: column;
     align-items: flex-start;
@@ -308,11 +369,17 @@
 
 .projectName {
     margin: 0;
+    display: block;
+    overflow: hidden;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
     color: #f3f3f3;
-    font-size: 20px;
+    font-size: 28px;
     font-weight: 700;
     line-height: 1.25;
-    word-break: break-word;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .note,

@@ -174,6 +174,11 @@ const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
         setSelectedDay(startOfDay(day));
     };
 
+    const handleWeekTitleClick = () => {
+        if (!selectedDay) return;
+        setSelectedDay(null);
+    };
+
     const openCreateForm = () => {
         const defaultStart = getDefaultEventStart(selectedDay, visibleWeekStart);
         setEditingEvent(null);
@@ -378,7 +383,18 @@ const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
                     <ChevronLeftIcon className={styles.weekNavIcon} />
                 </button>
 
-                <h3 className={styles.weekTitle}>Week</h3>
+                <button
+                    type="button"
+                    className={[
+                        styles.weekTitleButton,
+                        styles.weekTitle,
+                        !selectedDay ? styles.weekTitleActive : '',
+                    ].filter(Boolean).join(' ')}
+                    onClick={handleWeekTitleClick}
+                    aria-pressed={!selectedDay}
+                >
+                    Week
+                </button>
 
                 <button
                     type="button"

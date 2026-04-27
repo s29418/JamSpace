@@ -12,75 +12,22 @@ import styles from './TeamProjects.module.css';
 
 type Props = {
     teamId: string;
+    maxHeight?: number | null;
 };
 
 const getProjectFallback = (name: string) => name.trim().charAt(0).toUpperCase() || '?';
 const getErrorMessage = (error: unknown, fallback: string) =>
     isApiError(error) ? (error as ApiError).message : fallback;
 
-const TeamProjects = ({ teamId }: Props) => {
+const TeamProjects: React.FC<Props> = ({ teamId, maxHeight = null }) => {
     const { projects, loading, error, createProject, updateProjectPicture } = useTeamProjects(teamId);
-    const panelRef = useRef<HTMLElement | null>(null);
-    const titleRef = useRef<HTMLHeadingElement | null>(null);
-    const createButtonRef = useRef<HTMLButtonElement | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const [listHeight, setListHeight] = useState<number | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [projectName, setProjectName] = useState('');
     const [projectImage, setProjectImage] = useState<File | null>(null);
     const [projectImagePreviewUrl, setProjectImagePreviewUrl] = useState<string | null>(null);
     const [formError, setFormError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
-
-    useEffect(() => {
-        const panelElement = panelRef.current;
-        const titleElement = titleRef.current;
-        const buttonElement = createButtonRef.current;
-
-        if (!panelElement || !titleElement || !buttonElement) {
-            setListHeight(null);
-            return;
-        }
-
-        const updateListHeight = () => {
-            if (window.innerWidth <= 900) {
-                setListHeight(null);
-                return;
-            }
-
-            const styles = window.getComputedStyle(panelElement);
-            const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
-            const paddingBottom = Number.parseFloat(styles.paddingBottom) || 0;
-            const titleBottomMargin = Number.parseFloat(window.getComputedStyle(titleElement).marginBottom) || 0;
-            const buttonBottomMargin = Number.parseFloat(window.getComputedStyle(buttonElement).marginBottom) || 0;
-
-            const reservedSpace =
-                paddingTop +
-                paddingBottom +
-                titleElement.offsetHeight +
-                titleBottomMargin +
-                buttonElement.offsetHeight +
-                buttonBottomMargin;
-
-            setListHeight(Math.max(panelElement.clientHeight - reservedSpace, 0));
-        };
-
-        updateListHeight();
-
-        const observer = new ResizeObserver(() => {
-            updateListHeight();
-        });
-
-        observer.observe(panelElement);
-        observer.observe(titleElement);
-        observer.observe(buttonElement);
-        window.addEventListener('resize', updateListHeight);
-
-        return () => {
-            observer.disconnect();
-            window.removeEventListener('resize', updateListHeight);
-        };
-    }, []);
 
     useEffect(() => {
         if (!projectImage) {
@@ -135,7 +82,10 @@ const TeamProjects = ({ teamId }: Props) => {
     };
 
     return (
-        <aside ref={panelRef} className={styles.panel}>
+        <aside
+            className={styles.panel}
+            style={maxHeight ? { height: `${maxHeight}px`, maxHeight: `${maxHeight}px` } : undefined}
+        >
             {isCreateOpen && (
                 <div
                     className={styles.formOverlay}
@@ -232,10 +182,9 @@ const TeamProjects = ({ teamId }: Props) => {
                 </div>
             )}
 
-            <h2 ref={titleRef} className={styles.title}>Team Projects</h2>
+            <h2 className={styles.title}>Team Projects</h2>
 
             <button
-                ref={createButtonRef}
                 type="button"
                 className={styles.createButton}
                 onClick={() => {
@@ -247,10 +196,7 @@ const TeamProjects = ({ teamId }: Props) => {
                 Create new project
             </button>
 
-            <div
-                className={styles.projectsList}
-                style={listHeight ? { height: `${listHeight}px`, maxHeight: `${listHeight}px` } : undefined}
-            >
+            <div className={styles.projectsList}>
                 {loading && <p className={styles.note}>Loading projects...</p>}
                 {!loading && error && <p className={styles.error}>{error}</p>}
                 {!loading && !error && projects.length === 0 && (

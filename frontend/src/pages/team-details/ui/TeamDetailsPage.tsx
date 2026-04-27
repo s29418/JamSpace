@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './TeamDetailsPage.module.css';
 import defaultTeamIcon from '../../../shared/assets/defaultTeamIcon.jpg';
@@ -13,8 +13,59 @@ const TeamDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
     const { team, loading, error } = useTeam(id);
     const [showModal, setShowModal] = useState(false);
+    const [projectsHeight, setProjectsHeight] = useState<number | null>(null);
     const currentUserId = useMemo(() => getCurrentUserId(), []);
+    const calendarAreaRef = useRef<HTMLDivElement | null>(null);
+    const chatAreaRef = useRef<HTMLDivElement | null>(null);
+    const projectsAreaRef = useRef<HTMLDivElement | null>(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const calendarElement = calendarAreaRef.current;
+        const chatElement = chatAreaRef.current;
+        const projectsElement = projectsAreaRef.current;
+
+        if (!calendarElement || !chatElement || !projectsElement) {
+            setProjectsHeight(null);
+            return;
+        }
+
+        const updateProjectsHeight = () => {
+            if (window.innerWidth <= 900) {
+                setProjectsHeight(null);
+                return;
+            }
+
+            const calendarPanel = calendarElement.firstElementChild as HTMLElement | null;
+            const chatPanel = chatElement.firstElementChild as HTMLElement | null;
+            const projectsPanel = projectsElement.firstElementChild as HTMLElement | null;
+
+            if (!calendarPanel || !chatPanel || !projectsPanel) {
+                setProjectsHeight(null);
+                return;
+            }
+
+            const top = projectsPanel.getBoundingClientRect().top;
+            const bottom = chatPanel.getBoundingClientRect().bottom;
+            setProjectsHeight(Math.max(Math.round(bottom - top), 0));
+        };
+
+        updateProjectsHeight();
+
+        const observer = new ResizeObserver(() => {
+            updateProjectsHeight();
+        });
+
+        observer.observe(calendarElement);
+        observer.observe(chatElement);
+        observer.observe(projectsElement);
+        window.addEventListener('resize', updateProjectsHeight);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', updateProjectsHeight);
+        };
+    }, [team?.id]);
 
 
     if (loading) return <p>Loading...</p>;
@@ -46,7 +97,7 @@ const TeamDetailsPage = () => {
             </div>
 
             <div className={styles.contentGrid}>
-                <div className={styles.calendarArea}>
+                <div ref={calendarAreaRef} className={styles.calendarArea}>
                     <TeamCalendar
                         teamId={team.id}
                         currentUserId={currentUserId ?? ''}
@@ -54,11 +105,11 @@ const TeamDetailsPage = () => {
                     />
                 </div>
 
-                <div className={styles.projectsArea}>
-                    <TeamProjects teamId={team.id} />
+                <div ref={projectsAreaRef} className={styles.projectsArea}>
+                    <TeamProjects teamId={team.id} maxHeight={projectsHeight} />
                 </div>
 
-                <div className={styles.chatArea}>
+                <div ref={chatAreaRef} className={styles.chatArea}>
                     <TeamChat teamId={team.id} />
                 </div>
             </div>

@@ -6,12 +6,12 @@
 
 .contentGrid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(390px, 430px);
+    grid-template-columns: minmax(0, 1fr) minmax(390px, 450px);
     grid-template-areas:
         "calendar projects"
         "chat projects";
     align-items: stretch;
-    gap: 0 96px;
+    gap: 0 76px;
 }
 
 .calendarArea,

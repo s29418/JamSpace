@@ -61,7 +61,17 @@
     margin-bottom: 30px;
 }
 
+.modeSwitcher {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-self: center;
+}
+
 .weekTitle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     color: #f3f3f3;
     font-size: 36px;
     font-weight: 700;
@@ -69,14 +79,97 @@
     text-align: center;
 }
 
-.weekTitleButton {
+.weekTitleActionButton {
     padding: 0;
     border: 0;
     background: transparent;
     cursor: pointer;
 }
 
+.weekTitleText {
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s, opacity 0.2s;
+}
+
+.weekTitleActionButton:hover .weekTitleText {
+    border-color: currentColor;
+    opacity: 0.88;
+}
+
+.modeTitleIcon {
+    display: block;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    fill: white;
+    transform: translateY(1px);
+}
+
+.modeMenuToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin-left: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.modeMenuToggle:hover {
+    background: rgba(255, 255, 255, 0.08);
+    opacity: 0.88;
+}
+
 .weekTitleActive {
+    color: #26cdd4;
+}
+
+.modeMenu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    z-index: 5;
+    display: flex;
+    min-width: 164px;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    transform: translateX(-50%);
+    border: 1px solid rgba(38, 205, 212, 0.35);
+    border-radius: 12px;
+    background: rgba(18, 18, 18, 0.96);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.26);
+}
+
+.modeMenuButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.modeMenuButton:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.modeMenuButtonActive {
+    border-color: rgba(38, 205, 212, 0.5);
+    background: rgba(38, 205, 212, 0.12);
     color: #26cdd4;
 }
 
@@ -108,7 +201,17 @@
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 12px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+}
+
+.rangeViewViewport {
+    overflow: hidden;
+    transition: height 0.64s ease;
+}
+
+.rangeViewContent {
+    padding-bottom: 12px;
+    animation: calendarViewFadeIn 0.52s ease;
 }
 
 .dayButton {
@@ -129,6 +232,14 @@
 
 .dayButton:hover {
     background: rgba(255, 255, 255, 0.04);
+}
+
+.dayButtonDimmed {
+    opacity: 0.52;
+}
+
+.dayButtonDimmed:hover {
+    opacity: 0.78;
 }
 
 .dayButtonActive .dayNumber
@@ -161,6 +272,98 @@
     border-radius: 12px;
     color: #f3f3f3;
     font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.monthView {
+    margin-bottom: 6px;
+}
+
+.periodLabel {
+    margin: 0 0 8px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.calendarMonthWeekdaysRow,
+.calendarMonthDaysGrid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendarMonthWeekdaysRow {
+    margin-bottom: 6px;
+}
+
+.calendarMonthWeekdayLabel {
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 18px;
+    line-height: 1.1;
+    text-align: center;
+}
+
+.calendarMonthDaysGrid {
+    gap: 3px;
+}
+
+.calendarMonthDayButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    min-width: 0;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: #f3f3f3;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+
+.calendarMonthDayButton:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.calendarMonthDayButtonActive {
+    border-color: rgba(38, 205, 212, 0.45);
+    background: rgba(38, 205, 212, 0.18);
+}
+
+.calendarMonthDayButtonActive .calendarMonthDayNumber {
+    background: rgba(38, 205, 212, 0.42);
+    color: #26cdd4;
+}
+
+.calendarMonthDayButtonToday:not(.calendarMonthDayButtonActive) {
+    border-color: rgba(38, 205, 212, 0.45);
+}
+
+.calendarMonthDayButtonMuted {
+    color: rgba(255, 255, 255, 0.34);
+}
+
+.calendarMonthDayButtonDimmed {
+    opacity: 0.48;
+}
+
+.calendarMonthDayButtonDimmed:hover {
+    opacity: 0.75;
+}
+
+.calendarMonthDayNumber {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 10px;
+    font-size: 15px;
     font-weight: 700;
     line-height: 1;
 }
@@ -402,6 +605,45 @@
 .calendarError {
     border-color: rgba(255, 102, 102, 0.45);
     color: #ff9b9b;
+}
+
+.calendarModeToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin: 6px auto 0;
+    border-radius: 50%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #26cdd4;
+    cursor: pointer;
+    transition: opacity 0.4s, translate 0.4s;
+}
+
+.calendarModeToggle:hover {
+    opacity: 0.88;
+    translate: 0 1px;
+    background: rgba(38, 205, 212, 0.12);
+}
+
+.calendarModeToggleIcon {
+    width: 30px;
+    height: 30px;
+}
+
+@keyframes calendarViewFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .formOverlay {
@@ -705,6 +947,29 @@
         min-width: 32px;
         height: 28px;
         font-size: 18px;
+    }
+
+    .periodLabel {
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+
+    .calendarMonthWeekdayLabel {
+        font-size: 14px;
+    }
+
+    .calendarMonthDaysGrid {
+        gap: 3px;
+    }
+
+    .calendarMonthDayNumber {
+        min-width: 24px;
+        height: 20px;
+        font-size: 13px;
+    }
+
+    .calendarMonthDayButton {
+        min-height: 30px;
     }
 
     .eventCard {

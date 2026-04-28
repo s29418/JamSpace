@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
     ChevronLeftIcon,
@@ -10,6 +10,7 @@ import {
     XMarkIcon,
     TrashIcon,
 } from '@heroicons/react/24/outline';
+import { ChevronDownIcon as ChevronDownSolidIcon } from '@heroicons/react/20/solid';
 import { useTeamEvents } from 'features/team/team-events/model/useTeamEvents';
 import type { TeamEvent, TeamRoleLabel } from 'entities/team/model/types';
 import { ApiError, isApiError } from 'shared/api/base';
@@ -22,6 +23,8 @@ type Props = {
     currentUserId: string;
     currentUserRole: TeamRoleLabel;
 };
+
+type CalendarViewMode = 'week' | 'month';
 
 const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -37,8 +40,21 @@ const addDays = (date: Date, amount: number) => {
     return next;
 };
 
+const addMonths = (date: Date, amount: number) => {
+    const next = new Date(date);
+    next.setMonth(next.getMonth() + amount);
+    return next;
+};
+
 const addMinutes = (date: Date, amount: number) =>
     new Date(date.getTime() + amount * 60 * 1000);
+
+const startOfMonth = (date: Date) => {
+    const next = new Date(date);
+    next.setDate(1);
+    next.setHours(0, 0, 0, 0);
+    return next;
+};
 
 const startOfWeek = (date: Date) => {
     const day = date.getDay();
@@ -51,6 +67,10 @@ const isSameDay = (a: Date, b: Date) =>
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
 
+const isSameMonth = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth();
+
 const formatTime = (dateTime: string) =>
     new Intl.DateTimeFormat('en-GB', {
         hour: '2-digit',
@@ -60,37 +80,59 @@ const formatTime = (dateTime: string) =>
 
 const formatShortDate = (date: Date) =>
     new Intl.DateTimeFormat('en-GB', {
-        day: '2-digit',
+        day: 'numeric',
         month: 'short',
     }).format(date);
 
-const formatEventTimeRange = (event: TeamEvent, selectedDay: Date | null) => {
+const formatMonthLabel = (date: Date) =>
+    new Intl.DateTimeFormat('en-GB', {
+        month: 'long',
+        year: 'numeric',
+    }).format(date);
+
+const formatEventTimeRange = (event: TeamEvent) => {
     const start = new Date(event.startDateTime);
     const end = getEventEndDate(event);
-    const startTime = formatTime(event.startDateTime);
-    const endTime = formatTime(end.toISOString());
+    const startLabel = `${formatShortDate(start)} ${formatTime(event.startDateTime)}`;
+    const endLabel = isSameDay(start, end)
+        ? formatTime(end.toISOString())
+        : `${formatShortDate(end)} ${formatTime(end.toISOString())}`;
 
-    if (selectedDay && startOfDay(start) < startOfDay(selectedDay) && end > startOfDay(selectedDay)) {
-        return `${formatShortDate(start)} ${startTime} - ${endTime}`;
-    }
-
-    return `${startTime} - ${endTime}`;
+    return `${startLabel} - ${endLabel}`;
 };
 
 const getEventEndDate = (event: TeamEvent) =>
     new Date(new Date(event.startDateTime).getTime() + event.durationMinutes * 60 * 1000);
 
-const getDefaultEventStart = (selectedDay: Date | null, visibleWeekStart: Date) => {
+const getDefaultEventStart = (
+    selectedDay: Date | null,
+    viewMode: CalendarViewMode,
+    visibleDate: Date,
+    today: Date
+) => {
     const base = selectedDay ? new Date(selectedDay) : new Date();
-    if (!selectedDay && !isSameDay(startOfWeek(base), visibleWeekStart)) {
-        base.setTime(visibleWeekStart.getTime());
-        base.setHours(10, 0, 0, 0);
-        return base;
-    }
 
     if (selectedDay) {
         base.setHours(10, 0, 0, 0);
         return base;
+    }
+
+    if (viewMode === 'week') {
+        const visibleWeekStart = startOfWeek(visibleDate);
+        if (!isSameDay(visibleWeekStart, startOfWeek(today))) {
+            base.setTime(visibleWeekStart.getTime());
+            base.setHours(10, 0, 0, 0);
+            return base;
+        }
+    }
+
+    if (viewMode === 'month') {
+        const visibleMonthStart = startOfMonth(visibleDate);
+        if (!isSameMonth(visibleMonthStart, today)) {
+            base.setTime(visibleMonthStart.getTime());
+            base.setHours(10, 0, 0, 0);
+            return base;
+        }
     }
 
     const roundedMinutes = Math.ceil(base.getMinutes() / 15) * 15;
@@ -106,8 +148,10 @@ const getAvatarFallback = (displayName: string) =>
 
 const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
     const today = useMemo(() => new Date(), []);
-    const [visibleWeekStart, setVisibleWeekStart] = useState(() => startOfWeek(today));
+    const [viewMode, setViewMode] = useState<CalendarViewMode>('week');
+    const [visibleDate, setVisibleDate] = useState(() => startOfDay(today));
     const [selectedDay, setSelectedDay] = useState<Date | null>(() => startOfDay(today));
+    const [isModeMenuOpen, setIsModeMenuOpen] = useState(false);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [eventName, setEventName] = useState('');
     const [description, setDescription] = useState('');
@@ -120,6 +164,9 @@ const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
     const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
     const [eventToDelete, setEventToDelete] = useState<TeamEvent | null>(null);
     const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+    const modeSwitcherRef = useRef<HTMLDivElement | null>(null);
+    const rangeViewContentRef = useRef<HTMLDivElement | null>(null);
+    const [rangeViewHeight, setRangeViewHeight] = useState<number | null>(null);
     const {
         events,
         loading: eventsLoading,
@@ -131,11 +178,26 @@ const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
         removeEvent,
     } = useTeamEvents(teamId);
     const isFormOpen = isCreateOpen || !!editingEvent;
+    const visibleWeekStart = useMemo(() => startOfWeek(visibleDate), [visibleDate]);
+    const visibleMonthStart = useMemo(() => startOfMonth(visibleDate), [visibleDate]);
 
     const weekDays = useMemo(
         () => Array.from({ length: 7 }, (_, index) => addDays(visibleWeekStart, index)),
         [visibleWeekStart]
     );
+    const monthDays = useMemo(() => {
+        const monthStart = visibleMonthStart;
+        const monthEnd = addDays(addMonths(monthStart, 1), -1);
+        const gridStart = startOfWeek(monthStart);
+        const gridEnd = addDays(startOfWeek(monthEnd), 6);
+        const days: Date[] = [];
+
+        for (let cursor = gridStart; cursor <= gridEnd; cursor = addDays(cursor, 1)) {
+            days.push(cursor);
+        }
+
+        return days;
+    }, [visibleMonthStart]);
 
     const isCurrentWeek = useMemo(
         () => isSameDay(visibleWeekStart, startOfWeek(today)),
@@ -150,37 +212,83 @@ const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
             };
         }
 
+        if (viewMode === 'month') {
+            return {
+                from: visibleMonthStart,
+                to: addMonths(visibleMonthStart, 1),
+            };
+        }
+
         return {
             from: isCurrentWeek ? new Date() : visibleWeekStart,
             to: addDays(visibleWeekStart, 7),
         };
-    }, [isCurrentWeek, selectedDay, visibleWeekStart]);
+    }, [isCurrentWeek, selectedDay, viewMode, visibleMonthStart, visibleWeekStart]);
 
     useEffect(() => {
         setEventsRange(calendarRange);
     }, [calendarRange, setEventsRange]);
 
-    const handleWeekChange = (direction: -1 | 1) => {
-        setVisibleWeekStart(prev => addDays(prev, direction * 7));
+    useLayoutEffect(() => {
+        if (!rangeViewContentRef.current) return;
+
+        setRangeViewHeight(rangeViewContentRef.current.scrollHeight);
+    }, [viewMode, selectedDay, visibleDate]);
+
+    useEffect(() => {
+        if (!isModeMenuOpen) return;
+
+        const handlePointerDown = (event: MouseEvent) => {
+            if (!modeSwitcherRef.current?.contains(event.target as Node)) {
+                setIsModeMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handlePointerDown);
+        return () => {
+            document.removeEventListener('mousedown', handlePointerDown);
+        };
+    }, [isModeMenuOpen]);
+
+    const handleRangeChange = (direction: -1 | 1) => {
+        setVisibleDate(prev => viewMode === 'week' ? addDays(prev, direction * 7) : addMonths(prev, direction));
         setSelectedDay(null);
     };
 
     const handleDayClick = (day: Date) => {
-        if (selectedDay && isSameDay(selectedDay, day) && isCurrentWeek) {
+        if (selectedDay && isSameDay(selectedDay, day)) {
             setSelectedDay(null);
             return;
         }
 
+        setVisibleDate(startOfDay(day));
         setSelectedDay(startOfDay(day));
     };
 
-    const handleWeekTitleClick = () => {
-        if (!selectedDay) return;
+    const handleRangeModeClick = () => {
         setSelectedDay(null);
+        setIsModeMenuOpen(false);
+    };
+
+    const handleModeSelect = (mode: CalendarViewMode) => {
+        setViewMode(mode);
+        setSelectedDay(null);
+        setIsModeMenuOpen(false);
+    };
+
+    const handleBottomModeToggle = () => {
+        setViewMode(prev => {
+            const nextMode = prev === 'week' ? 'month' : 'week';
+            if (selectedDay) {
+                setVisibleDate(startOfDay(selectedDay));
+            }
+            return nextMode;
+        });
+        setIsModeMenuOpen(false);
     };
 
     const openCreateForm = () => {
-        const defaultStart = getDefaultEventStart(selectedDay, visibleWeekStart);
+        const defaultStart = getDefaultEventStart(selectedDay, viewMode, visibleDate, today);
         setEditingEvent(null);
         setEventName('');
         setDescription('');
@@ -287,6 +395,9 @@ const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
         teamEvent.createdById === currentUserId ||
         currentUserRole === 'Admin' ||
         currentUserRole === 'Leader';
+    const currentModeLabel = viewMode === 'week' ? 'Week' : 'Month';
+    const isRangeModeActive = selectedDay === null;
+    const showDimmedDays = selectedDay !== null;
 
     return (
         <section className={styles.calendarPanel}>
@@ -377,56 +488,149 @@ const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
                 <button
                     type="button"
                     className={styles.weekNavButton}
-                    onClick={() => handleWeekChange(-1)}
-                    aria-label="Previous week"
+                    onClick={() => handleRangeChange(-1)}
+                    aria-label={viewMode === 'week' ? 'Previous week' : 'Previous month'}
                 >
                     <ChevronLeftIcon className={styles.weekNavIcon} />
                 </button>
 
-                <button
-                    type="button"
-                    className={[
-                        styles.weekTitleButton,
-                        styles.weekTitle,
-                        !selectedDay ? styles.weekTitleActive : '',
-                    ].filter(Boolean).join(' ')}
-                    onClick={handleWeekTitleClick}
-                    aria-pressed={!selectedDay}
-                >
-                    Week
-                </button>
+                <div className={styles.modeSwitcher} ref={modeSwitcherRef}>
+                    <button
+                        type="button"
+                        className={[
+                            styles.weekTitleActionButton,
+                            styles.weekTitle,
+                            isRangeModeActive ? styles.weekTitleActive : '',
+                        ].filter(Boolean).join(' ')}
+                        onClick={handleRangeModeClick}
+                        aria-pressed={isRangeModeActive}
+                    >
+                        <span className={styles.weekTitleText}>{currentModeLabel}</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className={styles.modeMenuToggle}
+                        onClick={() => setIsModeMenuOpen(prev => !prev)}
+                        aria-label={`Open ${currentModeLabel.toLowerCase()} mode menu`}
+                        aria-haspopup="menu"
+                        aria-expanded={isModeMenuOpen}
+                    >
+                        <ChevronDownIcon className={styles.modeTitleIcon} />
+                    </button>
+
+                    {isModeMenuOpen && (
+                        <div className={styles.modeMenu} role="menu">
+                            {(['week', 'month'] as CalendarViewMode[]).map((mode) => (
+                                <button
+                                    key={mode}
+                                    type="button"
+                                    className={[
+                                        styles.modeMenuButton,
+                                        viewMode === mode ? styles.modeMenuButtonActive : '',
+                                    ].filter(Boolean).join(' ')}
+                                    onClick={() => handleModeSelect(mode)}
+                                    role="menuitemradio"
+                                    aria-checked={viewMode === mode}
+                                >
+                                    {mode === 'week' ? 'Week' : 'Month'}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 <button
                     type="button"
                     className={styles.weekNavButton}
-                    onClick={() => handleWeekChange(1)}
-                    aria-label="Next week"
+                    onClick={() => handleRangeChange(1)}
+                    aria-label={viewMode === 'week' ? 'Next week' : 'Next month'}
                 >
                     <ChevronRightIcon className={styles.weekNavIcon} />
                 </button>
             </div>
 
-            <div className={styles.daysGrid}>
-                {weekDays.map((day, index) => {
-                    const active = selectedDay ? isSameDay(selectedDay, day) : false;
-                    const current = isSameDay(today, day);
+            <div
+                className={styles.rangeViewViewport}
+                style={rangeViewHeight ? { height: `${rangeViewHeight}px` } : undefined}
+            >
+                <div
+                    ref={rangeViewContentRef}
+                    className={styles.rangeViewContent}
+                    key={viewMode}
+                >
+                    {viewMode === 'week' ? (
+                        <div className={styles.daysGrid}>
+                            {weekDays.map((day, index) => {
+                                const active = selectedDay ? isSameDay(selectedDay, day) : false;
+                                const current = isSameDay(today, day);
 
-                    return (
-                        <button
-                            type="button"
-                            key={day.toISOString()}
-                            className={[
-                                styles.dayButton,
-                                active ? styles.dayButtonActive : '',
-                                current ? styles.dayButtonToday : '',
-                            ].filter(Boolean).join(' ')}
-                            onClick={() => handleDayClick(day)}
-                        >
-                            <span className={styles.dayName}>{dayLabels[index]}</span>
-                            <span className={styles.dayNumber}>{day.getDate()}</span>
-                        </button>
-                    );
-                })}
+                                return (
+                                    <button
+                                        type="button"
+                                        key={day.toISOString()}
+                                        className={[
+                                            styles.dayButton,
+                                            active ? styles.dayButtonActive : '',
+                                            current ? styles.dayButtonToday : '',
+                                            showDimmedDays && !active ? styles.dayButtonDimmed : '',
+                                        ].filter(Boolean).join(' ')}
+                                        onClick={() => handleDayClick(day)}
+                                    >
+                                        <span className={styles.dayName}>{dayLabels[index]}</span>
+                                        <span className={styles.dayNumber}>{day.getDate()}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className={styles.monthView}>
+                            <p className={styles.periodLabel}>{formatMonthLabel(visibleMonthStart)}</p>
+
+                            <div className={styles.calendarMonthWeekdaysRow}>
+                                {dayLabels.map(label => (
+                                    <span key={label} className={styles.calendarMonthWeekdayLabel}>{label}</span>
+                                ))}
+                            </div>
+
+                            <div className={styles.calendarMonthDaysGrid}>
+                                {monthDays.map(day => {
+                                    const active = selectedDay ? isSameDay(selectedDay, day) : false;
+                                    const current = isSameDay(today, day);
+                                    const outsideMonth = !isSameMonth(day, visibleMonthStart);
+
+                                    return (
+                                        <button
+                                            type="button"
+                                            key={day.toISOString()}
+                                            className={[
+                                                styles.calendarMonthDayButton,
+                                                active ? styles.calendarMonthDayButtonActive : '',
+                                                current ? styles.calendarMonthDayButtonToday : '',
+                                                outsideMonth ? styles.calendarMonthDayButtonMuted : '',
+                                                showDimmedDays && !active ? styles.calendarMonthDayButtonDimmed : '',
+                                            ].filter(Boolean).join(' ')}
+                                            onClick={() => handleDayClick(day)}
+                                        >
+                                            <span className={styles.calendarMonthDayNumber}>{day.getDate()}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    <button
+                        type="button"
+                        className={styles.calendarModeToggle}
+                        onClick={handleBottomModeToggle}
+                        aria-label={viewMode === 'week' ? 'Switch to month view' : 'Switch to week view'}
+                    >
+                        {viewMode === 'week'
+                            ? <ChevronDownIcon className={styles.calendarModeToggleIcon} />
+                            : <ChevronUpIcon className={styles.calendarModeToggleIcon} />}
+                    </button>
+                </div>
             </div>
 
             <div className={styles.eventsList}>
@@ -453,7 +657,7 @@ const TeamCalendar = ({ teamId, currentUserId, currentUserRole }: Props) => {
                             <div className={styles.eventDetails}>
                                 <h4 className={styles.eventTitle}>{event.title}</h4>
                                 <p className={styles.eventTime}>
-                                    {formatEventTimeRange(event, selectedDay)}
+                                    {formatEventTimeRange(event)}
                                 </p>
                             </div>
 

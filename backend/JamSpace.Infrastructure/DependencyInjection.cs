@@ -38,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<IUserGenreRepository, UserGenreRepository>();
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IUserSkillRepository, UserSkillRepository>();
+        services.AddScoped<IUserExternalAccountRepository, UserExternalAccountRepository>();
         services.AddScoped<IUserFollowRepository, UserFollowRepository>();
 
         services.AddScoped<IMessageRepository, MessageRepository>();

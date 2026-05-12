@@ -6,6 +6,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Resources\countries.en.json"
              CopyToOutputDirectory="Always"
              CopyToPublishDirectory="Always"

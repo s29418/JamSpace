@@ -18,6 +18,7 @@ public static class DependencyInjection
             opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
         
         services.AddMemoryCache();
+        services.AddDataProtection();
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserSearchRepository, UserSearchRepository>();
@@ -61,6 +62,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IPasswordPolicy, PasswordPolicy>();
+        services.AddScoped<ITokenProtector, DataProtectionTokenProtector>();
         services.AddSingleton<ICountryService, CountryService>();
         services.AddScoped<ICountryCodeResolver, CountryCodeResolver>();
         services.AddScoped<IAuthSessionService, AuthSessionService>();

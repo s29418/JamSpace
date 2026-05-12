@@ -47,14 +47,8 @@ public class AzureBlobStorageService : IFileStorageService
         if (string.IsNullOrWhiteSpace(fileUrl))
             return;
 
-        var uri = new Uri(fileUrl);
-        var absolutePath = uri.AbsolutePath.TrimStart('/');
-
-        var prefix = _containerName.Trim('/') + "/";
-        if (!absolutePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        if (!TryGetBlobPath(fileUrl, out var blobPath))
             return;
-
-        var blobPath = absolutePath.Substring(prefix.Length);
 
         var container = _blobServiceClient.GetBlobContainerClient(_containerName);
         var blobClient = container.GetBlobClient(blobPath);

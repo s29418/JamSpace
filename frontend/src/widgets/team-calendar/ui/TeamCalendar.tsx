@@ -10,7 +10,6 @@ import {
     XMarkIcon,
     TrashIcon,
 } from '@heroicons/react/24/outline';
-import { ChevronDownIcon as ChevronDownSolidIcon } from '@heroicons/react/20/solid';
 import { useTeamEvents } from 'features/team/team-events/model/useTeamEvents';
 import type { TeamEvent, TeamRoleLabel } from 'entities/team/model/types';
 import { ApiError, isApiError } from 'shared/api/base';

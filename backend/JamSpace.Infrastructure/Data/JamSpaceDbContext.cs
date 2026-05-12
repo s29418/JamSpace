@@ -26,6 +26,7 @@ public sealed class JamSpaceDbContext : DbContext
     public DbSet<UserGenre> UserGenres => Set<UserGenre>();
     public DbSet<Skill> Skills => Set<Skill>();
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
+    public DbSet<UserExternalAccount> UserExternalAccounts => Set<UserExternalAccount>();
 
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<ConversationParticipant> ConversationParticipants => Set<ConversationParticipant>();
@@ -51,6 +52,7 @@ public sealed class JamSpaceDbContext : DbContext
         modelBuilder.ApplyConfiguration(new UserGenreConfiguration());
         modelBuilder.ApplyConfiguration(new SkillConfiguration());
         modelBuilder.ApplyConfiguration(new UserSkillConfiguration());
+        modelBuilder.ApplyConfiguration(new UserExternalAccountConfiguration());
         modelBuilder.ApplyConfiguration(new UserFollowConfiguration());
         modelBuilder.ApplyConfiguration(new MessageConfiguration());
         modelBuilder.ApplyConfiguration(new ConversationParticipantConfiguration());

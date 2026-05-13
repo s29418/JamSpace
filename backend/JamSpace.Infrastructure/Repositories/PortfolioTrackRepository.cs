@@ -39,6 +39,16 @@ public class PortfolioTrackRepository : IPortfolioTrackRepository
             .ToListAsync(ct);
     }
 
+    public async Task<int> GetNextDisplayOrderAsync(Guid userId, CancellationToken ct)
+    {
+        var maxOrder = await _db.PortfolioTracks
+            .Where(x => x.UserId == userId)
+            .Select(x => (int?)x.DisplayOrder)
+            .MaxAsync(ct);
+
+        return (maxOrder ?? -1) + 1;
+    }
+
     public async Task AddAsync(PortfolioTrack track, CancellationToken ct)
     {
         await _db.PortfolioTracks.AddAsync(track, ct);

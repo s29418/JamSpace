@@ -1,3 +1,7 @@
+using JamSpace.API.Extensions;
+using JamSpace.API.Requests;
+using JamSpace.Application.Features.PortfolioTracks.Commands.AddExternalLink;
+using JamSpace.Application.Features.PortfolioTracks.Commands.Upload;
 using JamSpace.Application.Features.PortfolioTracks.DTOs;
 using JamSpace.Application.Features.PortfolioTracks.Queries.GetUserPortfolioTracks;
 using MediatR;
@@ -25,5 +29,52 @@ public class PortfolioTracksController : ControllerBase
     {
         var result = await _mediator.Send(new GetUserPortfolioTracksQuery(userId), ct);
         return Ok(result);
+    }
+
+    [HttpPost("/api/me/portfolio/tracks/external-link")]
+    [Authorize]
+    public async Task<ActionResult<PortfolioTrackDto>> AddExternalPortfolioTrack(
+        [FromBody] AddExternalPortfolioTrackRequest request,
+        CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(
+            new AddExternalPortfolioTrackCommand(
+                userId,
+                request.Source,
+                request.Title,
+                request.ArtistName,
+                request.AlbumTitle,
+                request.ArtworkUrl,
+                request.DurationMs,
+                request.ExternalTrackId,
+                request.ExternalUrl,
+                request.EmbedUrl),
+            ct);
+
+        return StatusCode(StatusCodes.Status201Created, result);
+    }
+
+    [HttpPost("/api/me/portfolio/tracks/upload")]
+    [Authorize]
+    public async Task<ActionResult<PortfolioTrackDto>> UploadPortfolioTrack(
+        [FromForm] UploadPortfolioTrackRequest request,
+        CancellationToken ct)
+    {
+        if (request.File is null)
+            return BadRequest(new { message = "File is required." });
+
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(
+            new UploadPortfolioTrackCommand(
+                userId,
+                request.Title,
+                request.ArtistName,
+                request.AlbumTitle,
+                request.DurationMs,
+                request.File.ToFileUpload()),
+            ct);
+
+        return StatusCode(StatusCodes.Status201Created, result);
     }
 }

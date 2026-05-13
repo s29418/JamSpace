@@ -75,6 +75,16 @@ public static class MediaValidationRules
         };
     }
 
+    public static bool IsAllowedAudio(FileUpload file)
+    {
+        return ResolveCategory(file.ContentType) == MediaCategory.Audio;
+    }
+
+    public static bool HasValidAudioSize(FileUpload file)
+    {
+        return file.Length <= MaxAudioSizeBytes;
+    }
+
     public static IRuleBuilderOptions<T, FileUpload> MustBeValidImage<T>(
         this IRuleBuilder<T, FileUpload> ruleBuilder)
     {
@@ -105,5 +115,16 @@ public static class MediaValidationRules
                 _ when ResolveCategory(file.ContentType) == MediaCategory.Video => "Video file size must not exceed 100 MB.",
                 _ => "Unsupported media type."
             });
+    }
+
+    public static IRuleBuilderOptions<T, FileUpload> MustBeValidAudio<T>(
+        this IRuleBuilder<T, FileUpload> ruleBuilder)
+    {
+        return ruleBuilder
+            .NotNull().WithMessage("File is required.")
+            .Must(file => file.Length > 0).WithMessage("Uploaded file cannot be empty.")
+            .Must(file => !string.IsNullOrWhiteSpace(file.FileName)).WithMessage("File name is required.")
+            .Must(IsAllowedAudio).WithMessage("Only MP3, WAV or OGG audio files are allowed.")
+            .Must(HasValidAudioSize).WithMessage("Audio file size must not exceed 20 MB.");
     }
 }

@@ -64,6 +64,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IPasswordPolicy, PasswordPolicy>();
         services.AddScoped<ITokenProtector, DataProtectionTokenProtector>();
+        services.AddSingleton<IOAuthPkceGenerator, OAuthPkceGenerator>();
         services.AddSingleton<ICountryService, CountryService>();
         services.AddScoped<ICountryCodeResolver, CountryCodeResolver>();
         services.AddScoped<IAuthSessionService, AuthSessionService>();

@@ -1,6 +1,7 @@
 using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
 using JamSpace.Application.Features.PortfolioTracks.Commands.AddExternalLink;
+using JamSpace.Application.Features.PortfolioTracks.Commands.Delete;
 using JamSpace.Application.Features.PortfolioTracks.Commands.Upload;
 using JamSpace.Application.Features.PortfolioTracks.DTOs;
 using JamSpace.Application.Features.PortfolioTracks.Queries.GetUserPortfolioTracks;
@@ -76,5 +77,14 @@ public class PortfolioTracksController : ControllerBase
             ct);
 
         return StatusCode(StatusCodes.Status201Created, result);
+    }
+
+    [HttpDelete("/api/me/portfolio/tracks/{trackId:guid}")]
+    [Authorize]
+    public async Task<IActionResult> DeletePortfolioTrack([FromRoute] Guid trackId, CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        await _mediator.Send(new DeletePortfolioTrackCommand(userId, trackId), ct);
+        return NoContent();
     }
 }

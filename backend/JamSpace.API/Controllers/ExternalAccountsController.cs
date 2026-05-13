@@ -5,6 +5,7 @@ using JamSpace.Application.Features.ExternalAccounts.Commands.Disconnect;
 using JamSpace.Application.Features.ExternalAccounts.Commands.StartConnection;
 using JamSpace.Application.Features.ExternalAccounts.DTOs;
 using JamSpace.Application.Features.ExternalAccounts.Queries.GetMyExternalAccounts;
+using JamSpace.Application.Features.ExternalAccounts.Queries.GetUserPublicExternalAccounts;
 using JamSpace.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,6 +23,16 @@ public class ExternalAccountsController : ControllerBase
     public ExternalAccountsController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet("/api/users/{userId:guid}/external-accounts")]
+    [AllowAnonymous]
+    public async Task<ActionResult<IReadOnlyList<PublicUserExternalAccountDto>>> GetUserExternalAccounts(
+        [FromRoute] Guid userId,
+        CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetUserPublicExternalAccountsQuery(userId), ct);
+        return Ok(result);
     }
 
     [HttpGet]

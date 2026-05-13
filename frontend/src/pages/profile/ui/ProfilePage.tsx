@@ -12,6 +12,7 @@ import { getOrCreateDirectConversation } from '../../../entities/chat/api/conver
 
 import { ProfileHeaderCard } from '../../../widgets/profile-header/ui/ProfileHeaderCard';
 import { EditProfilePanel } from '../../../features/user/edit-profile/ui/EditProfilePanel';
+import type { EditProfilePanelTab } from '../../../features/user/edit-profile/ui/EditProfilePanel';
 import { ProfileHeaderCardSkeleton } from "../../../widgets/profile-header/ui/ProfileHeaderCardSkeleton";
 import { getToken, clearToken } from '../../../shared/lib/auth/token';
 import { chatHub } from '../../../shared/lib/realtime/chatHub';
@@ -78,6 +79,8 @@ const ProfilePage: FC = () => {
     } = useProfile(targetUserId);
 
     const [editOpen, setEditOpen] = useState(false);
+    const [editInitialTab, setEditInitialTab] = useState<EditProfilePanelTab>('profile');
+    const [platformsRefreshKey, setPlatformsRefreshKey] = useState(0);
     const {
         posts,
         loading: postsLoading,
@@ -90,6 +93,38 @@ const ProfilePage: FC = () => {
         removeComment,
     } = useUserPosts(targetUserId);
     const { message, showSuccess, showError } = useToast();
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const settingsTab = params.get('settingsTab');
+        const externalAccountConnected = params.get('externalAccountConnected');
+        const externalAccountProvider = params.get('externalAccountProvider');
+
+        if (settingsTab !== 'platforms' && externalAccountConnected === null) return;
+
+        setEditInitialTab('platforms');
+        setEditOpen(true);
+
+        if (externalAccountConnected === 'true') {
+            setPlatformsRefreshKey((value) => value + 1);
+            showSuccess(`${externalAccountProvider ?? 'Platform'} connected.`);
+        } else if (externalAccountConnected === 'false') {
+            showError(`Could not connect ${externalAccountProvider ?? 'platform'}.`);
+        }
+
+        params.delete('settingsTab');
+        params.delete('externalAccountConnected');
+        params.delete('externalAccountProvider');
+
+        const nextSearch = params.toString();
+        navigate(
+            {
+                pathname: location.pathname,
+                search: nextSearch ? `?${nextSearch}` : '',
+            },
+            { replace: true },
+        );
+    }, [location.pathname, location.search, navigate, showError, showSuccess]);
 
     useEffect(() => {
         if (navigationType === 'POP' && !loading && !postsLoading) {
@@ -236,7 +271,10 @@ const ProfilePage: FC = () => {
                         <ProfileHeaderCard
                             profile={profile}
                             isOwner={isOwner}
-                            onEdit={() => setEditOpen(true)}
+                            onEdit={() => {
+                                setEditInitialTab('profile');
+                                setEditOpen(true);
+                            }}
                             onLogout={isOwner ? handleLogout : undefined}
                             onToggleFollow={!isOwner ? toggleFollow : undefined}
                             onMessage={!isOwner ? handleMessage : undefined}
@@ -248,8 +286,9 @@ const ProfilePage: FC = () => {
                         <EditProfilePanel
                             isOpen={editOpen}
                             onClose={() => setEditOpen(false)}
-                            initialTab="profile"
+                            initialTab={editInitialTab}
                             profile={profile}
+                            platformsRefreshKey={platformsRefreshKey}
                             onSaveProfile={updateProfile}
                             addGenre={addGenre}
                             removeGenre={removeGenre}

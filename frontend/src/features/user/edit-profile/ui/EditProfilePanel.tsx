@@ -7,12 +7,16 @@ import {TagsEditorTab} from "./tags-editor-tab/TagsEditorTab";
 import {AccountTab} from "./account-tab/AccountTab";
 import {verifyPassword} from "../../../../entities/user/api/auth.api";
 import {ApiError} from "../../../../shared/api/base";
+import {PlatformsTab} from "./platforms-tab/PlatformsTab";
+
+export type EditProfilePanelTab = "profile" | "skills" | "genres" | "platforms" | "account";
 
 type Props = {
     isOpen: boolean;
     onClose: () => void;
-    initialTab?: "profile" | "skills" | "genres" | "account";
+    initialTab?: EditProfilePanelTab;
     profile: UserProfile;
+    platformsRefreshKey?: number;
     onSaveProfile: (draft: UpdateUserProfileRequest, file?: File) => Promise<void> | void;
     addGenre?: (name: string) => Promise<void> | void;
     removeGenre?: (id: string) => Promise<void> | void;
@@ -27,8 +31,9 @@ type Props = {
 export const EditProfilePanel: FC<Props> = ({
                                                       isOpen,
                                                       onClose,
-                                                      initialTab = "profile",
-                                                      profile,
+    initialTab = "profile",
+    profile,
+    platformsRefreshKey,
                                                       onSaveProfile,
                                                       addGenre,
                                                       removeGenre,
@@ -39,7 +44,7 @@ export const EditProfilePanel: FC<Props> = ({
                                                       onDeleteAccount,
                                                       onLogoutAll,
                                                   }) => {
-    const [tab, setTab] = useState<typeof initialTab>(initialTab);
+    const [tab, setTab] = useState<EditProfilePanelTab>(initialTab);
     const [isAccountUnlocked, setIsAccountUnlocked] = useState(false);
     const [verifyLoading, setVerifyLoading] = useState(false);
     const [verifyError, setVerifyError] = useState<string | null>(null);
@@ -87,6 +92,13 @@ export const EditProfilePanel: FC<Props> = ({
                     </button>
 
                     <button
+                        className={tab === "platforms" ? styles.active : ""}
+                        onClick={() => setTab("platforms")}
+                    >
+                        Platforms
+                    </button>
+
+                    <button
                         className={tab === "account" ? styles.active : ""}
                         onClick={() => setTab("account")}
                     >
@@ -124,6 +136,10 @@ export const EditProfilePanel: FC<Props> = ({
                             onRemove={async (id) => { await removeGenre?.(id); }}
                             placeholder="Add genre (e.g., Hip-hop)"
                         />
+                    )}
+
+                    {tab === 'platforms' && (
+                        <PlatformsTab refreshKey={platformsRefreshKey} />
                     )}
 
                     {tab === 'account' && (

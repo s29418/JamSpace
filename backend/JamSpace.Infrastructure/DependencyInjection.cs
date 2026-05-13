@@ -70,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenProtector, DataProtectionTokenProtector>();
         services.AddSingleton<IOAuthPkceGenerator, OAuthPkceGenerator>();
         services.AddHttpClient<IMusicPlatformAuthClient, SpotifyAuthClient>();
+        services.AddHttpClient<IMusicPlatformAuthClient, SoundCloudAuthClient>();
         services.AddSingleton<ICountryService, CountryService>();
         services.AddScoped<ICountryCodeResolver, CountryCodeResolver>();
         services.AddScoped<IAuthSessionService, AuthSessionService>();

@@ -54,6 +54,24 @@ public class UserExternalAccountRepository : IUserExternalAccountRepository
         await _db.UserExternalAccounts.AddAsync(account, ct);
     }
 
+    public void UpdateTokens(
+        UserExternalAccount account,
+        string accessToken,
+        string? refreshToken,
+        DateTimeOffset? tokenExpiresAt,
+        string? scopes,
+        DateTimeOffset updatedAt)
+    {
+        account.AccessToken = accessToken;
+
+        if (!string.IsNullOrWhiteSpace(refreshToken))
+            account.RefreshToken = refreshToken;
+
+        account.TokenExpiresAt = tokenExpiresAt;
+        account.Scopes = scopes;
+        account.UpdatedAt = updatedAt;
+    }
+
     public void Disconnect(UserExternalAccount account, DateTimeOffset disconnectedAt)
     {
         account.AccessToken = string.Empty;

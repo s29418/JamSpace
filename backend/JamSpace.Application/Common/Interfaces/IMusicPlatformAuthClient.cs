@@ -14,6 +14,10 @@ public interface IMusicPlatformAuthClient
         string codeVerifier,
         CancellationToken ct);
 
+    Task<ExternalTokenResponse> RefreshTokenAsync(
+        string refreshToken,
+        CancellationToken ct);
+
     Task<ExternalUserProfile> GetCurrentUserProfileAsync(
         string accessToken,
         CancellationToken ct);

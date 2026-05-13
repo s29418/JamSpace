@@ -8,7 +8,7 @@ using MediatR;
 namespace JamSpace.Application.Features.ExternalAccounts.Commands.CompleteConnection;
 
 public class CompleteExternalAccountConnectionHandler
-    : IRequestHandler<CompleteExternalAccountConnectionCommand, UserExternalAccountDto>
+    : IRequestHandler<CompleteExternalAccountConnectionCommand, CompleteExternalAccountConnectionResult>
 {
     private readonly IExternalOAuthStateRepository _oauthStates;
     private readonly IUserExternalAccountRepository _externalAccounts;
@@ -30,7 +30,7 @@ public class CompleteExternalAccountConnectionHandler
         _uow = uow;
     }
 
-    public async Task<UserExternalAccountDto> Handle(
+    public async Task<CompleteExternalAccountConnectionResult> Handle(
         CompleteExternalAccountConnectionCommand request,
         CancellationToken cancellationToken)
     {
@@ -87,7 +87,7 @@ public class CompleteExternalAccountConnectionHandler
         _oauthStates.MarkConsumed(oauthState, now);
         await _uow.SaveChangesAsync(cancellationToken);
 
-        return new UserExternalAccountDto(
+        var dto = new UserExternalAccountDto(
             account.Id,
             account.Provider.ToString(),
             account.ExternalUserId,
@@ -96,5 +96,7 @@ public class CompleteExternalAccountConnectionHandler
             account.AvatarUrl,
             account.ConnectedAt,
             account.UpdatedAt);
+
+        return new CompleteExternalAccountConnectionResult(dto, oauthState.ReturnUrl);
     }
 }

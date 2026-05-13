@@ -8,4 +8,4 @@ public sealed record CompleteExternalAccountConnectionCommand(
     ExternalMusicProvider Provider,
     string State,
     string Code
-) : IRequest<UserExternalAccountDto>;
+) : IRequest<CompleteExternalAccountConnectionResult>;

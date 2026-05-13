@@ -61,15 +61,20 @@ public class ExternalAccountsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{provider}/callback")]
-    public async Task<ActionResult<UserExternalAccountDto>> Callback(
+    [HttpGet("/api/external-accounts/{provider}/callback")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Callback(
         [FromRoute] string provider,
         [FromQuery] string? code,
         [FromQuery] string? state,
+        [FromQuery] string? error,
         CancellationToken ct)
     {
         if (!Enum.TryParse<ExternalMusicProvider>(provider, ignoreCase: true, out var parsedProvider))
             return BadRequest(new { message = "Unsupported external account provider." });
+
+        if (!string.IsNullOrWhiteSpace(error))
+            return BadRequest(new { message = "OAuth authorization failed.", error });
 
         if (string.IsNullOrWhiteSpace(code))
             return BadRequest(new { message = "OAuth code is required." });
@@ -81,7 +86,10 @@ public class ExternalAccountsController : ControllerBase
             new CompleteExternalAccountConnectionCommand(parsedProvider, state, code),
             ct);
 
-        return Ok(result);
+        if (string.IsNullOrWhiteSpace(result.ReturnUrl))
+            return Ok(result.Account);
+
+        return Redirect(BuildOAuthRedirectUrl(result.ReturnUrl, parsedProvider, true));
     }
 
     [HttpDelete("{provider}")]
@@ -93,5 +101,11 @@ public class ExternalAccountsController : ControllerBase
         var userId = User.GetUserId();
         await _mediator.Send(new DisconnectExternalAccountCommand(userId, parsedProvider), ct);
         return NoContent();
+    }
+
+    private static string BuildOAuthRedirectUrl(string returnUrl, ExternalMusicProvider provider, bool success)
+    {
+        var separator = returnUrl.Contains('?') ? '&' : '?';
+        return $"{returnUrl}{separator}externalAccountProvider={provider}&externalAccountConnected={success.ToString().ToLowerInvariant()}";
     }
 }

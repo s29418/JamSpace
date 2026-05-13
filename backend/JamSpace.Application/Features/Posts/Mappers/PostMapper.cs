@@ -1,4 +1,5 @@
 using JamSpace.Application.Features.Posts.DTOs;
+using JamSpace.Application.Features.PortfolioTracks.Mappers;
 using JamSpace.Domain.Entities;
 
 namespace JamSpace.Application.Features.Posts.Mappers;
@@ -20,6 +21,9 @@ public static class PostMapper
             CreatedAt = post.CreatedAt,
             MediaUrl = post.Media?.Url,
             MediaType = post.Media?.MediaType.ToString(),
+            PortfolioTrack = post.PortfolioTrack is null
+                ? null
+                : PortfolioTrackMapper.ToDto(post.PortfolioTrack),
 
             AuthorId = post.AuthorId,
             AuthorDisplayName = post.Author?.DisplayName,
@@ -61,6 +65,9 @@ public static class PostMapper
             CreatedAt = post.CreatedAt,
             MediaUrl = post.Media?.Url,
             MediaType = post.Media?.MediaType.ToString(),
+            PortfolioTrack = post.PortfolioTrack is null
+                ? null
+                : PortfolioTrackMapper.ToDto(post.PortfolioTrack),
             AuthorId = post.AuthorId,
             AuthorDisplayName = post.Author?.DisplayName,
             AuthorAvatarUrl = post.Author?.ProfilePictureUrl,

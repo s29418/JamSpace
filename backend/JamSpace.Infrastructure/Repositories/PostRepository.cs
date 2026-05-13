@@ -148,6 +148,7 @@ public class PostRepository : IPostRepository
         return _db.Posts
             .AsSplitQuery()
             .Include(p => p.Media)
+            .Include(p => p.PortfolioTrack)
             .Include(p => p.Author)
             .Include(p => p.Likes)
             .Include(p => p.Reposts)
@@ -157,6 +158,8 @@ public class PostRepository : IPostRepository
             .ThenInclude(op => op!.Author)
             .Include(p => p.OriginalPost)
             .ThenInclude(op => op!.Media)
+            .Include(p => p.OriginalPost)
+            .ThenInclude(op => op!.PortfolioTrack)
             .Include(p => p.OriginalPost)
             .ThenInclude(op => op!.Likes)
             .Include(p => p.OriginalPost)

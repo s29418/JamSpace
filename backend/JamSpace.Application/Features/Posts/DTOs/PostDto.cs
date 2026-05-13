@@ -1,4 +1,6 @@
-﻿namespace JamSpace.Application.Features.Posts.DTOs;
+using JamSpace.Application.Features.PortfolioTracks.DTOs;
+
+namespace JamSpace.Application.Features.Posts.DTOs;
 
 public class PostDto
 {
@@ -8,6 +10,7 @@ public class PostDto
 
     public string? MediaUrl { get; set; }
     public string? MediaType { get; set; }
+    public PortfolioTrackDto? PortfolioTrack { get; set; }
     
     public Guid AuthorId { get; set; }
     public string? AuthorDisplayName { get; set; } 

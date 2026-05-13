@@ -67,7 +67,7 @@ public class PostController : ControllerBase
         var userId = User.GetUserId();
 
         var result = await _mediator.Send(new CreatePostCommand
-            (userId, request.Content, request.File?.ToFileUpload()), ct);
+            (userId, request.Content, request.File?.ToFileUpload(), request.PortfolioTrackId), ct);
 
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }

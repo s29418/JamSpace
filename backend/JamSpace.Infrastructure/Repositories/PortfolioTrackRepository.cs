@@ -34,8 +34,8 @@ public class PortfolioTrackRepository : IPortfolioTrackRepository
     {
         return await _db.PortfolioTracks
             .Where(x => x.UserId == userId)
-            .OrderBy(x => x.DisplayOrder)
-            .ThenByDescending(x => x.CreatedAt)
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
             .ToListAsync(ct);
     }
 

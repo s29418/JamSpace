@@ -22,6 +22,9 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
         builder.Property(p => p.OriginalPostId)
             .IsRequired(false);
 
+        builder.Property(p => p.PortfolioTrackId)
+            .IsRequired(false);
+
         builder.HasOne(p => p.Author)
             .WithMany(u => u.Posts)
             .HasForeignKey(p => p.AuthorId)
@@ -31,6 +34,11 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
             .WithOne(pm => pm.Post)
             .HasForeignKey<PostMedia>(pm => pm.PostId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(p => p.PortfolioTrack)
+            .WithMany()
+            .HasForeignKey(p => p.PortfolioTrackId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(p => p.OriginalPost)
             .WithMany(p => p.Reposts)
@@ -52,6 +60,8 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
         builder.HasIndex(p => p.CreatedAt);
 
         builder.HasIndex(p => p.OriginalPostId);
+
+        builder.HasIndex(p => p.PortfolioTrackId);
 
         builder.HasIndex(p => new { p.AuthorId, p.OriginalPostId })
             .IsUnique()

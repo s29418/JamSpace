@@ -8,6 +8,9 @@ public class Post
     
     public PostMedia? Media { get; set; }
     
+    public Guid? PortfolioTrackId { get; set; }
+    public PortfolioTrack? PortfolioTrack { get; set; }
+    
     public Guid AuthorId { get; set; }
     public User? Author { get; set; }
     

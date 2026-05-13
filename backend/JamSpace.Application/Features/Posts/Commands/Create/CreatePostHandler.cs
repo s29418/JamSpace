@@ -15,14 +15,17 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
 {
     private readonly IPostRepository _post;
     private readonly IUserRepository _user;
+    private readonly IPortfolioTrackRepository _portfolioTracks;
     private readonly IUnitOfWork _uow;
     private readonly IFileStorageService _fileStorageService;
 
     public CreatePostHandler(IPostRepository post, IUserRepository user, 
+        IPortfolioTrackRepository portfolioTracks,
         IUnitOfWork uow, IFileStorageService fileStorageService)
     {
         _post = post;
         _user = user;
+        _portfolioTracks = portfolioTracks;
         _uow = uow;
         _fileStorageService = fileStorageService;
     }
@@ -34,10 +37,20 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
 
         string? uploadedUrl = null;
         PostMedia? media = null;
+        PortfolioTrack? portfolioTrack = null;
         var postId = Guid.NewGuid();
 
         try
         {
+            if (c.PortfolioTrackId.HasValue)
+            {
+                portfolioTrack = await _portfolioTracks.GetByIdAndUserIdAsync(
+                    c.PortfolioTrackId.Value,
+                    c.AuthorId,
+                    ct)
+                    ?? throw new NotFoundException("Portfolio track not found.");
+            }
+
             if (c.File is not null)
             {
                 var category = MediaValidationRules.ResolveCategory(c.File.ContentType);
@@ -81,13 +94,16 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
                 AuthorId = c.AuthorId,
                 Content = string.IsNullOrWhiteSpace(c.Content) ? null : c.Content.Trim(),
                 CreatedAt = DateTimeOffset.UtcNow,
-                Media = media
+                Media = media,
+                PortfolioTrackId = portfolioTrack?.Id,
+                PortfolioTrack = portfolioTrack
             };
 
             await _post.AddAsync(post, ct);
             await _uow.SaveChangesAsync(ct);
 
             post.Author = author;
+            post.PortfolioTrack = portfolioTrack;
 
             return PostMapper.ToDto(post, false, c.AuthorId);
         }

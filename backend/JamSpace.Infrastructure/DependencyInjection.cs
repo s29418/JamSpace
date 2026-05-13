@@ -1,6 +1,7 @@
-﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs;
 using JamSpace.Application.Common.Interfaces;
 using JamSpace.Application.Common.Persistence;
+using JamSpace.Application.Common.Settings;
 using JamSpace.Infrastructure.Data;
 using JamSpace.Infrastructure.Repositories;
 using JamSpace.Infrastructure.Services;
@@ -14,6 +15,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
+        services.Configure<MusicPlatformOAuthSettings>(config.GetSection("MusicPlatformOAuth"));
+
         services.AddDbContext<JamSpaceDbContext>(opt =>
             opt.UseSqlServer(config.GetConnectionString("DefaultConnection")));
         
@@ -65,6 +68,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordPolicy, PasswordPolicy>();
         services.AddScoped<ITokenProtector, DataProtectionTokenProtector>();
         services.AddSingleton<IOAuthPkceGenerator, OAuthPkceGenerator>();
+        services.AddHttpClient<IMusicPlatformAuthClient, SpotifyAuthClient>();
         services.AddSingleton<ICountryService, CountryService>();
         services.AddScoped<ICountryCodeResolver, CountryCodeResolver>();
         services.AddScoped<IAuthSessionService, AuthSessionService>();

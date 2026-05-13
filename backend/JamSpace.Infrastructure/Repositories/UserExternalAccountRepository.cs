@@ -53,4 +53,13 @@ public class UserExternalAccountRepository : IUserExternalAccountRepository
     {
         await _db.UserExternalAccounts.AddAsync(account, ct);
     }
+
+    public void Disconnect(UserExternalAccount account, DateTimeOffset disconnectedAt)
+    {
+        account.AccessToken = string.Empty;
+        account.RefreshToken = null;
+        account.TokenExpiresAt = null;
+        account.DisconnectedAt = disconnectedAt;
+        account.UpdatedAt = disconnectedAt;
+    }
 }

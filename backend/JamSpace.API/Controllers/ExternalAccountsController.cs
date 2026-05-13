@@ -1,6 +1,7 @@
 using JamSpace.API.Extensions;
 using JamSpace.Application.Common.Models;
 using JamSpace.Application.Features.ExternalAccounts.Commands.CompleteConnection;
+using JamSpace.Application.Features.ExternalAccounts.Commands.Disconnect;
 using JamSpace.Application.Features.ExternalAccounts.Commands.StartConnection;
 using JamSpace.Application.Features.ExternalAccounts.DTOs;
 using JamSpace.Application.Features.ExternalAccounts.Queries.GetMyExternalAccounts;
@@ -70,5 +71,16 @@ public class ExternalAccountsController : ControllerBase
             ct);
 
         return Ok(result);
+    }
+
+    [HttpDelete("{provider}")]
+    public async Task<IActionResult> Disconnect([FromRoute] string provider, CancellationToken ct)
+    {
+        if (!Enum.TryParse<ExternalMusicProvider>(provider, ignoreCase: true, out var parsedProvider))
+            return BadRequest(new { message = "Unsupported external account provider." });
+
+        var userId = User.GetUserId();
+        await _mediator.Send(new DisconnectExternalAccountCommand(userId, parsedProvider), ct);
+        return NoContent();
     }
 }

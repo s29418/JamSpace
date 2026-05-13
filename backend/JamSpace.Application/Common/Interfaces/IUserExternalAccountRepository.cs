@@ -15,4 +15,5 @@ public interface IUserExternalAccountRepository
         string externalUserId,
         CancellationToken ct);
     Task AddAsync(UserExternalAccount account, CancellationToken ct);
+    void Disconnect(UserExternalAccount account, DateTimeOffset disconnectedAt);
 }

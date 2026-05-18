@@ -7,8 +7,12 @@ import {
 import type { PortfolioTrack } from '../../../entities/portfolio-track/model/types';
 import { PostAudioPlayer } from '../../../entities/post/ui/PostAudioPlayer';
 import { PlatformLogo } from '../../../shared/ui/platform-logo/PlatformLogo';
-import { AddExternalPortfolioTrackRequest } from '../../../entities/portfolio-track/api/portfolioTracks.api';
-import { AddExternalTrackForm } from './AddExternalTrackForm';
+import {
+    AddExternalPortfolioTrackRequest,
+    UploadPortfolioTrackRequest
+} from '../../../entities/portfolio-track/api/portfolioTracks.api';
+import { AddPortfolioTrackForm } from './AddPortfolioTrackForm';
+import { toMediaProxyUrl } from '../../../shared/api/media';
 import styles from './PortfolioTracksSection.module.css';
 
 type Props = {
@@ -17,6 +21,7 @@ type Props = {
     error?: string | null;
     canAdd?: boolean;
     onAddExternalTrack?: (request: AddExternalPortfolioTrackRequest) => Promise<void> | void;
+    onUploadTrack?: (request: UploadPortfolioTrackRequest) => Promise<void> | void;
     canDelete?: boolean;
     onDeleteTrack?: (trackId: string) => Promise<void> | void;
 };
@@ -53,17 +58,20 @@ export const PortfolioTracksSection: React.FC<Props> = ({
     error,
     canAdd = false,
     onAddExternalTrack,
+    onUploadTrack,
     canDelete = false,
     onDeleteTrack,
 }) => {
-    const addForm = canAdd && onAddExternalTrack ? (
-        <AddExternalTrackForm onSubmit={onAddExternalTrack} />
+    const addForm = canAdd && onAddExternalTrack && onUploadTrack ? (
+        <AddPortfolioTrackForm
+            onAddExternalTrack={onAddExternalTrack}
+            onUploadTrack={onUploadTrack}
+        />
     ) : null;
 
     if (loading) {
         return (
             <section className={styles.section}>
-                <h2 className={styles.title}>Portfolio</h2>
                 {addForm}
                 <div className={styles.message}>Loading portfolio...</div>
             </section>
@@ -73,7 +81,6 @@ export const PortfolioTracksSection: React.FC<Props> = ({
     if (error) {
         return (
             <section className={styles.section}>
-                <h2 className={styles.title}>Portfolio</h2>
                 {addForm}
                 <div className={`${styles.message} ${styles.error}`}>{error}</div>
             </section>
@@ -83,7 +90,6 @@ export const PortfolioTracksSection: React.FC<Props> = ({
     if (!tracks.length) {
         return (
             <section className={styles.section}>
-                <h2 className={styles.title}>Portfolio</h2>
                 {addForm}
                 <div className={styles.message}>No portfolio tracks yet.</div>
             </section>
@@ -97,26 +103,24 @@ export const PortfolioTracksSection: React.FC<Props> = ({
             <div className={styles.list}>
                 {tracks.map((track) => {
                     const meta = resolveTrackMeta(track);
-                    const shouldShowTitle = track.source === 'Upload' || !track.embedUrl;
-                    const playerTitle = shouldShowTitle ? track.title : `${track.source} player`;
+                    const playerTitle = track.source === 'Upload' || !track.embedUrl
+                        ? track.title
+                        : `${track.source} player`;
+                    const artworkUrl = track.source === 'Upload'
+                        ? toMediaProxyUrl(track.artworkUrl)
+                        : track.artworkUrl;
+                    const fileUrl = track.source === 'Upload'
+                        ? toMediaProxyUrl(track.fileUrl)
+                        : track.fileUrl;
 
                     return (
                         <article key={track.id} className={styles.track}>
                             <div className={styles.header}>
-                                <div className={styles.artwork}>
-                                    {track.artworkUrl ? (
-                                        <img src={track.artworkUrl} alt="" />
-                                    ) : (
-                                        renderSourceIcon(track)
-                                    )}
-                                </div>
-
                                 <div className={styles.info}>
                                     <div className={styles.sourceRow}>
                                         {renderSourceIcon(track)}
                                         <span>{track.source}</span>
                                     </div>
-                                    {shouldShowTitle && <h3>{track.title}</h3>}
                                     {meta && <p>{meta}</p>}
                                 </div>
 
@@ -156,8 +160,12 @@ export const PortfolioTracksSection: React.FC<Props> = ({
                                 />
                             )}
 
-                            {!track.embedUrl && track.fileUrl && (
-                                <PostAudioPlayer src={track.fileUrl} />
+                            {!track.embedUrl && fileUrl && (
+                                <PostAudioPlayer
+                                    src={fileUrl}
+                                    title={track.title}
+                                    artworkUrl={artworkUrl}
+                                />
                             )}
                         </article>
                     );

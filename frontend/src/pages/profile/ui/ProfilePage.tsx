@@ -31,7 +31,9 @@ import {
     addExternalPortfolioTrack,
     AddExternalPortfolioTrackRequest,
     deletePortfolioTrack,
-    getUserPortfolioTracks
+    getUserPortfolioTracks,
+    uploadPortfolioTrack,
+    UploadPortfolioTrackRequest
 } from '../../../entities/portfolio-track/api/portfolioTracks.api';
 import type { PortfolioTrack } from '../../../entities/portfolio-track/model/types';
 
@@ -316,6 +318,16 @@ const ProfilePage: FC = () => {
         }
     }
 
+    async function handleUploadPortfolioTrack(request: UploadPortfolioTrackRequest) {
+        try {
+            const track = await uploadPortfolioTrack(request);
+            setPortfolioTracks((current) => [track, ...current]);
+            showSuccess('Track uploaded to portfolio.');
+        } catch (e) {
+            throw new Error(isApiError(e) ? e.message : 'Failed to upload track.');
+        }
+    }
+
     async function handleToggleLike(post: Parameters<typeof toggleLike>[0]) {
         try {
             await toggleLike(post);
@@ -443,6 +455,7 @@ const ProfilePage: FC = () => {
                                 error={portfolioError}
                                 canAdd={isOwner}
                                 onAddExternalTrack={isOwner ? handleAddExternalTrack : undefined}
+                                onUploadTrack={isOwner ? handleUploadPortfolioTrack : undefined}
                                 canDelete={isOwner}
                                 onDeleteTrack={isOwner ? handleDeletePortfolioTrack : undefined}
                             />

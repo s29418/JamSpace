@@ -74,7 +74,7 @@
 
 .sourcePicker {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
 }
 
@@ -134,6 +134,54 @@
     font-size: 13px;
 }
 
+.filePickerRow {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+}
+
+.hiddenFileInput {
+    display: none;
+}
+
+.filePickerButton {
+    border: 1px solid #26cdd4;
+    border-radius: 999px;
+    color: #26cdd4;
+    cursor: pointer;
+    padding: 9px 12px;
+    font-weight: 700;
+}
+
+.filePickerButton:hover {
+    background: rgba(38, 205, 212, .1);
+}
+
+.fileName {
+    color: #a7ded8;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.artworkPreview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #a7ded8;
+    font-size: 13px;
+}
+
+.artworkPreview img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(38, 205, 212, .35);
+}
+
 .track,
 .message {
     border: 1px solid rgba(38, 205, 212, 0.28);
@@ -157,26 +205,11 @@
 
 .header {
     display: grid;
-    grid-template-columns: 64px minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 12px;
-}
-
-.artwork {
-    width: 64px;
-    height: 64px;
-    border-radius: 8px;
-    overflow: hidden;
-    display: grid;
-    place-items: center;
-    background: #0f1112;
-    color: #26cdd4;
-}
-
-.artwork img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    padding-left: 2px;
+    margin-bottom: 14px;
 }
 
 .info {
@@ -246,17 +279,15 @@
     min-height: 152px;
     border: 0;
     border-radius: 8px;
-    margin-top: 14px;
     background: #0f1112;
 }
 
 @media (max-width: 560px) {
-    .header {
-        grid-template-columns: 52px minmax(0, 1fr) auto;
+    .sourcePicker {
+        grid-template-columns: 1fr;
     }
 
-    .artwork {
-        width: 52px;
-        height: 52px;
+    .header {
+        grid-template-columns: minmax(0, 1fr) auto;
     }
 }

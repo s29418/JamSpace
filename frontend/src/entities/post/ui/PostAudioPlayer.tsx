@@ -12,6 +12,8 @@ import styles from './PostAudioPlayer.module.css';
 
 type Props = {
     src: string;
+    title?: string;
+    artworkUrl?: string | null;
 };
 
 const AUDIO_PLAY_EVENT = 'jamspace:audio-player:play';
@@ -33,7 +35,7 @@ function formatPlaybackRate(rate: number) {
     return `${Number(rate.toFixed(2)).toString()}x`;
 }
 
-export const PostAudioPlayer: React.FC<Props> = ({ src }) => {
+export const PostAudioPlayer: React.FC<Props> = ({ src, title, artworkUrl }) => {
     const waveformRef = useRef<HTMLDivElement | null>(null);
     const wavesurferRef = useRef<WaveSurfer | null>(null);
     const rateMenuRef = useRef<HTMLDivElement | null>(null);
@@ -244,6 +246,19 @@ export const PostAudioPlayer: React.FC<Props> = ({ src }) => {
             className={styles.player}
             onClick={(event) => event.stopPropagation()}
         >
+            {(title || artworkUrl) && (
+                <div className={styles.trackHeader}>
+                    <div className={styles.artwork}>
+                        {artworkUrl ? (
+                            <img src={artworkUrl} alt="" />
+                        ) : (
+                            <span>{title?.[0]?.toUpperCase() ?? '?'}</span>
+                        )}
+                    </div>
+                    {title && <div className={styles.trackTitle}>{title}</div>}
+                </div>
+            )}
+
             <div className={styles.mainRow}>
                 <button
                     type="button"

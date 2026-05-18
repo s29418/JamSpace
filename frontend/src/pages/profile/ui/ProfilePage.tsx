@@ -28,6 +28,8 @@ import {
 } from '../../../entities/user/api/externalAccounts.api';
 import { PortfolioTracksSection } from '../../../widgets/portfolio-tracks/ui/PortfolioTracksSection';
 import {
+    addExternalPortfolioTrack,
+    AddExternalPortfolioTrackRequest,
     getUserPortfolioTracks
 } from '../../../entities/portfolio-track/api/portfolioTracks.api';
 import type { PortfolioTrack } from '../../../entities/portfolio-track/model/types';
@@ -293,6 +295,16 @@ const ProfilePage: FC = () => {
         }
     }
 
+    async function handleAddExternalTrack(request: AddExternalPortfolioTrackRequest) {
+        try {
+            const track = await addExternalPortfolioTrack(request);
+            setPortfolioTracks((current) => [track, ...current]);
+            showSuccess('Track added to portfolio.');
+        } catch (e) {
+            throw new Error(isApiError(e) ? e.message : 'Failed to add track.');
+        }
+    }
+
     async function handleToggleLike(post: Parameters<typeof toggleLike>[0]) {
         try {
             await toggleLike(post);
@@ -418,6 +430,8 @@ const ProfilePage: FC = () => {
                                 tracks={portfolioTracks}
                                 loading={portfolioLoading}
                                 error={portfolioError}
+                                canAdd={isOwner}
+                                onAddExternalTrack={isOwner ? handleAddExternalTrack : undefined}
                             />
                         )}
                     </div>

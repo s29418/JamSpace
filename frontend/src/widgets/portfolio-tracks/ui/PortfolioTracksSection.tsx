@@ -3,12 +3,16 @@ import { ArrowTopRightOnSquareIcon, MusicalNoteIcon } from '@heroicons/react/24/
 import type { PortfolioTrack } from '../../../entities/portfolio-track/model/types';
 import { PostAudioPlayer } from '../../../entities/post/ui/PostAudioPlayer';
 import { PlatformLogo } from '../../../shared/ui/platform-logo/PlatformLogo';
+import { AddExternalPortfolioTrackRequest } from '../../../entities/portfolio-track/api/portfolioTracks.api';
+import { AddExternalTrackForm } from './AddExternalTrackForm';
 import styles from './PortfolioTracksSection.module.css';
 
 type Props = {
     tracks: PortfolioTrack[];
     loading: boolean;
     error?: string | null;
+    canAdd?: boolean;
+    onAddExternalTrack?: (request: AddExternalPortfolioTrackRequest) => Promise<void> | void;
 };
 
 function formatDuration(durationMs?: number | null) {
@@ -37,11 +41,22 @@ function renderSourceIcon(track: PortfolioTrack) {
     return <MusicalNoteIcon width={24} height={24} />;
 }
 
-export const PortfolioTracksSection: React.FC<Props> = ({ tracks, loading, error }) => {
+export const PortfolioTracksSection: React.FC<Props> = ({
+    tracks,
+    loading,
+    error,
+    canAdd = false,
+    onAddExternalTrack,
+}) => {
+    const addForm = canAdd && onAddExternalTrack ? (
+        <AddExternalTrackForm onSubmit={onAddExternalTrack} />
+    ) : null;
+
     if (loading) {
         return (
             <section className={styles.section}>
                 <h2 className={styles.title}>Portfolio</h2>
+                {addForm}
                 <div className={styles.message}>Loading portfolio...</div>
             </section>
         );
@@ -51,6 +66,7 @@ export const PortfolioTracksSection: React.FC<Props> = ({ tracks, loading, error
         return (
             <section className={styles.section}>
                 <h2 className={styles.title}>Portfolio</h2>
+                {addForm}
                 <div className={`${styles.message} ${styles.error}`}>{error}</div>
             </section>
         );
@@ -60,6 +76,7 @@ export const PortfolioTracksSection: React.FC<Props> = ({ tracks, loading, error
         return (
             <section className={styles.section}>
                 <h2 className={styles.title}>Portfolio</h2>
+                {addForm}
                 <div className={styles.message}>No portfolio tracks yet.</div>
             </section>
         );
@@ -68,10 +85,13 @@ export const PortfolioTracksSection: React.FC<Props> = ({ tracks, loading, error
     return (
         <section className={styles.section}>
             <h2 className={styles.title}>Portfolio</h2>
+            {addForm}
 
             <div className={styles.list}>
                 {tracks.map((track) => {
                     const meta = resolveTrackMeta(track);
+                    const shouldShowTitle = track.source === 'Upload' || !track.embedUrl;
+                    const playerTitle = shouldShowTitle ? track.title : `${track.source} player`;
 
                     return (
                         <article key={track.id} className={styles.track}>
@@ -89,7 +109,7 @@ export const PortfolioTracksSection: React.FC<Props> = ({ tracks, loading, error
                                         {renderSourceIcon(track)}
                                         <span>{track.source}</span>
                                     </div>
-                                    <h3>{track.title}</h3>
+                                    {shouldShowTitle && <h3>{track.title}</h3>}
                                     {meta && <p>{meta}</p>}
                                 </div>
 
@@ -99,7 +119,7 @@ export const PortfolioTracksSection: React.FC<Props> = ({ tracks, loading, error
                                         target="_blank"
                                         rel="noreferrer"
                                         className={styles.openLink}
-                                        aria-label={`Open ${track.title}`}
+                                        aria-label={`Open ${playerTitle}`}
                                     >
                                         <ArrowTopRightOnSquareIcon width={18} height={18} />
                                     </a>
@@ -110,7 +130,7 @@ export const PortfolioTracksSection: React.FC<Props> = ({ tracks, loading, error
                                 <iframe
                                     className={styles.embed}
                                     src={track.embedUrl}
-                                    title={track.title}
+                                    title={playerTitle}
                                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                     loading="lazy"
                                 />

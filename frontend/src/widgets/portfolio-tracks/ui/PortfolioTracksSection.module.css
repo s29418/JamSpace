@@ -19,6 +19,120 @@
     gap: 14px;
 }
 
+.addFormShell {
+    width: 100%;
+}
+
+.addTrackButton,
+.submitButton,
+.formCancel {
+    border: 1px solid #26cdd4;
+    border-radius: 999px;
+    background: transparent;
+    color: #26cdd4;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.addTrackButton {
+    padding: 10px 16px;
+}
+
+.addTrackButton:hover,
+.formCancel:hover {
+    background: rgba(38, 205, 212, .1);
+}
+
+.addForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid rgba(38, 205, 212, 0.28);
+    border-radius: 12px;
+    background: #161819;
+    padding: 14px;
+}
+
+.formHeader,
+.formActions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.formHeader h3 {
+    margin: 0;
+    color: #e9fffb;
+}
+
+.formCancel {
+    padding: 8px 12px;
+}
+
+.sourcePicker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.sourceOption {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #2b3c3b;
+    border-radius: 999px;
+    color: #a7ded8;
+    cursor: pointer;
+}
+
+.sourceOption input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sourceOptionActive {
+    border-color: #26cdd4;
+    color: #e9fffb;
+    background: rgba(38, 205, 212, .08);
+}
+
+.input {
+    width: 100%;
+    border: 1px solid #2b3c3b;
+    border-radius: 10px;
+    background: #0f1112;
+    color: #e9fffb;
+    padding: 10px 12px;
+    outline: none;
+}
+
+.input:focus {
+    border-color: #26cdd4;
+}
+
+.submitButton {
+    padding: 10px 16px;
+    background: #26cdd4;
+    color: #0b1414;
+}
+
+.submitButton:disabled,
+.formCancel:disabled {
+    cursor: default;
+    opacity: .55;
+}
+
+.formError {
+    margin: 0;
+    color: #ff8d8d;
+    font-size: 13px;
+}
+
 .track,
 .message {
     border: 1px solid rgba(38, 205, 212, 0.28);

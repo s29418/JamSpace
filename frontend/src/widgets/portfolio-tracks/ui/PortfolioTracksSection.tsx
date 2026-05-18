@@ -1,5 +1,9 @@
 import React from 'react';
-import { ArrowTopRightOnSquareIcon, MusicalNoteIcon } from '@heroicons/react/24/outline';
+import {
+    ArrowTopRightOnSquareIcon,
+    MusicalNoteIcon,
+    TrashIcon
+} from '@heroicons/react/24/outline';
 import type { PortfolioTrack } from '../../../entities/portfolio-track/model/types';
 import { PostAudioPlayer } from '../../../entities/post/ui/PostAudioPlayer';
 import { PlatformLogo } from '../../../shared/ui/platform-logo/PlatformLogo';
@@ -13,6 +17,8 @@ type Props = {
     error?: string | null;
     canAdd?: boolean;
     onAddExternalTrack?: (request: AddExternalPortfolioTrackRequest) => Promise<void> | void;
+    canDelete?: boolean;
+    onDeleteTrack?: (trackId: string) => Promise<void> | void;
 };
 
 function formatDuration(durationMs?: number | null) {
@@ -47,6 +53,8 @@ export const PortfolioTracksSection: React.FC<Props> = ({
     error,
     canAdd = false,
     onAddExternalTrack,
+    canDelete = false,
+    onDeleteTrack,
 }) => {
     const addForm = canAdd && onAddExternalTrack ? (
         <AddExternalTrackForm onSubmit={onAddExternalTrack} />
@@ -84,7 +92,6 @@ export const PortfolioTracksSection: React.FC<Props> = ({
 
     return (
         <section className={styles.section}>
-            <h2 className={styles.title}>Portfolio</h2>
             {addForm}
 
             <div className={styles.list}>
@@ -113,17 +120,30 @@ export const PortfolioTracksSection: React.FC<Props> = ({
                                     {meta && <p>{meta}</p>}
                                 </div>
 
-                                {track.externalUrl && (
-                                    <a
-                                        href={track.externalUrl}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className={styles.openLink}
-                                        aria-label={`Open ${playerTitle}`}
-                                    >
-                                        <ArrowTopRightOnSquareIcon width={18} height={18} />
-                                    </a>
-                                )}
+                                <div className={styles.trackActions}>
+                                    {track.externalUrl && (
+                                        <a
+                                            href={track.externalUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className={styles.openLink}
+                                            aria-label={`Open ${playerTitle}`}
+                                        >
+                                            <ArrowTopRightOnSquareIcon width={18} height={18} />
+                                        </a>
+                                    )}
+
+                                    {canDelete && onDeleteTrack && (
+                                        <button
+                                            type="button"
+                                            className={styles.deleteButton}
+                                            aria-label={`Delete ${playerTitle}`}
+                                            onClick={() => void onDeleteTrack(track.id)}
+                                        >
+                                            <TrashIcon width={18} height={18} />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
 
                             {track.embedUrl && (

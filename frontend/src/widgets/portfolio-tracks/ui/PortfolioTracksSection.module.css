@@ -37,6 +37,7 @@
 
 .addTrackButton {
     padding: 10px 16px;
+    width: 100%;
 }
 
 .addTrackButton:hover,
@@ -205,7 +206,15 @@
     font-size: 13px;
 }
 
-.openLink {
+.trackActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.openLink,
+.deleteButton {
     width: 36px;
     height: 36px;
     border-radius: 999px;
@@ -214,10 +223,22 @@
     color: #26cdd4;
     border: 1px solid #26cdd4;
     text-decoration: none;
+    background: transparent;
+    cursor: pointer;
 }
 
-.openLink:hover {
+.openLink:hover,
+.deleteButton:hover {
     background: rgba(38, 205, 212, .1);
+}
+
+.deleteButton {
+    color: #ff8d8d;
+    border-color: rgba(255, 141, 141, .7);
+}
+
+.deleteButton:hover {
+    background: rgba(255, 141, 141, .1);
 }
 
 .embed {

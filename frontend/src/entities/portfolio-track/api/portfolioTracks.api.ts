@@ -22,3 +22,7 @@ export const addExternalPortfolioTrack = async (request: AddExternalPortfolioTra
     const res = await api.post<PortfolioTrack>('/me/portfolio/tracks/external-link', request);
     return res.data;
 };
+
+export const deletePortfolioTrack = async (trackId: string) => {
+    await api.delete(`/me/portfolio/tracks/${trackId}`);
+};

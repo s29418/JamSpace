@@ -30,6 +30,7 @@ import { PortfolioTracksSection } from '../../../widgets/portfolio-tracks/ui/Por
 import {
     addExternalPortfolioTrack,
     AddExternalPortfolioTrackRequest,
+    deletePortfolioTrack,
     getUserPortfolioTracks
 } from '../../../entities/portfolio-track/api/portfolioTracks.api';
 import type { PortfolioTrack } from '../../../entities/portfolio-track/model/types';
@@ -305,6 +306,16 @@ const ProfilePage: FC = () => {
         }
     }
 
+    async function handleDeletePortfolioTrack(trackId: string) {
+        try {
+            await deletePortfolioTrack(trackId);
+            setPortfolioTracks((current) => current.filter((track) => track.id !== trackId));
+            showSuccess('Track removed from portfolio.');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to remove track.');
+        }
+    }
+
     async function handleToggleLike(post: Parameters<typeof toggleLike>[0]) {
         try {
             await toggleLike(post);
@@ -432,6 +443,8 @@ const ProfilePage: FC = () => {
                                 error={portfolioError}
                                 canAdd={isOwner}
                                 onAddExternalTrack={isOwner ? handleAddExternalTrack : undefined}
+                                canDelete={isOwner}
+                                onDeleteTrack={isOwner ? handleDeletePortfolioTrack : undefined}
                             />
                         )}
                     </div>

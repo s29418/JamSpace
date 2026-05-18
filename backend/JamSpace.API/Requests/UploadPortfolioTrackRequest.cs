@@ -7,4 +7,5 @@ public class UploadPortfolioTrackRequest
     public string? AlbumTitle { get; set; }
     public int? DurationMs { get; set; }
     public IFormFile? File { get; set; }
+    public IFormFile? ArtworkFile { get; set; }
 }

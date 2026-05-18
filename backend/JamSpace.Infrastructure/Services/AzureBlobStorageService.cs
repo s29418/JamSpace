@@ -107,7 +107,7 @@ public class AzureBlobStorageService : IFileStorageService
         if (!absolutePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             return false;
 
-        blobPath = absolutePath.Substring(prefix.Length);
+        blobPath = Uri.UnescapeDataString(absolutePath.Substring(prefix.Length));
         return !string.IsNullOrWhiteSpace(blobPath);
     }
 

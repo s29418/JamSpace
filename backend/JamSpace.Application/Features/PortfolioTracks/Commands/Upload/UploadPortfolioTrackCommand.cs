@@ -10,5 +10,6 @@ public sealed record UploadPortfolioTrackCommand(
     string? ArtistName,
     string? AlbumTitle,
     int? DurationMs,
-    FileUpload File
+    FileUpload File,
+    FileUpload? ArtworkFile
 ) : IRequest<PortfolioTrackDto>;

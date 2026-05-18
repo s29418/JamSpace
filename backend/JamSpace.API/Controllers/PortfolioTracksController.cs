@@ -73,7 +73,8 @@ public class PortfolioTracksController : ControllerBase
                 request.ArtistName,
                 request.AlbumTitle,
                 request.DurationMs,
-                request.File.ToFileUpload()),
+                request.File.ToFileUpload(),
+                request.ArtworkFile?.ToFileUpload()),
             ct);
 
         return StatusCode(StatusCodes.Status201Created, result);

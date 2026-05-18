@@ -37,6 +37,7 @@ public class UploadPortfolioTrackHandler : IRequestHandler<UploadPortfolioTrackC
             throw new NotFoundException("User not found.");
 
         string? uploadedUrl = null;
+        string? artworkUrl = null;
         var trackId = Guid.NewGuid();
 
         try
@@ -46,6 +47,15 @@ public class UploadPortfolioTrackHandler : IRequestHandler<UploadPortfolioTrackC
                 StorageObjectType.PortfolioTrackAudio,
                 trackId,
                 cancellationToken);
+
+            if (request.ArtworkFile is not null)
+            {
+                artworkUrl = await _fileStorage.UploadAsync(
+                    request.ArtworkFile,
+                    StorageObjectType.PortfolioTrackArtwork,
+                    trackId,
+                    cancellationToken);
+            }
 
             var now = DateTimeOffset.UtcNow;
             var displayOrder = await _portfolioTracks.GetNextDisplayOrderAsync(
@@ -60,6 +70,7 @@ public class UploadPortfolioTrackHandler : IRequestHandler<UploadPortfolioTrackC
                 Title = request.Title.Trim(),
                 ArtistName = Normalize(request.ArtistName),
                 AlbumTitle = Normalize(request.AlbumTitle),
+                ArtworkUrl = artworkUrl,
                 DurationMs = request.DurationMs,
                 FileUrl = uploadedUrl,
                 OriginalFileName = request.File.FileName,
@@ -82,6 +93,18 @@ public class UploadPortfolioTrackHandler : IRequestHandler<UploadPortfolioTrackC
                 try
                 {
                     await _fileStorage.DeleteAsync(uploadedUrl, cancellationToken);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(artworkUrl))
+            {
+                try
+                {
+                    await _fileStorage.DeleteAsync(artworkUrl, cancellationToken);
                 }
                 catch
                 {

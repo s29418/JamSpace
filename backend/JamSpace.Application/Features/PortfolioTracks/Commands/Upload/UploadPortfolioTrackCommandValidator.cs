@@ -25,5 +25,8 @@ public class UploadPortfolioTrackCommandValidator : AbstractValidator<UploadPort
 
         RuleFor(x => x.File)
             .MustBeValidAudio();
+
+        RuleFor(x => x.ArtworkFile)
+            .MustBeValidOptionalImage();
     }
 }

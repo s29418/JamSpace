@@ -96,6 +96,20 @@ public static class MediaValidationRules
             .Must(HasValidImageSize).WithMessage("Image file size must not exceed 2 MB.");
     }
 
+    public static IRuleBuilderOptions<T, FileUpload?> MustBeValidOptionalImage<T>(
+        this IRuleBuilder<T, FileUpload?> ruleBuilder)
+    {
+        return ruleBuilder
+            .Must(file => file is null || file.Length > 0)
+            .WithMessage("Uploaded image cannot be empty.")
+            .Must(file => file is null || !string.IsNullOrWhiteSpace(file.FileName))
+            .WithMessage("Image file name is required.")
+            .Must(file => file is null || IsAllowedImage(file))
+            .WithMessage("Only JPEG or PNG images are allowed.")
+            .Must(file => file is null || HasValidImageSize(file))
+            .WithMessage("Image file size must not exceed 2 MB.");
+    }
+
     public static IRuleBuilderOptions<T, FileUpload?> MustBeValidPostMedia<T>(
         this IRuleBuilder<T, FileUpload?> ruleBuilder)
     {

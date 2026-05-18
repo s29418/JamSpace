@@ -22,8 +22,18 @@ import { useToast } from '../../../shared/lib/hooks/useToast';
 import { isApiError } from '../../../shared/api/base';
 import { PostComposer } from '../../../features/post/ui/PostComposer';
 import { restoreScrollPosition } from '../../../shared/lib/scroll/postDetailsScroll';
+import {
+    getUserExternalAccounts,
+    PublicUserExternalAccount
+} from '../../../entities/user/api/externalAccounts.api';
+import { PortfolioTracksSection } from '../../../widgets/portfolio-tracks/ui/PortfolioTracksSection';
+import {
+    getUserPortfolioTracks
+} from '../../../entities/portfolio-track/api/portfolioTracks.api';
+import type { PortfolioTrack } from '../../../entities/portfolio-track/model/types';
 
 type JwtPayload = { sub: string; username: string; email: string };
+type ProfileContentTab = 'posts' | 'portfolio';
 
 const ProfilePage: FC = () => {
     const params = useParams<{ id?: string }>();
@@ -81,6 +91,11 @@ const ProfilePage: FC = () => {
     const [editOpen, setEditOpen] = useState(false);
     const [editInitialTab, setEditInitialTab] = useState<EditProfilePanelTab>('profile');
     const [platformsRefreshKey, setPlatformsRefreshKey] = useState(0);
+    const [externalAccounts, setExternalAccounts] = useState<PublicUserExternalAccount[]>([]);
+    const [portfolioTracks, setPortfolioTracks] = useState<PortfolioTrack[]>([]);
+    const [portfolioLoading, setPortfolioLoading] = useState(false);
+    const [portfolioError, setPortfolioError] = useState<string | null>(null);
+    const [contentTab, setContentTab] = useState<ProfileContentTab>('posts');
     const {
         posts,
         loading: postsLoading,
@@ -93,6 +108,57 @@ const ProfilePage: FC = () => {
         removeComment,
     } = useUserPosts(targetUserId);
     const { message, showSuccess, showError } = useToast();
+
+    useEffect(() => {
+        if (!profile?.id) {
+            setExternalAccounts([]);
+            return;
+        }
+
+        let alive = true;
+
+        (async () => {
+            try {
+                const accounts = await getUserExternalAccounts(profile.id);
+                if (alive) setExternalAccounts(accounts);
+            } catch {
+                if (alive) setExternalAccounts([]);
+            }
+        })();
+
+        return () => {
+            alive = false;
+        };
+    }, [profile?.id, platformsRefreshKey]);
+
+    useEffect(() => {
+        if (!profile?.id) {
+            setPortfolioTracks([]);
+            return;
+        }
+
+        let alive = true;
+        setPortfolioLoading(true);
+        setPortfolioError(null);
+
+        (async () => {
+            try {
+                const tracks = await getUserPortfolioTracks(profile.id);
+                if (alive) setPortfolioTracks(tracks);
+            } catch (e) {
+                if (alive) {
+                    setPortfolioError(isApiError(e) ? e.message : 'Failed to load portfolio.');
+                    setPortfolioTracks([]);
+                }
+            } finally {
+                if (alive) setPortfolioLoading(false);
+            }
+        })();
+
+        return () => {
+            alive = false;
+        };
+    }, [profile?.id]);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -271,6 +337,7 @@ const ProfilePage: FC = () => {
                         <ProfileHeaderCard
                             profile={profile}
                             isOwner={isOwner}
+                            externalAccounts={externalAccounts}
                             onEdit={() => {
                                 setEditInitialTab('profile');
                                 setEditOpen(true);
@@ -307,20 +374,52 @@ const ProfilePage: FC = () => {
                             <p style={{ color: message.color }}>{message.text}</p>
                         )}
 
-                        {isOwner && <PostComposer onSubmit={handleCreatePost} />}
+                        <div className={styles.contentTabs} role="tablist" aria-label="Profile content">
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={contentTab === 'posts'}
+                                className={contentTab === 'posts' ? styles.contentTabActive : ''}
+                                onClick={() => setContentTab('posts')}
+                            >
+                                Posts
+                            </button>
 
-                        <PostFeed
-                            posts={posts}
-                            loading={postsLoading}
-                            error={postsError}
-                            emptyText="This user hasn't published any posts yet."
-                            currentUserId={myId}
-                            onDeletePost={isOwner ? handleDeletePost : undefined}
-                            onToggleLike={handleToggleLike}
-                            onToggleRepost={handleToggleRepost}
-                            onAddComment={handleAddComment}
-                            onDeleteComment={handleDeleteComment}
-                        />
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={contentTab === 'portfolio'}
+                                className={contentTab === 'portfolio' ? styles.contentTabActive : ''}
+                                onClick={() => setContentTab('portfolio')}
+                            >
+                                Portfolio
+                            </button>
+                        </div>
+
+                        {contentTab === 'posts' ? (
+                            <>
+                                {isOwner && <PostComposer onSubmit={handleCreatePost} />}
+
+                                <PostFeed
+                                    posts={posts}
+                                    loading={postsLoading}
+                                    error={postsError}
+                                    emptyText="This user hasn't published any posts yet."
+                                    currentUserId={myId}
+                                    onDeletePost={isOwner ? handleDeletePost : undefined}
+                                    onToggleLike={handleToggleLike}
+                                    onToggleRepost={handleToggleRepost}
+                                    onAddComment={handleAddComment}
+                                    onDeleteComment={handleDeleteComment}
+                                />
+                            </>
+                        ) : (
+                            <PortfolioTracksSection
+                                tracks={portfolioTracks}
+                                loading={portfolioLoading}
+                                error={portfolioError}
+                            />
+                        )}
                     </div>
                 )}
             </div>

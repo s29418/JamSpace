@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
 import { UserProfile } from "../../../entities/user/model/types";
+import { PublicUserExternalAccount } from "../../../entities/user/api/externalAccounts.api";
+import { PlatformLogo } from "../../../shared/ui/platform-logo/PlatformLogo";
 import styles from "./ProfileHeaderCard.module.css";
 import {
     CogIcon as SettingsIcon,
@@ -19,6 +21,7 @@ type Props = {
     followLoading?: boolean;
     onOpenFollowers?: () => void;
     onOpenFollowing?: () => void;
+    externalAccounts?: PublicUserExternalAccount[];
 };
 
 function useRegionName(locale = "en") {
@@ -44,6 +47,7 @@ export const ProfileHeaderCard: React.FC<Props> = ({
                                                        followLoading,
                                                        onOpenFollowers,
                                                        onOpenFollowing,
+                                                       externalAccounts = [],
                                                    }) => {
     const regionName = useRegionName("en");
 
@@ -108,6 +112,24 @@ export const ProfileHeaderCard: React.FC<Props> = ({
                         {profile.followingCount ?? 0} following
                     </button>
                 </div>
+
+                {externalAccounts.length > 0 && (
+                    <div className={styles.externalAccounts}>
+                        {externalAccounts.map((account) => (
+                            <a
+                                key={account.provider}
+                                className={styles.externalAccountLink}
+                                href={account.profileUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={`${account.provider}: ${account.displayName}`}
+                                aria-label={`Open ${account.displayName} on ${account.provider}`}
+                            >
+                                <PlatformLogo provider={account.provider} size={22} />
+                            </a>
+                        ))}
+                    </div>
+                )}
 
                 {!isOwner && (
                     <div className={styles.actionsInline}>

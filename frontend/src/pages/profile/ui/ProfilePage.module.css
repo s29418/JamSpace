@@ -80,3 +80,36 @@
     flex-direction: column;
     gap: 24px;
 }
+
+.contentTabs {
+    width: min(100%, 680px);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid #3f3f3f;
+    border-radius: 999px;
+    background: #1d1d1d;
+}
+
+.contentTabs button {
+    min-height: 38px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #a7ded8;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.contentTabs button:hover {
+    color: #e9fffb;
+    background: rgba(38, 205, 212, .08);
+}
+
+.contentTabs .contentTabActive {
+    background: #26cdd4;
+    color: #0b1414;
+}

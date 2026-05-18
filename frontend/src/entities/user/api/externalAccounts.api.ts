@@ -13,12 +13,24 @@ export type UserExternalAccount = {
     updatedAt: string;
 };
 
+export type PublicUserExternalAccount = {
+    provider: ExternalMusicProvider;
+    displayName: string;
+    profileUrl: string;
+    avatarUrl?: string | null;
+};
+
 type ExternalAuthUrlResponse = {
     url: string;
 };
 
 export const getMyExternalAccounts = async () => {
     const res = await api.get<UserExternalAccount[]>('/me/external-accounts');
+    return res.data;
+};
+
+export const getUserExternalAccounts = async (userId: string) => {
+    const res = await api.get<PublicUserExternalAccount[]>(`/users/${userId}/external-accounts`);
     return res.data;
 };
 

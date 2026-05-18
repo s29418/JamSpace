@@ -20,7 +20,10 @@ export function useToast(opts: Options = {}) {
         palette = {},
     } = opts;
 
-    const colors = { ...DEFAULT_PALETTE, ...palette };
+    const colors = React.useMemo(
+        () => ({ ...DEFAULT_PALETTE, ...palette }),
+        [palette],
+    );
     const [message, setMessage] = React.useState<MessageState>(null);
     const timeoutRef = React.useRef<number | null>(null);
 

@@ -7,6 +7,7 @@ import {
     UserExternalAccount,
 } from '../../../../../entities/user/api/externalAccounts.api';
 import { isApiError } from '../../../../../shared/api/base';
+import { PlatformLogo } from '../../../../../shared/ui/platform-logo/PlatformLogo';
 import styles from '../EditProfilePanel.module.css';
 
 type Props = {
@@ -78,7 +79,7 @@ export const PlatformsTab: FC<Props> = ({ refreshKey = 0 }) => {
 
             <section className={styles.platformItem}>
                 <div className={styles.platformMain}>
-                    <div className={`${styles.platformIcon} ${styles.spotifyIcon}`}>S</div>
+                    <PlatformLogo provider="Spotify" size={42} />
                     <div>
                         <h3>Spotify</h3>
                         {spotify ? (
@@ -122,7 +123,7 @@ export const PlatformsTab: FC<Props> = ({ refreshKey = 0 }) => {
 
             <section className={styles.platformItem}>
                 <div className={styles.platformMain}>
-                    <div className={`${styles.platformIcon} ${styles.soundCloudIcon}`}>SC</div>
+                    <PlatformLogo provider="SoundCloud" size={42} />
                     <div>
                         <h3>SoundCloud</h3>
                         <p className={styles.help}>Temporarily unavailable.</p>

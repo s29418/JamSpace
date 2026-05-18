@@ -460,27 +460,6 @@ select.input {
     margin: 0 0 4px;
 }
 
-.platformIcon {
-    width: 42px;
-    height: 42px;
-    border-radius: 999px;
-    display: grid;
-    place-items: center;
-    flex: 0 0 42px;
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.spotifyIcon {
-    background: #1db954;
-    color: #06170d;
-}
-
-.soundCloudIcon {
-    background: #ff7a1a;
-    color: #211006;
-}
-
 .platformActions {
     display: flex;
     flex-wrap: wrap;

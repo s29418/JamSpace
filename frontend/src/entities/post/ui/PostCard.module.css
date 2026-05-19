@@ -239,6 +239,46 @@
     text-decoration: underline;
 }
 
+.portfolioTrack {
+    margin-top: 16px;
+    border: 1px solid rgba(38, 205, 212, 0.28);
+    border-radius: 18px;
+    background: #151919;
+    padding: 14px;
+}
+
+.portfolioTrackHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 6px;
+    margin-bottom: 12px;
+    color: #93cbc5;
+    font-size: 13px;
+}
+
+.portfolioTrackHeader strong {
+    min-width: 0;
+    color: #e9fffb;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.portfolioTrackUploadIcon {
+    color: #26cdd4;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.portfolioTrackEmbed {
+    width: 100%;
+    min-height: 152px;
+    border: 0;
+    border-radius: 12px;
+    background: #0f1112;
+}
+
 .actions {
     display: flex;
     align-items: center;

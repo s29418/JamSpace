@@ -13,6 +13,12 @@ export interface Post {
     createdAt: string;
     mediaUrl?: string | null;
     mediaType?: string | null;
+    portfolioTrack?: import('../../portfolio-track/model/types').PortfolioTrack | null;
+    spotifyPlaylist?: {
+        title: string;
+        externalUrl: string;
+        embedUrl: string;
+    } | null;
     authorId: string;
     authorDisplayName?: string | null;
     authorAvatarUrl?: string | null;

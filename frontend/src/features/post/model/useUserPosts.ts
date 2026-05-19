@@ -12,6 +12,7 @@ import {
     repostPost,
     unlikePost,
 } from '../../../entities/post/api/posts.api';
+import type { CreatePostSpotifyPlaylist } from '../../../entities/post/api/posts.api';
 import type { Post } from '../../../entities/post/model/types';
 import { removeOwnRepostsForOriginal, updatePostsById } from './postState';
 
@@ -50,8 +51,13 @@ export function useUserPosts(userId?: string) {
         setPosts((current) => current.filter((post) => post.id !== postId));
     }, []);
 
-    const addPost = useCallback(async (content: string, file?: File | null) => {
-        const createdPost = await createPost(content, file);
+    const addPost = useCallback(async (
+        content: string,
+        file?: File | null,
+        portfolioTrackId?: string | null,
+        spotifyPlaylist?: CreatePostSpotifyPlaylist | null,
+    ) => {
+        const createdPost = await createPost(content, file, portfolioTrackId, spotifyPlaylist);
         setPosts((current) => [createdPost, ...current]);
         return createdPost;
     }, []);

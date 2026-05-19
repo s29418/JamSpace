@@ -247,7 +247,8 @@
 }
 
 .openLink,
-.deleteButton {
+.deleteButton,
+.shareButton {
     width: 36px;
     height: 36px;
     border-radius: 999px;
@@ -261,8 +262,17 @@
 }
 
 .openLink:hover,
-.deleteButton:hover {
+.deleteButton:hover,
+.shareButton:hover {
     background: rgba(38, 205, 212, .1);
+}
+
+.shareButton {
+    width: auto;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .deleteButton {
@@ -280,6 +290,70 @@
     border: 0;
     border-radius: 8px;
     background: #0f1112;
+}
+
+.shareComposer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 14px;
+    padding: 12px;
+    border: 1px solid rgba(38, 205, 212, .2);
+    border-radius: 10px;
+    background: #111516;
+}
+
+.shareTextarea {
+    width: 100%;
+    min-height: 82px;
+    resize: vertical;
+    border: 1px solid #2b3c3b;
+    border-radius: 10px;
+    background: #0f1112;
+    color: #e9fffb;
+    padding: 10px 12px;
+    font: inherit;
+    outline: none;
+}
+
+.shareTextarea:focus {
+    border-color: #26cdd4;
+}
+
+.shareActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.shareCancel,
+.sharePublish {
+    border: 1px solid #26cdd4;
+    border-radius: 999px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    padding: 8px 14px;
+}
+
+.shareCancel {
+    background: transparent;
+    color: #26cdd4;
+}
+
+.sharePublish {
+    background: #26cdd4;
+    color: #0b1414;
+}
+
+.shareCancel:hover {
+    background: rgba(38, 205, 212, .1);
+}
+
+.sharePublish:disabled,
+.shareCancel:disabled {
+    cursor: default;
+    opacity: .55;
 }
 
 @media (max-width: 560px) {

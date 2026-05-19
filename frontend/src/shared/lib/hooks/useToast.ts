@@ -14,14 +14,12 @@ const DEFAULT_PALETTE: Record<InlineMessageType, string> = {
     info: '#9ca3af',
 };
 
-export function useToast(opts: Options = {}) {
-    const {
-        defaultTimeoutMs = 5000,
-        palette = {},
-    } = opts;
+export function useToast(opts?: Options) {
+    const defaultTimeoutMs = opts?.defaultTimeoutMs ?? 5000;
+    const palette = opts?.palette;
 
     const colors = React.useMemo(
-        () => ({ ...DEFAULT_PALETTE, ...palette }),
+        () => ({ ...DEFAULT_PALETTE, ...(palette ?? {}) }),
         [palette],
     );
     const [message, setMessage] = React.useState<MessageState>(null);

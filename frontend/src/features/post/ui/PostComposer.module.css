@@ -58,6 +58,7 @@
 }
 
 .fileButton,
+.trackButton,
 .submitButton,
 .removeFileButton {
     border: none;
@@ -82,11 +83,167 @@
     background: rgba(38, 205, 212, 0.2);
 }
 
+.trackPicker {
+    position: relative;
+}
+
+.playlistPicker {
+    position: relative;
+}
+
+.trackButton {
+    padding: 10px 14px;
+    background: rgba(38, 205, 212, 0.12);
+    color: #26cdd4;
+}
+
+.trackButton:hover {
+    background: rgba(38, 205, 212, 0.2);
+}
+
+.trackMenu {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 8px);
+    z-index: 10;
+    width: min(320px, 82vw);
+    max-height: 280px;
+    overflow: auto;
+    border: 1px solid rgba(38, 205, 212, 0.32);
+    border-radius: 14px;
+    background: #101414;
+    padding: 8px;
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
+}
+
+.playlistForm {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 8px);
+    z-index: 10;
+    width: min(340px, 82vw);
+    border: 1px solid rgba(38, 205, 212, 0.32);
+    border-radius: 14px;
+    background: #101414;
+    padding: 10px;
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.playlistInput {
+    width: 100%;
+    border: 1px solid #2b3c3b;
+    border-radius: 10px;
+    background: #0f1112;
+    color: #e9fffb;
+    padding: 10px 12px;
+    font: inherit;
+    outline: none;
+}
+
+.playlistInput:focus {
+    border-color: #26cdd4;
+}
+
+.playlistActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.playlistCancel,
+.playlistAdd {
+    border: 1px solid #26cdd4;
+    border-radius: 999px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    padding: 8px 12px;
+}
+
+.playlistCancel {
+    background: transparent;
+    color: #26cdd4;
+}
+
+.playlistAdd {
+    background: #26cdd4;
+    color: #0b1414;
+}
+
+.trackOption {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #e9fffb;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    text-align: left;
+}
+
+.trackOption:hover {
+    background: rgba(38, 205, 212, 0.1);
+}
+
+.trackOptionIcon,
+.selectedTrackIcon {
+    display: grid;
+    place-items: center;
+    color: #26cdd4;
+}
+
+.trackOptionText {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.trackOptionText strong,
+.selectedTrackName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.trackOptionText small {
+    color: #93cbc5;
+}
+
+.trackMenuMessage {
+    color: #a7ded8;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+}
+
+.playlistImage {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
 .fileMeta {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
+    color: #d8d8d8;
+    font-size: 0.92rem;
+}
+
+.selectedTrack {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    gap: 8px;
     color: #d8d8d8;
     font-size: 0.92rem;
 }

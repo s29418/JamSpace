@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     ArrowTopRightOnSquareIcon,
     MusicalNoteIcon,
@@ -13,6 +13,7 @@ import {
 } from '../../../entities/portfolio-track/api/portfolioTracks.api';
 import { AddPortfolioTrackForm } from './AddPortfolioTrackForm';
 import { toMediaProxyUrl } from '../../../shared/api/media';
+import { applyExternalTrackEmbedTheme } from '../../../entities/portfolio-track/lib/externalTrackEmbed';
 import styles from './PortfolioTracksSection.module.css';
 
 type Props = {
@@ -24,6 +25,8 @@ type Props = {
     onUploadTrack?: (request: UploadPortfolioTrackRequest) => Promise<void> | void;
     canDelete?: boolean;
     onDeleteTrack?: (trackId: string) => Promise<void> | void;
+    canShare?: boolean;
+    onShareTrack?: (trackId: string, content?: string) => Promise<void> | void;
 };
 
 function formatDuration(durationMs?: number | null) {
@@ -61,13 +64,31 @@ export const PortfolioTracksSection: React.FC<Props> = ({
     onUploadTrack,
     canDelete = false,
     onDeleteTrack,
+    canShare = false,
+    onShareTrack,
 }) => {
+    const [sharingTrackId, setSharingTrackId] = useState<string | null>(null);
+    const [shareContent, setShareContent] = useState('');
+    const [sharingBusy, setSharingBusy] = useState(false);
     const addForm = canAdd && onAddExternalTrack && onUploadTrack ? (
         <AddPortfolioTrackForm
             onAddExternalTrack={onAddExternalTrack}
             onUploadTrack={onUploadTrack}
         />
     ) : null;
+
+    async function handleShare(trackId: string) {
+        if (!onShareTrack || sharingBusy) return;
+
+        setSharingBusy(true);
+        try {
+            await onShareTrack(trackId, shareContent.trim());
+            setShareContent('');
+            setSharingTrackId(null);
+        } finally {
+            setSharingBusy(false);
+        }
+    }
 
     if (loading) {
         return (
@@ -112,6 +133,9 @@ export const PortfolioTracksSection: React.FC<Props> = ({
                     const fileUrl = track.source === 'Upload'
                         ? toMediaProxyUrl(track.fileUrl)
                         : track.fileUrl;
+                    const embedUrl = track.embedUrl && track.source !== 'Upload'
+                        ? applyExternalTrackEmbedTheme(track.source, track.embedUrl)
+                        : track.embedUrl;
 
                     return (
                         <article key={track.id} className={styles.track}>
@@ -121,6 +145,9 @@ export const PortfolioTracksSection: React.FC<Props> = ({
                                         {renderSourceIcon(track)}
                                         <span>{track.source}</span>
                                     </div>
+                                    {track.source !== 'Upload' && (
+                                        <h3>{track.title}</h3>
+                                    )}
                                     {meta && <p>{meta}</p>}
                                 </div>
 
@@ -147,13 +174,61 @@ export const PortfolioTracksSection: React.FC<Props> = ({
                                             <TrashIcon width={18} height={18} />
                                         </button>
                                     )}
+
+                                    {canShare && onShareTrack && (
+                                        <button
+                                            type="button"
+                                            className={styles.shareButton}
+                                            onClick={() => {
+                                                setSharingTrackId((current) => current === track.id ? null : track.id);
+                                                setShareContent('');
+                                            }}
+                                        >
+                                            Post
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
-                            {track.embedUrl && (
+                            {sharingTrackId === track.id && (
+                                <div className={styles.shareComposer}>
+                                    <textarea
+                                        className={styles.shareTextarea}
+                                        placeholder="Add text to your post..."
+                                        value={shareContent}
+                                        onChange={(event) => setShareContent(event.target.value)}
+                                        disabled={sharingBusy}
+                                    />
+
+                                    <div className={styles.shareActions}>
+                                        <button
+                                            type="button"
+                                            className={styles.shareCancel}
+                                            onClick={() => {
+                                                setSharingTrackId(null);
+                                                setShareContent('');
+                                            }}
+                                            disabled={sharingBusy}
+                                        >
+                                            Cancel
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className={styles.sharePublish}
+                                            onClick={() => void handleShare(track.id)}
+                                            disabled={sharingBusy}
+                                        >
+                                            {sharingBusy ? 'Posting...' : 'Publish'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {embedUrl && (
                                 <iframe
                                     className={styles.embed}
-                                    src={track.embedUrl}
+                                    src={embedUrl}
                                     title={playerTitle}
                                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                                     loading="lazy"

@@ -81,6 +81,13 @@
     gap: 24px;
 }
 
+.inlineMessage {
+    width: min(100%, 680px);
+    margin: 0 auto;
+    text-align: center;
+    font-weight: 600;
+}
+
 .contentTabs {
     width: min(100%, 680px);
     margin: 0 auto;

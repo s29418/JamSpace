@@ -1,5 +1,6 @@
 import { api, API_BASE_URL } from '../../../shared/api/base';
 import type { CursorResult, Post, PostComment } from '../model/types';
+import type { PortfolioTrack } from '../../portfolio-track/model/types';
 
 const ROOT = '/posts';
 
@@ -38,6 +39,30 @@ function normalizeComment(comment: any): PostComment {
     };
 }
 
+function normalizePortfolioTrack(dto: any): PortfolioTrack | null {
+    if (!dto) return null;
+
+    return {
+        id: String(dto.id),
+        userId: String(dto.userId),
+        source: dto.source,
+        title: dto.title ?? '',
+        artistName: dto.artistName ?? null,
+        albumTitle: dto.albumTitle ?? null,
+        artworkUrl: dto.artworkUrl ?? null,
+        durationMs: dto.durationMs ?? null,
+        externalTrackId: dto.externalTrackId ?? null,
+        externalUrl: dto.externalUrl ?? null,
+        embedUrl: dto.embedUrl ?? null,
+        fileUrl: dto.fileUrl ?? null,
+        contentType: dto.contentType ?? null,
+        length: dto.length ?? null,
+        displayOrder: Number(dto.displayOrder ?? 0),
+        createdAt: dto.createdAt,
+        updatedAt: dto.updatedAt,
+    };
+}
+
 function normalizePost(dto: any): Post {
     return {
         id: String(dto.id),
@@ -45,6 +70,14 @@ function normalizePost(dto: any): Post {
         createdAt: dto.createdAt,
         mediaUrl: buildMediaUrl(dto.mediaUrl ?? null, dto.mediaType ?? null),
         mediaType: dto.mediaType ?? null,
+        portfolioTrack: normalizePortfolioTrack(dto.portfolioTrack ?? null),
+        spotifyPlaylist: dto.spotifyPlaylist
+            ? {
+                title: dto.spotifyPlaylist.title ?? '',
+                externalUrl: dto.spotifyPlaylist.externalUrl ?? '',
+                embedUrl: dto.spotifyPlaylist.embedUrl ?? '',
+            }
+            : null,
         authorId: String(dto.authorId),
         authorDisplayName: dto.authorDisplayName ?? null,
         authorAvatarUrl: dto.authorAvatarUrl ?? null,
@@ -103,7 +136,18 @@ export async function getPost(postId: string) {
     return normalizePost(res.data);
 }
 
-export async function createPost(content: string, file?: File | null) {
+export type CreatePostSpotifyPlaylist = {
+    title: string;
+    externalUrl: string;
+    embedUrl?: string | null;
+};
+
+export async function createPost(
+    content: string,
+    file?: File | null,
+    portfolioTrackId?: string | null,
+    spotifyPlaylist?: CreatePostSpotifyPlaylist | null,
+) {
     const formData = new FormData();
 
     if (content.trim()) {
@@ -114,9 +158,16 @@ export async function createPost(content: string, file?: File | null) {
         formData.append('file', file);
     }
 
-    const res = await api.post<Post>(ROOT, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    if (portfolioTrackId) {
+        formData.append('portfolioTrackId', portfolioTrackId);
+    }
+
+    if (spotifyPlaylist) {
+        formData.append('spotifyPlaylistTitle', spotifyPlaylist.title);
+        formData.append('spotifyPlaylistExternalUrl', spotifyPlaylist.externalUrl);
+    }
+
+    const res = await api.post<Post>(ROOT, formData);
 
     return normalizePost(res.data);
 }

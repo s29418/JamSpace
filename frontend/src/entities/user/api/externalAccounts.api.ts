@@ -20,6 +20,14 @@ export type PublicUserExternalAccount = {
     avatarUrl?: string | null;
 };
 
+export type SpotifyPlaylist = {
+    id: string;
+    name: string;
+    externalUrl: string;
+    embedUrl: string;
+    imageUrl?: string | null;
+};
+
 type ExternalAuthUrlResponse = {
     url: string;
 };
@@ -49,4 +57,9 @@ export const startExternalAccountConnection = async (
 
 export const disconnectExternalAccount = async (provider: ExternalMusicProvider) => {
     await api.delete(`/me/external-accounts/${provider}`);
+};
+
+export const getMySpotifyPlaylists = async () => {
+    const res = await api.get<SpotifyPlaylist[]>('/me/external-accounts/spotify/playlists');
+    return res.data;
 };

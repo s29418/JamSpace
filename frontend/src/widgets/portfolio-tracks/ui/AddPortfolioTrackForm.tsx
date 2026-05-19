@@ -5,8 +5,7 @@ import {
 } from '../../../entities/portfolio-track/api/portfolioTracks.api';
 import { PlatformLogo } from '../../../shared/ui/platform-logo/PlatformLogo';
 import {
-    resolveExternalTrackEmbedUrl,
-    resolveExternalTrackTitle
+    resolveExternalTrackEmbedUrl
 } from '../../../entities/portfolio-track/lib/externalTrackEmbed';
 import { MusicalNoteIcon } from '@heroicons/react/24/outline';
 import styles from './PortfolioTracksSection.module.css';
@@ -48,7 +47,7 @@ export const AddPortfolioTrackForm: React.FC<Props> = ({
 
     const canSubmit = mode === 'Upload'
         ? Boolean(title.trim() && file)
-        : Boolean(externalUrl.trim());
+        : Boolean(title.trim() && externalUrl.trim());
 
     useEffect(() => {
         if (!artworkFile) {
@@ -95,7 +94,7 @@ export const AddPortfolioTrackForm: React.FC<Props> = ({
 
                 await onAddExternalTrack({
                     source: mode,
-                    title: resolveExternalTrackTitle(mode, externalUrl),
+                    title: title.trim(),
                     embedUrl,
                     externalUrl: externalUrl.trim(),
                 });
@@ -215,13 +214,23 @@ export const AddPortfolioTrackForm: React.FC<Props> = ({
                             )}
                         </>
                     ) : (
-                        <input
-                            className={styles.input}
-                            value={externalUrl}
-                            onChange={(event) => setExternalUrl(event.target.value)}
-                            placeholder={`${mode} track link`}
-                            disabled={busy}
-                        />
+                        <>
+                            <input
+                                className={styles.input}
+                                value={title}
+                                onChange={(event) => setTitle(event.target.value)}
+                                placeholder="Track title"
+                                disabled={busy}
+                            />
+
+                            <input
+                                className={styles.input}
+                                value={externalUrl}
+                                onChange={(event) => setExternalUrl(event.target.value)}
+                                placeholder={`${mode} track link`}
+                                disabled={busy}
+                            />
+                        </>
                     )}
 
                     {error && <p className={styles.formError}>{error}</p>}

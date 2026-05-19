@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useNavigationType, useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
@@ -24,6 +24,8 @@ import { PostComposer } from '../../../features/post/ui/PostComposer';
 import { restoreScrollPosition } from '../../../shared/lib/scroll/postDetailsScroll';
 import {
     getUserExternalAccounts,
+    getMySpotifyPlaylists,
+    SpotifyPlaylist,
     PublicUserExternalAccount
 } from '../../../entities/user/api/externalAccounts.api';
 import { PortfolioTracksSection } from '../../../widgets/portfolio-tracks/ui/PortfolioTracksSection';
@@ -36,6 +38,7 @@ import {
     UploadPortfolioTrackRequest
 } from '../../../entities/portfolio-track/api/portfolioTracks.api';
 import type { PortfolioTrack } from '../../../entities/portfolio-track/model/types';
+import type { CreatePostSpotifyPlaylist } from '../../../entities/post/api/posts.api';
 
 type JwtPayload = { sub: string; username: string; email: string };
 type ProfileContentTab = 'posts' | 'portfolio';
@@ -48,6 +51,7 @@ const ProfilePage: FC = () => {
 
     const [isLoginView, setIsLoginView] = useState(true);
     const [myId, setMyId] = useState<string | null>(null);
+    const handledOAuthSearchRef = useRef<string | null>(null);
 
     useEffect(() => {
         const token = getToken();
@@ -100,6 +104,9 @@ const ProfilePage: FC = () => {
     const [portfolioTracks, setPortfolioTracks] = useState<PortfolioTrack[]>([]);
     const [portfolioLoading, setPortfolioLoading] = useState(false);
     const [portfolioError, setPortfolioError] = useState<string | null>(null);
+    const [spotifyPlaylists, setSpotifyPlaylists] = useState<SpotifyPlaylist[]>([]);
+    const [spotifyPlaylistsLoading, setSpotifyPlaylistsLoading] = useState(false);
+    const [spotifyPlaylistsError, setSpotifyPlaylistsError] = useState<string | null>(null);
     const [contentTab, setContentTab] = useState<ProfileContentTab>('posts');
     const {
         posts,
@@ -166,6 +173,8 @@ const ProfilePage: FC = () => {
     }, [profile?.id]);
 
     useEffect(() => {
+        if (handledOAuthSearchRef.current === location.search) return;
+
         const params = new URLSearchParams(location.search);
         const settingsTab = params.get('settingsTab');
         const externalAccountConnected = params.get('externalAccountConnected');
@@ -173,6 +182,7 @@ const ProfilePage: FC = () => {
 
         if (settingsTab !== 'platforms' && externalAccountConnected === null) return;
 
+        handledOAuthSearchRef.current = location.search;
         setEditInitialTab('platforms');
         setEditOpen(true);
 
@@ -289,12 +299,34 @@ const ProfilePage: FC = () => {
         }
     }
 
-    async function handleCreatePost(content: string, file?: File | null) {
+    async function handleCreatePost(
+        content: string,
+        file?: File | null,
+        portfolioTrackId?: string | null,
+        spotifyPlaylist?: CreatePostSpotifyPlaylist | null,
+    ) {
         try {
-            await addPost(content, file);
+            await addPost(content, file, portfolioTrackId, spotifyPlaylist);
             showSuccess('Post published.');
         } catch (e) {
             throw new Error(isApiError(e) ? e.message : 'Failed to publish post.');
+        }
+    }
+
+    async function loadSpotifyPlaylists() {
+        if (!isOwner || spotifyPlaylistsLoading) return;
+
+        setSpotifyPlaylistsLoading(true);
+        setSpotifyPlaylistsError(null);
+
+        try {
+            const playlists = await getMySpotifyPlaylists();
+            setSpotifyPlaylists(playlists);
+        } catch (e) {
+            setSpotifyPlaylistsError(isApiError(e) ? e.message : 'Could not load Spotify playlists.');
+            setSpotifyPlaylists([]);
+        } finally {
+            setSpotifyPlaylistsLoading(false);
         }
     }
 
@@ -305,6 +337,16 @@ const ProfilePage: FC = () => {
             showSuccess('Track added to portfolio.');
         } catch (e) {
             throw new Error(isApiError(e) ? e.message : 'Failed to add track.');
+        }
+    }
+
+    async function handleSharePortfolioTrack(trackId: string, content = '') {
+        try {
+            await addPost(content, null, trackId);
+            setContentTab('posts');
+            showSuccess('Track published.');
+        } catch (e) {
+            showError(isApiError(e) ? e.message : 'Failed to publish track.');
         }
     }
 
@@ -406,7 +448,12 @@ const ProfilePage: FC = () => {
                         />
 
                         {message && (
-                            <p style={{ color: message.color }}>{message.text}</p>
+                            <p
+                                className={styles.inlineMessage}
+                                style={{ color: message.color }}
+                            >
+                                {message.text}
+                            </p>
                         )}
 
                         <div className={styles.contentTabs} role="tablist" aria-label="Profile content">
@@ -433,7 +480,16 @@ const ProfilePage: FC = () => {
 
                         {contentTab === 'posts' ? (
                             <>
-                                {isOwner && <PostComposer onSubmit={handleCreatePost} />}
+                                {isOwner && (
+                                    <PostComposer
+                                        onSubmit={handleCreatePost}
+                                        portfolioTracks={portfolioTracks}
+                                        spotifyPlaylists={spotifyPlaylists}
+                                        spotifyPlaylistsLoading={spotifyPlaylistsLoading}
+                                        spotifyPlaylistsError={spotifyPlaylistsError}
+                                        onRefreshSpotifyPlaylists={loadSpotifyPlaylists}
+                                    />
+                                )}
 
                                 <PostFeed
                                     posts={posts}
@@ -458,6 +514,8 @@ const ProfilePage: FC = () => {
                                 onUploadTrack={isOwner ? handleUploadPortfolioTrack : undefined}
                                 canDelete={isOwner}
                                 onDeleteTrack={isOwner ? handleDeletePortfolioTrack : undefined}
+                                canShare={isOwner}
+                                onShareTrack={isOwner ? handleSharePortfolioTrack : undefined}
                             />
                         )}
                     </div>

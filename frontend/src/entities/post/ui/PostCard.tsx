@@ -11,6 +11,9 @@ import { PostAudioPlayer } from './PostAudioPlayer';
 import { PostVideoPlayer } from './PostVideoPlayer';
 import { inferMediaKind } from './postCard.utils';
 import { saveScrollPosition } from '../../../shared/lib/scroll/postDetailsScroll';
+import { PlatformLogo } from '../../../shared/ui/platform-logo/PlatformLogo';
+import { toMediaProxyUrl } from '../../../shared/api/media';
+import { applyExternalTrackEmbedTheme } from '../../portfolio-track/lib/externalTrackEmbed';
 
 type Props = {
     post: Post;
@@ -48,6 +51,17 @@ export const PostCard: React.FC<Props> = ({
     const detailsHref = `/posts/${post.id}`;
     const isCardClickable = enableDetailsNavigation;
     const canPreviewMedia = mediaKind === 'image' || mediaKind === 'video';
+    const portfolioTrack = post.portfolioTrack;
+    const portfolioTrackArtworkUrl = portfolioTrack?.source === 'Upload'
+        ? toMediaProxyUrl(portfolioTrack.artworkUrl)
+        : portfolioTrack?.artworkUrl;
+    const portfolioTrackFileUrl = portfolioTrack?.source === 'Upload'
+        ? toMediaProxyUrl(portfolioTrack.fileUrl)
+        : portfolioTrack?.fileUrl;
+    const portfolioTrackEmbedUrl = portfolioTrack?.embedUrl && portfolioTrack.source !== 'Upload'
+        ? applyExternalTrackEmbedTheme(portfolioTrack.source, portfolioTrack.embedUrl)
+        : portfolioTrack?.embedUrl;
+    const spotifyPlaylist = post.spotifyPlaylist;
 
     useEffect(() => {
         if (!mediaViewerOpen) {
@@ -133,6 +147,57 @@ export const PostCard: React.FC<Props> = ({
                             Open attachment
                         </a>
                     )}
+                </div>
+            )}
+
+            {portfolioTrack && (
+                <div className={styles.portfolioTrack}>
+                    <div className={styles.portfolioTrackHeader}>
+                        {(portfolioTrack.source === 'Spotify' || portfolioTrack.source === 'SoundCloud') ? (
+                            <PlatformLogo provider={portfolioTrack.source} size={22} />
+                        ) : (
+                            <span className={styles.portfolioTrackUploadIcon}>♪</span>
+                        )}
+                        <span>{portfolioTrack.source}</span>
+                    </div>
+
+                    {portfolioTrackEmbedUrl && (
+                        <iframe
+                            className={styles.portfolioTrackEmbed}
+                            src={portfolioTrackEmbedUrl}
+                            title={`${portfolioTrack.source} player`}
+                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                            loading="lazy"
+                            onClick={(event) => event.stopPropagation()}
+                        />
+                    )}
+
+                    {!portfolioTrack.embedUrl && portfolioTrackFileUrl && (
+                        <PostAudioPlayer
+                            src={portfolioTrackFileUrl}
+                            title={portfolioTrack.title}
+                            artworkUrl={portfolioTrackArtworkUrl}
+                        />
+                    )}
+                </div>
+            )}
+
+            {spotifyPlaylist && (
+                <div className={styles.portfolioTrack}>
+                    <div className={styles.portfolioTrackHeader}>
+                        <PlatformLogo provider="Spotify" size={22} />
+                        <span>Spotify playlist</span>
+                        <strong>{spotifyPlaylist.title}</strong>
+                    </div>
+
+                    <iframe
+                        className={styles.portfolioTrackEmbed}
+                        src={spotifyPlaylist.embedUrl}
+                        title={`${spotifyPlaylist.title} Spotify playlist`}
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"
+                        onClick={(event) => event.stopPropagation()}
+                    />
                 </div>
             )}
 

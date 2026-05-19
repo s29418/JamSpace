@@ -9,5 +9,6 @@ public enum StorageObjectType
     PostVideo,
     PostAudio,
     PortfolioTrackAudio,
-    PortfolioTrackArtwork
+    PortfolioTrackArtwork,
+    ProjectAudioVersionAudio
 }

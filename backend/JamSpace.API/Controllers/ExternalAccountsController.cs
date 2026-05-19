@@ -5,6 +5,7 @@ using JamSpace.Application.Features.ExternalAccounts.Commands.Disconnect;
 using JamSpace.Application.Features.ExternalAccounts.Commands.StartConnection;
 using JamSpace.Application.Features.ExternalAccounts.DTOs;
 using JamSpace.Application.Features.ExternalAccounts.Queries.GetMyExternalAccounts;
+using JamSpace.Application.Features.ExternalAccounts.Queries.GetMySpotifyPlaylists;
 using JamSpace.Application.Features.ExternalAccounts.Queries.GetUserPublicExternalAccounts;
 using JamSpace.Domain.Enums;
 using MediatR;
@@ -41,6 +42,15 @@ public class ExternalAccountsController : ControllerBase
     {
         var userId = User.GetUserId();
         var result = await _mediator.Send(new GetMyExternalAccountsQuery(userId), ct);
+        return Ok(result);
+    }
+
+    [HttpGet("spotify/playlists")]
+    public async Task<ActionResult<IReadOnlyList<SpotifyPlaylistDto>>> GetMySpotifyPlaylists(
+        CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(new GetMySpotifyPlaylistsQuery(userId), ct);
         return Ok(result);
     }
 

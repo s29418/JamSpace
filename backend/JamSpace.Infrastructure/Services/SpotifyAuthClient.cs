@@ -16,7 +16,11 @@ public class SpotifyAuthClient : IMusicPlatformAuthClient
     private const string DefaultTokenEndpoint = "https://accounts.spotify.com/api/token";
     private const string DefaultCurrentUserEndpoint = "https://api.spotify.com/v1/me";
 
-    private static readonly string[] DefaultScopes = ["user-read-private", "user-read-email"];
+    private static readonly string[] DefaultScopes = [
+        "user-read-private",
+        "user-read-email",
+        "playlist-read-private"
+    ];
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly HttpClient _httpClient;

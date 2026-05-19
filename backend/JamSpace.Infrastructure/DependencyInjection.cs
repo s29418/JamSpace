@@ -71,6 +71,7 @@ public static class DependencyInjection
         services.AddSingleton<IOAuthPkceGenerator, OAuthPkceGenerator>();
         services.AddHttpClient<IMusicPlatformAuthClient, SpotifyAuthClient>();
         services.AddHttpClient<IMusicPlatformAuthClient, SoundCloudAuthClient>();
+        services.AddHttpClient<ISpotifyPlaylistClient, SpotifyPlaylistClient>();
         services.AddSingleton<ICountryService, CountryService>();
         services.AddScoped<ICountryCodeResolver, CountryCodeResolver>();
         services.AddScoped<IAuthSessionService, AuthSessionService>();

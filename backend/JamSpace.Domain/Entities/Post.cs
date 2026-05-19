@@ -10,6 +10,10 @@ public class Post
     
     public Guid? PortfolioTrackId { get; set; }
     public PortfolioTrack? PortfolioTrack { get; set; }
+
+    public string? SpotifyPlaylistTitle { get; set; }
+    public string? SpotifyPlaylistExternalUrl { get; set; }
+    public string? SpotifyPlaylistEmbedUrl { get; set; }
     
     public Guid AuthorId { get; set; }
     public User? Author { get; set; }

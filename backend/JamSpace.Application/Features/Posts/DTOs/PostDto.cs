@@ -11,6 +11,7 @@ public class PostDto
     public string? MediaUrl { get; set; }
     public string? MediaType { get; set; }
     public PortfolioTrackDto? PortfolioTrack { get; set; }
+    public PostSpotifyPlaylistDto? SpotifyPlaylist { get; set; }
     
     public Guid AuthorId { get; set; }
     public string? AuthorDisplayName { get; set; } 

@@ -38,6 +38,7 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
         string? uploadedUrl = null;
         PostMedia? media = null;
         PortfolioTrack? portfolioTrack = null;
+        string? spotifyPlaylistEmbedUrl = null;
         var postId = Guid.NewGuid();
 
         try
@@ -88,6 +89,12 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
                 };
             }
 
+            if (!string.IsNullOrWhiteSpace(c.SpotifyPlaylistExternalUrl))
+            {
+                if (!SpotifyPlaylistLink.TryBuildEmbedUrl(c.SpotifyPlaylistExternalUrl, out spotifyPlaylistEmbedUrl))
+                    throw new InvalidOperationException("Invalid Spotify playlist link.");
+            }
+
             var post = new Post
             {
                 Id = postId,
@@ -96,7 +103,14 @@ public class CreatePostHandler : IRequestHandler<CreatePostCommand, PostDto>
                 CreatedAt = DateTimeOffset.UtcNow,
                 Media = media,
                 PortfolioTrackId = portfolioTrack?.Id,
-                PortfolioTrack = portfolioTrack
+                PortfolioTrack = portfolioTrack,
+                SpotifyPlaylistTitle = string.IsNullOrWhiteSpace(c.SpotifyPlaylistTitle)
+                    ? null
+                    : c.SpotifyPlaylistTitle.Trim(),
+                SpotifyPlaylistExternalUrl = string.IsNullOrWhiteSpace(c.SpotifyPlaylistExternalUrl)
+                    ? null
+                    : c.SpotifyPlaylistExternalUrl.Trim(),
+                SpotifyPlaylistEmbedUrl = spotifyPlaylistEmbedUrl
             };
 
             await _post.AddAsync(post, ct);

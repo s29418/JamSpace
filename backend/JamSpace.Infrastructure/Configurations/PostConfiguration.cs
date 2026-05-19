@@ -25,6 +25,18 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
         builder.Property(p => p.PortfolioTrackId)
             .IsRequired(false);
 
+        builder.Property(p => p.SpotifyPlaylistTitle)
+            .IsRequired(false)
+            .HasMaxLength(200);
+
+        builder.Property(p => p.SpotifyPlaylistExternalUrl)
+            .IsRequired(false)
+            .HasMaxLength(500);
+
+        builder.Property(p => p.SpotifyPlaylistEmbedUrl)
+            .IsRequired(false)
+            .HasMaxLength(500);
+
         builder.HasOne(p => p.Author)
             .WithMany(u => u.Posts)
             .HasForeignKey(p => p.AuthorId)

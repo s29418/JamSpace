@@ -8,5 +8,7 @@ public sealed record CreatePostCommand(
     Guid AuthorId,
     string? Content,
     FileUpload? File,
-    Guid? PortfolioTrackId
+    Guid? PortfolioTrackId,
+    string? SpotifyPlaylistTitle,
+    string? SpotifyPlaylistExternalUrl
 ) : IRequest<PostDto>;

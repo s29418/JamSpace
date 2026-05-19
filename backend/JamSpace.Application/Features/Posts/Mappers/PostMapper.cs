@@ -24,6 +24,7 @@ public static class PostMapper
             PortfolioTrack = post.PortfolioTrack is null
                 ? null
                 : PortfolioTrackMapper.ToDto(post.PortfolioTrack),
+            SpotifyPlaylist = MapSpotifyPlaylist(post),
 
             AuthorId = post.AuthorId,
             AuthorDisplayName = post.Author?.DisplayName,
@@ -68,6 +69,7 @@ public static class PostMapper
             PortfolioTrack = post.PortfolioTrack is null
                 ? null
                 : PortfolioTrackMapper.ToDto(post.PortfolioTrack),
+            SpotifyPlaylist = MapSpotifyPlaylist(post),
             AuthorId = post.AuthorId,
             AuthorDisplayName = post.Author?.DisplayName,
             AuthorAvatarUrl = post.Author?.ProfilePictureUrl,
@@ -98,6 +100,21 @@ public static class PostMapper
                                    post.Likes.Any(l => l.UserId == currentUserId.Value),
             IsRepostedByCurrentUser = currentUserId.HasValue &&
                                       post.Reposts.Any(r => r.AuthorId == currentUserId.Value),
+        };
+    }
+
+    private static PostSpotifyPlaylistDto? MapSpotifyPlaylist(Post post)
+    {
+        if (string.IsNullOrWhiteSpace(post.SpotifyPlaylistTitle)
+            || string.IsNullOrWhiteSpace(post.SpotifyPlaylistExternalUrl)
+            || string.IsNullOrWhiteSpace(post.SpotifyPlaylistEmbedUrl))
+            return null;
+
+        return new PostSpotifyPlaylistDto
+        {
+            Title = post.SpotifyPlaylistTitle,
+            ExternalUrl = post.SpotifyPlaylistExternalUrl,
+            EmbedUrl = post.SpotifyPlaylistEmbedUrl
         };
     }
 }

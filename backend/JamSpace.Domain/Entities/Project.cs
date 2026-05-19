@@ -15,4 +15,5 @@ public class Project
     public DateTimeOffset UpdatedAt { get; set; }
     
     public ICollection<ProjectAudioVersion> AudioVersions { get; set; } = new List<ProjectAudioVersion>();
+    public ICollection<ProjectNote> Notes { get; set; } = new List<ProjectNote>();
 }

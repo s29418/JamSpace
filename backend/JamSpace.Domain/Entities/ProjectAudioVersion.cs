@@ -18,4 +18,6 @@ public class ProjectAudioVersion
     public int? DurationSeconds { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
+
+    public ICollection<ProjectNote> Notes { get; set; } = new List<ProjectNote>();
 }

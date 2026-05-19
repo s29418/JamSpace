@@ -40,6 +40,7 @@ public sealed class JamSpaceDbContext : DbContext
     public DbSet<TeamEvent> TeamEvents => Set<TeamEvent>();
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<ProjectAudioVersion> ProjectAudioVersions => Set<ProjectAudioVersion>();
+    public DbSet<ProjectNote> ProjectNotes => Set<ProjectNote>();
     
     
     public new async Task SaveChangesAsync(CancellationToken ct) => await base.SaveChangesAsync(ct);
@@ -68,6 +69,7 @@ public sealed class JamSpaceDbContext : DbContext
         modelBuilder.ApplyConfiguration(new TeamEventConfiguration());
         modelBuilder.ApplyConfiguration(new ProjectConfiguration());
         modelBuilder.ApplyConfiguration(new ProjectAudioVersionConfiguration());
+        modelBuilder.ApplyConfiguration(new ProjectNoteConfiguration());
     }
     
 }

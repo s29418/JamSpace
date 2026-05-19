@@ -18,6 +18,8 @@ namespace JamSpace.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AudioVersionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    AudioVersionNameSnapshot = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    IsAudioVersionDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CompletedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Content = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),

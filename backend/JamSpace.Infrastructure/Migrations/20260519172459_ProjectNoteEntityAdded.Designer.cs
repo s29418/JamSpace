@@ -518,6 +518,15 @@ namespace JamSpace.Infrastructure.Migrations
                     b.Property<Guid?>("AudioVersionId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsAudioVersionDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("AudioVersionNameSnapshot")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTimeOffset?>("CompletedAt")
                         .HasColumnType("datetimeoffset");
 

@@ -11,6 +11,8 @@ public class ProjectNote
 
     public Guid? AudioVersionId { get; set; }
     public ProjectAudioVersion? AudioVersion { get; set; }
+    public string? AudioVersionNameSnapshot { get; set; }
+    public bool IsAudioVersionDeleted { get; set; }
 
     public Guid CreatedById { get; set; }
     public User CreatedBy { get; set; } = null!;

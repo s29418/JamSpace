@@ -1,5 +1,6 @@
 using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
+using JamSpace.Application.Features.ProjectAudioVersions.Commands.Delete;
 using JamSpace.Application.Features.ProjectAudioVersions.Commands.Upload;
 using JamSpace.Application.Features.ProjectAudioVersions.DTOs;
 using JamSpace.Application.Features.ProjectAudioVersions.Queries.GetProjectAudioVersions;
@@ -55,5 +56,18 @@ public class ProjectAudioVersionsController : ControllerBase
             ct);
 
         return StatusCode(StatusCodes.Status201Created, result);
+    }
+
+    [HttpDelete("{versionId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteProjectAudioVersion(
+        [FromRoute] Guid teamId,
+        [FromRoute] Guid projectId,
+        [FromRoute] Guid versionId,
+        CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        await _mediator.Send(new DeleteProjectAudioVersionCommand(teamId, projectId, versionId, userId), ct);
+        return NoContent();
     }
 }

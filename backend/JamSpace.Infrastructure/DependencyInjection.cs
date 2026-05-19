@@ -38,6 +38,7 @@ public static class DependencyInjection
         services.AddScoped<ITeamEventRepository, TeamEventRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IProjectAudioVersionRepository, ProjectAudioVersionRepository>();
+        services.AddScoped<IProjectNoteRepository, ProjectNoteRepository>();
         services.AddScoped<IPortfolioTrackRepository, PortfolioTrackRepository>();
         
         services.AddScoped<IGenreRepository, GenreRepository>();

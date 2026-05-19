@@ -23,6 +23,14 @@ public class ProjectNoteConfiguration : IEntityTypeConfiguration<ProjectNote>
         builder.Property(n => n.EndTimeSeconds)
             .IsRequired(false);
 
+        builder.Property(n => n.AudioVersionNameSnapshot)
+            .IsRequired(false)
+            .HasMaxLength(100);
+
+        builder.Property(n => n.IsAudioVersionDeleted)
+            .IsRequired()
+            .HasDefaultValue(false);
+
         builder.Property(n => n.Status)
             .IsRequired()
             .HasDefaultValue(ProjectNoteStatus.Active);

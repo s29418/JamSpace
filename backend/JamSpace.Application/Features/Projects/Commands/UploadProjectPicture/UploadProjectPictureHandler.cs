@@ -49,6 +49,7 @@ public class UploadProjectPictureHandler : IRequestHandler<UploadProjectPictureC
             newPictureUrl = await _files.UploadAsync(c.File, StorageObjectType.ProjectPicture, c.ProjectId, ct);
 
             project.PictureUrl = newPictureUrl;
+            project.UpdatedAt = DateTimeOffset.UtcNow;
 
             await _uow.SaveChangesAsync(ct);
         }

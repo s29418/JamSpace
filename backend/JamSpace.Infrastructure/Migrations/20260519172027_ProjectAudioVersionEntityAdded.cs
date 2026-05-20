@@ -22,8 +22,22 @@ namespace JamSpace.Infrastructure.Migrations
                 name: "UpdatedAt",
                 table: "Project",
                 type: "datetimeoffset",
+                nullable: true);
+
+            migrationBuilder.Sql("""
+                UPDATE [Project]
+                SET [UpdatedAt] = [CreatedAt]
+                WHERE [UpdatedAt] IS NULL
+                """);
+
+            migrationBuilder.AlterColumn<DateTimeOffset>(
+                name: "UpdatedAt",
+                table: "Project",
+                type: "datetimeoffset",
                 nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
+                oldClrType: typeof(DateTimeOffset),
+                oldType: "datetimeoffset",
+                oldNullable: true);
 
             migrationBuilder.CreateTable(
                 name: "ProjectAudioVersion",

@@ -1,4 +1,6 @@
 using JamSpace.API.Extensions;
+using JamSpace.API.Requests;
+using JamSpace.Application.Features.ProjectNotes.Commands.Create;
 using JamSpace.Application.Features.ProjectNotes.DTOs;
 using JamSpace.Application.Features.ProjectNotes.Queries.GetProjectNotes;
 using MediatR;
@@ -29,5 +31,28 @@ public class ProjectNotesController : ControllerBase
         var userId = User.GetUserId();
         var result = await _mediator.Send(new GetProjectNotesQuery(teamId, projectId, userId, versionId), ct);
         return Ok(result);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<ActionResult<ProjectNoteDto>> CreateProjectNote(
+        [FromRoute] Guid teamId,
+        [FromRoute] Guid projectId,
+        [FromBody] CreateProjectNoteRequest request,
+        CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(
+            new CreateProjectNoteCommand(
+                teamId,
+                projectId,
+                userId,
+                request.Content,
+                request.AudioVersionId,
+                request.StartTimeSeconds,
+                request.EndTimeSeconds),
+            ct);
+
+        return StatusCode(StatusCodes.Status201Created, result);
     }
 }

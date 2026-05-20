@@ -3,6 +3,7 @@ using JamSpace.API.Requests;
 using JamSpace.Application.Features.Projects.Commands.Create;
 using JamSpace.Application.Features.Projects.Commands.UploadProjectPicture;
 using JamSpace.Application.Features.Projects.DTOs;
+using JamSpace.Application.Features.Projects.Queries.GetProjectById;
 using JamSpace.Application.Features.Projects.Queries.GetTeamProjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -27,13 +28,27 @@ public class ProjectController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost]
+    [HttpGet("{projectId}")]
     [Authorize]
-    public async Task<ActionResult<ProjectDto>> CreateProject([FromRoute] Guid teamId, [FromBody] string name,
+    public async Task<ActionResult<ProjectDto>> GetProjectById(
+        [FromRoute] Guid teamId,
+        [FromRoute] Guid projectId,
         CancellationToken ct = default)
     {
         var userId = User.GetUserId();
-        var result = await _mediator.Send(new CreateProjectCommand(userId, teamId, name), ct);
+        var result = await _mediator.Send(new GetProjectByIdQuery(teamId, projectId, userId), ct);
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<ActionResult<ProjectDto>> CreateProject(
+        [FromRoute] Guid teamId,
+        [FromBody] CreateProjectRequest request,
+        CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(new CreateProjectCommand(userId, teamId, request.Name, request.Description), ct);
         return StatusCode(StatusCodes.Status201Created, result);
     }
 

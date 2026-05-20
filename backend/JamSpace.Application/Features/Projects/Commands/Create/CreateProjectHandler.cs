@@ -30,17 +30,25 @@ public class CreateProjectHandler : IRequestHandler<CreateProjectCommand, Projec
         if (!isTeamMember)
             throw new ForbiddenAccessException("You are not a member of this team");
         
+        var now = DateTimeOffset.UtcNow;
         var project = new Project
         {
             Id = Guid.NewGuid(),
             TeamId = request.TeamId,
-            Name = request.Name,
-            CreatedAt = DateTimeOffset.UtcNow
+            Name = request.Name.Trim(),
+            Description = Normalize(request.Description),
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         await _project.AddAsync(project, ct);
         await _uow.SaveChangesAsync(ct);
 
         return ProjectMapper.ToDto(project);
+    }
+
+    private static string? Normalize(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 }

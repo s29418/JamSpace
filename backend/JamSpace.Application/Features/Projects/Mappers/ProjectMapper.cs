@@ -12,8 +12,10 @@ public static class ProjectMapper
             Id = project.Id,
             TeamId = project.TeamId,
             Name = project.Name,
+            Description = project.Description,
             PictureUrl = project.PictureUrl,
-            CreatedAt = project.CreatedAt
+            CreatedAt = project.CreatedAt,
+            UpdatedAt = project.UpdatedAt
         };
     }
 }

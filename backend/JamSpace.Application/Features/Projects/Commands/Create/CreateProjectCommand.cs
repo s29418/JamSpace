@@ -3,4 +3,5 @@ using MediatR;
 
 namespace JamSpace.Application.Features.Projects.Commands.Create;
 
-public record CreateProjectCommand(Guid RequestingUserId, Guid TeamId, string Name) : IRequest<ProjectDto>;
+public record CreateProjectCommand(Guid RequestingUserId, Guid TeamId, string Name, string? Description) 
+    : IRequest<ProjectDto>;

@@ -26,17 +26,17 @@
 }
 
 .projectArtwork {
-    width: 132px;
-    height: 132px;
+    width: 168px;
+    height: 168px;
     flex: 0 0 auto;
     display: grid;
     place-items: center;
     overflow: hidden;
-    border: 1px solid rgba(38, 205, 212, 0.55);
+    border: 2px solid rgba(38, 205, 212, 0.55);
     border-radius: 14px;
     background: #151b1c;
     color: #26cdd4;
-    font-size: 3rem;
+    font-size: 5rem;
     font-weight: 900;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .headerText {
-    min-width: 0;
+    flex: 1;
 }
 
 .title {
@@ -60,11 +60,12 @@
 }
 
 .description {
-    max-width: 820px;
+    max-width: 100%;
     margin-top: 12px;
     color: #c3d6d7;
     font-size: 1.05rem;
     line-height: 1.45;
+    word-wrap: break-word;
 }
 
 .meta,
@@ -77,6 +78,29 @@
 
 .meta {
     margin-top: 10px;
+}
+
+.editProjectButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    padding: 6px 16px;
+    margin-top: 12px;
+    border: 1px solid #26cdd4;
+    border-radius: 10px;
+    background: rgba(38, 205, 212, 0.08);
+    color: #26cdd4;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.editProjectButton:hover {
+    background: rgba(38, 205, 212, 0.18);
+    transform: translateY(-1px);
 }
 
 .workspace {
@@ -377,6 +401,7 @@
     .header {
         align-items: flex-start;
         gap: 16px;
+        flex-wrap: wrap;
     }
 
     .projectArtwork {

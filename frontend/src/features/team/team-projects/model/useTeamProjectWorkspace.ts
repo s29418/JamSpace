@@ -4,15 +4,19 @@ import {
     createProjectNote,
     deleteProjectAudioVersion,
     deleteProjectNote,
+    deleteTeamProject,
     editProjectNote,
+    editTeamProject,
     getProjectAudioVersions,
     getProjectNotes,
     getTeamProjectById,
     reopenProjectNote,
     uploadProjectAudioVersion,
+    uploadTeamProjectPicture,
 } from 'entities/team/api/teamProjects.api';
 import type {
     CreateProjectNoteRequest,
+    EditTeamProjectRequest,
     EditProjectNoteRequest,
     ProjectAudioVersion,
     ProjectNote,
@@ -144,6 +148,28 @@ export function useTeamProjectWorkspace(teamId?: string, projectId?: string) {
         await refreshNotes();
     }, [projectId, refreshNotes, teamId]);
 
+    const updateProject = useCallback(async (payload: EditTeamProjectRequest) => {
+        if (!teamId || !projectId) throw new ApiError(400, 'Project is not selected');
+
+        const updated = await editTeamProject(teamId, projectId, payload);
+        setProject(updated);
+        return updated;
+    }, [projectId, teamId]);
+
+    const updateProjectPicture = useCallback(async (file: File) => {
+        if (!teamId || !projectId) throw new ApiError(400, 'Project is not selected');
+
+        const pictureUrl = await uploadTeamProjectPicture(teamId, projectId, file);
+        setProject(prev => prev ? { ...prev, pictureUrl, updatedAt: new Date().toISOString() } : prev);
+        return pictureUrl;
+    }, [projectId, teamId]);
+
+    const removeProject = useCallback(async () => {
+        if (!teamId || !projectId) throw new ApiError(400, 'Project is not selected');
+
+        await deleteTeamProject(teamId, projectId);
+    }, [projectId, teamId]);
+
     const addNote = useCallback(async (payload: CreateProjectNoteRequest) => {
         if (!teamId || !projectId) throw new ApiError(400, 'Project is not selected');
 
@@ -197,6 +223,9 @@ export function useTeamProjectWorkspace(teamId?: string, projectId?: string) {
         error,
         refresh,
         refreshNotes,
+        updateProject,
+        updateProjectPicture,
+        removeProject,
         uploadVersion,
         removeVersion,
         addNote,

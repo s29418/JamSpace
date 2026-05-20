@@ -1,14 +1,16 @@
-import React, { useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
     ArrowLeftIcon,
     CheckCircleIcon,
+    Cog6ToothIcon,
     PencilSquareIcon,
     TrashIcon,
 } from '@heroicons/react/24/outline';
 import { PostAudioPlayer } from 'entities/post/ui/PostAudioPlayer';
 import { useTeamProjectWorkspace } from 'features/team/team-projects/model/useTeamProjectWorkspace';
 import { toMediaProxyUrl } from 'shared/api/media';
+import ProjectEditModal from 'widgets/team-projects/ui/ProjectEditModal';
 import type { ProjectNote } from 'entities/team/model/types';
 import styles from './TeamProjectDetailsPage.module.css';
 
@@ -35,6 +37,8 @@ const getProjectFallback = (name?: string | null) => name?.trim().charAt(0).toUp
 
 const TeamProjectDetailsPage: React.FC = () => {
     const { teamId, projectId } = useParams<{ teamId: string; projectId: string }>();
+    const navigate = useNavigate();
+    const [editOpen, setEditOpen] = useState(false);
     const {
         project,
         versions,
@@ -44,6 +48,9 @@ const TeamProjectDetailsPage: React.FC = () => {
         setSelectedVersionId,
         loading,
         error,
+        updateProject,
+        updateProjectPicture,
+        removeProject,
     } = useTeamProjectWorkspace(teamId, projectId);
 
     const activeTimestampNotes = useMemo(
@@ -83,8 +90,35 @@ const TeamProjectDetailsPage: React.FC = () => {
                     <h1 className={styles.title}>{project.name}</h1>
                     {project.description && <p className={styles.description}>{project.description}</p>}
                     <p className={styles.meta}>Updated {formatDate(project.updatedAt)}</p>
+
+                    <button
+                        type="button"
+                        className={styles.editProjectButton}
+                        onClick={() => setEditOpen(true)}
+                    >
+                        <Cog6ToothIcon width={20} height={20} />
+                        Edit
+                    </button>
                 </div>
+
+
             </header>
+
+            <ProjectEditModal
+                isOpen={editOpen}
+                project={project}
+                onClose={() => setEditOpen(false)}
+                onSave={async ({ name, description, picture }) => {
+                    await updateProject({ name, description });
+                    if (picture) {
+                        await updateProjectPicture(picture);
+                    }
+                }}
+                onDelete={async () => {
+                    await removeProject();
+                    navigate(`/teams/${teamId}`);
+                }}
+            />
 
             <section className={styles.workspace}>
                 <div className={styles.mainColumn}>

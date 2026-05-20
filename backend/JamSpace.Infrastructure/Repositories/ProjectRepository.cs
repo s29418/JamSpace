@@ -20,6 +20,13 @@ public class ProjectRepository : IProjectRepository
             .FirstOrDefaultAsync(p => p.Id == projectId, ct);
     }
 
+    public async Task<Project?> GetByIdWithAudioVersionsAsync(Guid projectId, CancellationToken ct)
+    {
+        return await _db.Projects
+            .Include(p => p.AudioVersions)
+            .FirstOrDefaultAsync(p => p.Id == projectId, ct);
+    }
+
     public async Task<IReadOnlyList<Project>> GetByTeamIdAsync(Guid teamId, CancellationToken ct)
     {
         return await _db.Projects
@@ -31,5 +38,10 @@ public class ProjectRepository : IProjectRepository
     public async Task AddAsync(Project project, CancellationToken ct)
     {
         await _db.Projects.AddAsync(project, ct);
+    }
+
+    public void Remove(Project project)
+    {
+        _db.Projects.Remove(project);
     }
 }

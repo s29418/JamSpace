@@ -1,6 +1,7 @@
 ﻿using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
 using JamSpace.Application.Features.Projects.Commands.Create;
+using JamSpace.Application.Features.Projects.Commands.Delete;
 using JamSpace.Application.Features.Projects.Commands.Edit;
 using JamSpace.Application.Features.Projects.Commands.UploadProjectPicture;
 using JamSpace.Application.Features.Projects.DTOs;
@@ -67,6 +68,18 @@ public class ProjectController : ControllerBase
             ct);
 
         return Ok(result);
+    }
+
+    [HttpDelete("{projectId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteProject(
+        [FromRoute] Guid teamId,
+        [FromRoute] Guid projectId,
+        CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        await _mediator.Send(new DeleteProjectCommand(teamId, projectId, userId), ct);
+        return NoContent();
     }
 
     [HttpPatch("{projectId}/picture")]

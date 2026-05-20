@@ -2,6 +2,7 @@ using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
 using JamSpace.Application.Features.ProjectNotes.Commands.Complete;
 using JamSpace.Application.Features.ProjectNotes.Commands.Create;
+using JamSpace.Application.Features.ProjectNotes.Commands.Delete;
 using JamSpace.Application.Features.ProjectNotes.Commands.Edit;
 using JamSpace.Application.Features.ProjectNotes.Commands.Reopen;
 using JamSpace.Application.Features.ProjectNotes.DTOs;
@@ -108,5 +109,18 @@ public class ProjectNotesController : ControllerBase
         var userId = User.GetUserId();
         var result = await _mediator.Send(new ReopenProjectNoteCommand(teamId, projectId, noteId, userId), ct);
         return Ok(result);
+    }
+
+    [HttpDelete("{noteId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteProjectNote(
+        [FromRoute] Guid teamId,
+        [FromRoute] Guid projectId,
+        [FromRoute] Guid noteId,
+        CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        await _mediator.Send(new DeleteProjectNoteCommand(teamId, projectId, noteId, userId), ct);
+        return NoContent();
     }
 }

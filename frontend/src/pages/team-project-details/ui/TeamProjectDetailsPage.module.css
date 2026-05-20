@@ -194,6 +194,129 @@
     gap: 12px;
 }
 
+.addVersionButton {
+    width: 100%;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    border: 1px solid #26cdd4;
+    border-radius: 12px;
+    background: rgba(38, 205, 212, 0.08);
+    color: #26cdd4;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.addVersionButton:hover {
+    background: rgba(38, 205, 212, 0.18);
+}
+
+.versionForm {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 14px;
+    border: 1px solid rgba(95, 113, 115, 0.82);
+    border-radius: 14px;
+    background: rgba(13, 18, 19, 0.82);
+}
+
+.versionField {
+    display: grid;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.94rem;
+    font-weight: 800;
+}
+
+.versionInput {
+    width: 100%;
+    min-height: 38px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 10px;
+    background: #101414;
+    color: #ffffff;
+    font: inherit;
+    outline: none;
+}
+
+.versionInput:focus {
+    border-color: #26cdd4;
+    box-shadow: 0 0 0 3px rgba(38, 205, 212, 0.12);
+}
+
+.hiddenInput {
+    display: none;
+}
+
+.fileButton,
+.versionPrimaryButton,
+.versionSecondaryButton {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.fileButton,
+.versionSecondaryButton {
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+}
+
+.versionPrimaryButton {
+    border: 1px solid #26cdd4;
+    background: rgba(38, 205, 212, 0.12);
+    color: #26cdd4;
+}
+
+.fileButton:hover,
+.versionSecondaryButton:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.versionPrimaryButton:hover {
+    background: rgba(38, 205, 212, 0.2);
+}
+
+.fileButton:disabled,
+.versionPrimaryButton:disabled,
+.versionSecondaryButton:disabled {
+    cursor: default;
+    opacity: 0.62;
+}
+
+.fileName {
+    color: #9fb4b5;
+    font-size: 0.88rem;
+    overflow-wrap: anywhere;
+}
+
+.versionFormActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.versionError {
+    margin: 0 0 12px;
+    color: #ff9b9b;
+    font-size: 0.92rem;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
 .noteItem {
     position: relative;
     display: grid;

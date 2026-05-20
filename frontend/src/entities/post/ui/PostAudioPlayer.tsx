@@ -10,10 +10,18 @@ import {
 import WaveSurfer from 'wavesurfer.js';
 import styles from './PostAudioPlayer.module.css';
 
+export type AudioWaveformPeaks = Array<Float32Array | number[]>;
+
 type Props = {
     src: string;
     title?: string;
     artworkUrl?: string | null;
+    precomputedPeaks?: AudioWaveformPeaks;
+    precomputedDuration?: number;
+    initialTimeSeconds?: number;
+    autoPlayOnReady?: boolean;
+    onTimeUpdate?: (seconds: number) => void;
+    onPlaybackStateChange?: (isPlaying: boolean) => void;
 };
 
 const AUDIO_PLAY_EVENT = 'jamspace:audio-player:play';
@@ -35,7 +43,17 @@ function formatPlaybackRate(rate: number) {
     return `${Number(rate.toFixed(2)).toString()}x`;
 }
 
-export const PostAudioPlayer: React.FC<Props> = ({ src, title, artworkUrl }) => {
+export const PostAudioPlayer: React.FC<Props> = ({
+    src,
+    title,
+    artworkUrl,
+    precomputedPeaks,
+    precomputedDuration,
+    initialTimeSeconds = 0,
+    autoPlayOnReady = false,
+    onTimeUpdate,
+    onPlaybackStateChange,
+}) => {
     const waveformRef = useRef<HTMLDivElement | null>(null);
     const wavesurferRef = useRef<WaveSurfer | null>(null);
     const rateMenuRef = useRef<HTMLDivElement | null>(null);
@@ -70,6 +88,9 @@ export const PostAudioPlayer: React.FC<Props> = ({ src, title, artworkUrl }) => 
         const wavesurfer = WaveSurfer.create({
             container: waveformRef.current,
             url: src,
+            ...(precomputedPeaks && precomputedDuration
+                ? { peaks: precomputedPeaks, duration: precomputedDuration }
+                : {}),
             height: 78,
             waveColor: 'rgba(163,212,216,0.8)',
             progressColor: '#26cdd4',
@@ -95,14 +116,29 @@ export const PostAudioPlayer: React.FC<Props> = ({ src, title, artworkUrl }) => 
         const unsubscribeReady = wavesurfer.on('ready', (audioDuration) => {
             setIsReady(true);
             setDuration(audioDuration);
+
+            const nextTime = Math.max(0, Math.min(initialTimeSeconds, audioDuration));
+            if (nextTime > 0) {
+                wavesurfer.setTime(nextTime);
+                setCurrentTime(nextTime);
+                onTimeUpdate?.(nextTime);
+            }
+
+            if (autoPlayOnReady) {
+                wavesurfer.play().catch(() => {
+                    setError('Failed to start audio playback.');
+                });
+            }
         });
 
         const unsubscribeTimeUpdate = wavesurfer.on('timeupdate', (time) => {
             setCurrentTime(time);
+            onTimeUpdate?.(time);
         });
 
         const unsubscribePlay = wavesurfer.on('play', () => {
             setIsPlaying(true);
+            onPlaybackStateChange?.(true);
             window.dispatchEvent(
                 new CustomEvent(AUDIO_PLAY_EVENT, {
                     detail: { playerId },
@@ -112,11 +148,14 @@ export const PostAudioPlayer: React.FC<Props> = ({ src, title, artworkUrl }) => 
 
         const unsubscribePause = wavesurfer.on('pause', () => {
             setIsPlaying(false);
+            onPlaybackStateChange?.(false);
         });
 
         const unsubscribeFinish = wavesurfer.on('finish', () => {
             setIsPlaying(false);
+            onPlaybackStateChange?.(false);
             setCurrentTime(wavesurfer.getDuration());
+            onTimeUpdate?.(wavesurfer.getDuration());
         });
 
         const unsubscribeError = wavesurfer.on('error', (waveError) => {
@@ -144,7 +183,16 @@ export const PostAudioPlayer: React.FC<Props> = ({ src, title, artworkUrl }) => 
             wavesurfer.destroy();
             wavesurferRef.current = null;
         };
-    }, [playerId, src]);
+    }, [
+        autoPlayOnReady,
+        initialTimeSeconds,
+        onPlaybackStateChange,
+        onTimeUpdate,
+        playerId,
+        precomputedDuration,
+        precomputedPeaks,
+        src,
+    ]);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {

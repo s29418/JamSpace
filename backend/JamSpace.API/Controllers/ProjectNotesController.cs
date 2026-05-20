@@ -1,7 +1,9 @@
 using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
+using JamSpace.Application.Features.ProjectNotes.Commands.Complete;
 using JamSpace.Application.Features.ProjectNotes.Commands.Create;
 using JamSpace.Application.Features.ProjectNotes.Commands.Edit;
+using JamSpace.Application.Features.ProjectNotes.Commands.Reopen;
 using JamSpace.Application.Features.ProjectNotes.DTOs;
 using JamSpace.Application.Features.ProjectNotes.Queries.GetProjectNotes;
 using MediatR;
@@ -79,6 +81,32 @@ public class ProjectNotesController : ControllerBase
                 request.EndTimeSeconds),
             ct);
 
+        return Ok(result);
+    }
+
+    [HttpPatch("{noteId}/complete")]
+    [Authorize]
+    public async Task<ActionResult<ProjectNoteDto>> CompleteProjectNote(
+        [FromRoute] Guid teamId,
+        [FromRoute] Guid projectId,
+        [FromRoute] Guid noteId,
+        CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(new CompleteProjectNoteCommand(teamId, projectId, noteId, userId), ct);
+        return Ok(result);
+    }
+
+    [HttpPatch("{noteId}/reopen")]
+    [Authorize]
+    public async Task<ActionResult<ProjectNoteDto>> ReopenProjectNote(
+        [FromRoute] Guid teamId,
+        [FromRoute] Guid projectId,
+        [FromRoute] Guid noteId,
+        CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(new ReopenProjectNoteCommand(teamId, projectId, noteId, userId), ct);
         return Ok(result);
     }
 }

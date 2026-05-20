@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
     createTeamProject,
+    deleteTeamProject,
+    editTeamProject,
     getTeamProjects,
     uploadTeamProjectPicture,
 } from 'entities/team/api/teamProjects.api';
-import type { CreateTeamProjectRequest, TeamProject } from 'entities/team/model/types';
+import type { CreateTeamProjectRequest, EditTeamProjectRequest, TeamProject } from 'entities/team/model/types';
 import { ApiError, isApiError } from 'shared/api/base';
 
 const byCreatedAtDesc = (a: TeamProject, b: TeamProject) =>
@@ -73,9 +75,26 @@ export function useTeamProjects(teamId?: string) {
 
         const pictureUrl = await uploadTeamProjectPicture(teamId, projectId, file);
         setProjects(prev => prev.map(project => (
-            project.id === projectId ? { ...project, pictureUrl } : project
+            project.id === projectId ? { ...project, pictureUrl, updatedAt: new Date().toISOString() } : project
         )));
         return pictureUrl;
+    }, [teamId]);
+
+    const updateProject = useCallback(async (projectId: string, payload: EditTeamProjectRequest) => {
+        if (!teamId) throw new ApiError(400, 'Team is not selected');
+
+        const updated = await editTeamProject(teamId, projectId, payload);
+        setProjects(prev => prev.map(project => (
+            project.id === projectId ? updated : project
+        )).sort(byCreatedAtDesc));
+        return updated;
+    }, [teamId]);
+
+    const removeProject = useCallback(async (projectId: string) => {
+        if (!teamId) throw new ApiError(400, 'Team is not selected');
+
+        await deleteTeamProject(teamId, projectId);
+        setProjects(prev => prev.filter(project => project.id !== projectId));
     }, [teamId]);
 
     return {
@@ -86,5 +105,7 @@ export function useTeamProjects(teamId?: string) {
         refresh,
         createProject,
         updateProjectPicture,
+        updateProject,
+        removeProject,
     };
 }

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
     ArrowLeftIcon,
+    ArrowUturnLeftIcon,
     CheckCircleIcon,
     Cog6ToothIcon,
     PencilSquareIcon,
@@ -62,6 +63,14 @@ const TeamProjectDetailsPage: React.FC = () => {
     const [deletingVersion, setDeletingVersion] = useState(false);
     const [versionToDelete, setVersionToDelete] = useState<ProjectAudioVersion | null>(null);
     const [waveformCache, setWaveformCache] = useState<Record<string, WaveformCacheEntry>>({});
+    const [noteFormOpen, setNoteFormOpen] = useState(false);
+    const [editingNote, setEditingNote] = useState<ProjectNote | null>(null);
+    const [noteContent, setNoteContent] = useState('');
+    const [attachCurrentTime, setAttachCurrentTime] = useState(false);
+    const [noteError, setNoteError] = useState<string | null>(null);
+    const [savingNote, setSavingNote] = useState(false);
+    const [updatingNoteId, setUpdatingNoteId] = useState<string | null>(null);
+    const [noteToDelete, setNoteToDelete] = useState<ProjectNote | null>(null);
     const {
         project,
         versions,
@@ -76,6 +85,11 @@ const TeamProjectDetailsPage: React.FC = () => {
         removeProject,
         uploadVersion,
         removeVersion,
+        addNote,
+        updateNote,
+        completeNote,
+        reopenNote,
+        removeNote,
     } = useTeamProjectWorkspace(teamId, projectId);
 
     const activeTimestampNotes = useMemo(
@@ -179,6 +193,106 @@ const TeamProjectDetailsPage: React.FC = () => {
     }, [selectedVersionId, setSelectedVersionId]);
 
     const selectedWaveformCache = selectedVersion ? waveformCache[selectedVersion.id] : undefined;
+
+    const openCreateNoteForm = () => {
+        setEditingNote(null);
+        setNoteContent('');
+        setAttachCurrentTime(false);
+        setNoteError(null);
+        setNoteFormOpen(true);
+    };
+
+    const openEditNoteForm = (note: ProjectNote) => {
+        setEditingNote(note);
+        setNoteContent(note.content);
+        setAttachCurrentTime(note.startTimeSeconds !== null && note.startTimeSeconds !== undefined);
+        setNoteError(null);
+        setNoteFormOpen(true);
+    };
+
+    const closeNoteForm = () => {
+        if (savingNote) return;
+
+        setNoteFormOpen(false);
+        setEditingNote(null);
+        setNoteContent('');
+        setAttachCurrentTime(false);
+        setNoteError(null);
+    };
+
+    const handleSaveNote = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setNoteError(null);
+
+        const trimmedContent = noteContent.trim();
+        if (!trimmedContent) {
+            setNoteError('Note content is required.');
+            return;
+        }
+
+        const currentSecond = Math.floor(playbackRef.current.currentTime);
+        const timestampPayload = attachCurrentTime
+            ? {
+                audioVersionId: selectedVersionId,
+                startTimeSeconds: currentSecond,
+                endTimeSeconds: currentSecond,
+            }
+            : {
+                audioVersionId: null,
+                startTimeSeconds: null,
+                endTimeSeconds: null,
+            };
+
+        try {
+            setSavingNote(true);
+            if (editingNote) {
+                await updateNote(editingNote.id, {
+                    content: trimmedContent,
+                    ...timestampPayload,
+                });
+            } else {
+                await addNote({
+                    content: trimmedContent,
+                    ...timestampPayload,
+                });
+            }
+            closeNoteForm();
+        } catch (e) {
+            setNoteError(getErrorMessage(e, editingNote ? 'Failed to update note.' : 'Failed to add note.'));
+        } finally {
+            setSavingNote(false);
+        }
+    };
+
+    const handleToggleNoteStatus = async (note: ProjectNote) => {
+        try {
+            setUpdatingNoteId(note.id);
+            if (note.status === 'Completed') {
+                await reopenNote(note.id);
+            } else {
+                await completeNote(note.id);
+            }
+        } catch (e) {
+            setNoteError(getErrorMessage(e, 'Failed to update note status.'));
+        } finally {
+            setUpdatingNoteId(null);
+        }
+    };
+
+    const handleDeleteNote = async () => {
+        if (!noteToDelete) return;
+
+        try {
+            setUpdatingNoteId(noteToDelete.id);
+            await removeNote(noteToDelete.id);
+            setNoteToDelete(null);
+        } catch (e) {
+            setNoteError(getErrorMessage(e, 'Failed to delete note.'));
+            setNoteToDelete(null);
+        } finally {
+            setUpdatingNoteId(null);
+        }
+    };
 
     const resetVersionForm = () => {
         setIsVersionFormOpen(false);
@@ -303,6 +417,18 @@ const TeamProjectDetailsPage: React.FC = () => {
                 }}
             />
 
+            <ConfirmDialog
+                isOpen={!!noteToDelete}
+                title="Delete note"
+                message="Are you sure you want to delete this note?"
+                confirmLabel="Delete"
+                loading={updatingNoteId === noteToDelete?.id}
+                onConfirm={handleDeleteNote}
+                onCancel={() => {
+                    if (!updatingNoteId) setNoteToDelete(null);
+                }}
+            />
+
             <section className={styles.workspace}>
                 <div className={styles.mainColumn}>
                     <section className={styles.playerPanel}>
@@ -348,10 +474,75 @@ const TeamProjectDetailsPage: React.FC = () => {
                             <span className={styles.count}>{notes.length}</span>
                         </div>
 
+                        <button
+                            type="button"
+                            className={styles.addVersionButton}
+                            onClick={openCreateNoteForm}
+                        >
+                            <PlusIcon width={20} height={20} />
+                            Add note
+                        </button>
+
+                        {noteFormOpen && (
+                            <form className={styles.noteForm} onSubmit={handleSaveNote}>
+                                <label className={styles.versionField}>
+                                    <span>Content</span>
+                                    <textarea
+                                        className={styles.noteTextarea}
+                                        value={noteContent}
+                                        onChange={(event) => setNoteContent(event.target.value)}
+                                        rows={4}
+                                        maxLength={2000}
+                                        disabled={savingNote}
+                                        required
+                                    />
+                                </label>
+
+                                <label className={styles.checkboxRow}>
+                                    <input
+                                        type="checkbox"
+                                        checked={attachCurrentTime}
+                                        onChange={(event) => setAttachCurrentTime(event.target.checked)}
+                                        disabled={savingNote || !selectedVersionId}
+                                    />
+                                    <span>Attach current player time</span>
+                                </label>
+
+                                {noteError && <p className={styles.versionError}>{noteError}</p>}
+
+                                <div className={styles.versionFormActions}>
+                                    <button
+                                        type="button"
+                                        className={styles.versionSecondaryButton}
+                                        onClick={closeNoteForm}
+                                        disabled={savingNote}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className={styles.versionPrimaryButton}
+                                        disabled={savingNote}
+                                    >
+                                        {savingNote ? 'Saving...' : editingNote ? 'Save note' : 'Add note'}
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+
+                        {!noteFormOpen && noteError && <p className={styles.versionError}>{noteError}</p>}
+
                         <div className={styles.notesList}>
                             {notes.length === 0 && <p className={styles.muted}>No notes yet.</p>}
                             {notes.map(note => (
-                                <NoteRow key={note.id} note={note} />
+                                <NoteRow
+                                    key={note.id}
+                                    note={note}
+                                    busy={updatingNoteId === note.id}
+                                    onToggleStatus={handleToggleNoteStatus}
+                                    onEdit={openEditNoteForm}
+                                    onDelete={setNoteToDelete}
+                                />
                             ))}
                         </div>
                     </section>
@@ -478,9 +669,20 @@ const TeamProjectDetailsPage: React.FC = () => {
 type NoteRowProps = {
     note: ProjectNote;
     compact?: boolean;
+    busy?: boolean;
+    onToggleStatus?: (note: ProjectNote) => void | Promise<void>;
+    onEdit?: (note: ProjectNote) => void;
+    onDelete?: (note: ProjectNote) => void;
 };
 
-const NoteRow: React.FC<NoteRowProps> = ({ note, compact = false }) => {
+const NoteRow: React.FC<NoteRowProps> = ({
+    note,
+    compact = false,
+    busy = false,
+    onToggleStatus,
+    onEdit,
+    onDelete,
+}) => {
     const range = formatRange(note);
     const isCompleted = note.status === 'Completed';
 
@@ -513,13 +715,31 @@ const NoteRow: React.FC<NoteRowProps> = ({ note, compact = false }) => {
 
             {!compact && (
                 <div className={styles.noteActions}>
-                    <button type="button" className={styles.iconButton} aria-label={isCompleted ? 'Reopen note' : 'Complete note'} disabled>
-                        <CheckCircleIcon width={18} height={18} />
+                    <button
+                        type="button"
+                        className={styles.iconButton}
+                        aria-label={isCompleted ? 'Reopen note' : 'Complete note'}
+                        onClick={() => onToggleStatus?.(note)}
+                        disabled={busy}
+                    >
+                        {isCompleted ? <ArrowUturnLeftIcon width={18} height={18} /> : <CheckCircleIcon width={18} height={18} />}
                     </button>
-                    <button type="button" className={styles.iconButton} aria-label="Edit note" disabled>
+                    <button
+                        type="button"
+                        className={styles.iconButton}
+                        aria-label="Edit note"
+                        onClick={() => onEdit?.(note)}
+                        disabled={busy}
+                    >
                         <PencilSquareIcon width={18} height={18} />
                     </button>
-                    <button type="button" className={`${styles.iconButton} ${styles.dangerButton}`} aria-label="Delete note" disabled>
+                    <button
+                        type="button"
+                        className={`${styles.iconButton} ${styles.dangerButton}`}
+                        aria-label="Delete note"
+                        onClick={() => onDelete?.(note)}
+                        disabled={busy}
+                    >
                         <TrashIcon width={18} height={18} />
                     </button>
                 </div>

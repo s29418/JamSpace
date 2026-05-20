@@ -226,6 +226,16 @@
     background: rgba(13, 18, 19, 0.82);
 }
 
+.noteForm {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 14px;
+    border: 1px solid rgba(95, 113, 115, 0.82);
+    border-radius: 14px;
+    background: rgba(13, 18, 19, 0.82);
+}
+
 .versionField {
     display: grid;
     gap: 8px;
@@ -246,9 +256,38 @@
     outline: none;
 }
 
-.versionInput:focus {
+.noteTextarea {
+    width: 100%;
+    min-height: 112px;
+    resize: vertical;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 10px;
+    background: #101414;
+    color: #ffffff;
+    font: inherit;
+    line-height: 1.4;
+    outline: none;
+}
+
+.versionInput:focus,
+.noteTextarea:focus {
     border-color: #26cdd4;
     box-shadow: 0 0 0 3px rgba(38, 205, 212, 0.12);
+}
+
+.checkboxRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #c7d8d9;
+    font-weight: 800;
+}
+
+.checkboxRow input {
+    width: 18px;
+    height: 18px;
+    accent-color: #26cdd4;
 }
 
 .hiddenInput {

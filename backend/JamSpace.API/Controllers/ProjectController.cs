@@ -1,6 +1,7 @@
 ﻿using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
 using JamSpace.Application.Features.Projects.Commands.Create;
+using JamSpace.Application.Features.Projects.Commands.Edit;
 using JamSpace.Application.Features.Projects.Commands.UploadProjectPicture;
 using JamSpace.Application.Features.Projects.DTOs;
 using JamSpace.Application.Features.Projects.Queries.GetProjectById;
@@ -50,6 +51,22 @@ public class ProjectController : ControllerBase
         var userId = User.GetUserId();
         var result = await _mediator.Send(new CreateProjectCommand(userId, teamId, request.Name, request.Description), ct);
         return StatusCode(StatusCodes.Status201Created, result);
+    }
+
+    [HttpPut("{projectId}")]
+    [Authorize]
+    public async Task<ActionResult<ProjectDto>> EditProject(
+        [FromRoute] Guid teamId,
+        [FromRoute] Guid projectId,
+        [FromBody] EditProjectRequest request,
+        CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(
+            new EditProjectCommand(teamId, projectId, userId, request.Name, request.Description),
+            ct);
+
+        return Ok(result);
     }
 
     [HttpPatch("{projectId}/picture")]

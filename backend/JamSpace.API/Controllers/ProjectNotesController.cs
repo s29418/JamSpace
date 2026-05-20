@@ -1,6 +1,7 @@
 using JamSpace.API.Extensions;
 using JamSpace.API.Requests;
 using JamSpace.Application.Features.ProjectNotes.Commands.Create;
+using JamSpace.Application.Features.ProjectNotes.Commands.Edit;
 using JamSpace.Application.Features.ProjectNotes.DTOs;
 using JamSpace.Application.Features.ProjectNotes.Queries.GetProjectNotes;
 using MediatR;
@@ -54,5 +55,30 @@ public class ProjectNotesController : ControllerBase
             ct);
 
         return StatusCode(StatusCodes.Status201Created, result);
+    }
+
+    [HttpPut("{noteId}")]
+    [Authorize]
+    public async Task<ActionResult<ProjectNoteDto>> EditProjectNote(
+        [FromRoute] Guid teamId,
+        [FromRoute] Guid projectId,
+        [FromRoute] Guid noteId,
+        [FromBody] EditProjectNoteRequest request,
+        CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        var result = await _mediator.Send(
+            new EditProjectNoteCommand(
+                teamId,
+                projectId,
+                noteId,
+                userId,
+                request.Content,
+                request.AudioVersionId,
+                request.StartTimeSeconds,
+                request.EndTimeSeconds),
+            ct);
+
+        return Ok(result);
     }
 }

@@ -6,6 +6,7 @@ import ProfilePage from "../../../pages/profile/ui/ProfilePage";
 import FollowsListPage from "../../../pages/follows-list/ui/FollowsListPage";
 import TeamsPage from "../../../pages/teams/ui/TeamsPage";
 import TeamDetailsPage from "../../../pages/team-details/ui/TeamDetailsPage";
+import TeamProjectDetailsPage from "../../../pages/team-project-details/ui/TeamProjectDetailsPage";
 import SearchPage from "../../../pages/search/ui/SearchPage";
 import ChatPage from "../../../pages/chat/ui/ChatPage";
 import PostDetailsPage from "../../../pages/post-details/ui/PostDetailsPage";
@@ -30,6 +31,7 @@ function AppRouter() {
                 />
 
                 <Route path="/teams" element={<TeamsPage />} />
+                <Route path="/teams/:teamId/projects/:projectId" element={<TeamProjectDetailsPage />} />
                 <Route path="/teams/:id" element={<TeamDetailsPage />} />
 
                 <Route path="/search" element={<SearchPage />} />

@@ -10,9 +10,11 @@ public class ProjectNoteDto
     public Guid CreatedById { get; set; }
     public string CreatedByDisplayName { get; set; } = null!;
     public string? CreatedByAvatarUrl { get; set; }
+    public string? CreatedByMusicalRole { get; set; }
     public Guid? CompletedById { get; set; }
     public string? CompletedByDisplayName { get; set; }
     public string? CompletedByAvatarUrl { get; set; }
+    public string? CompletedByMusicalRole { get; set; }
     public string Content { get; set; } = null!;
     public int? StartTimeSeconds { get; set; }
     public int? EndTimeSeconds { get; set; }

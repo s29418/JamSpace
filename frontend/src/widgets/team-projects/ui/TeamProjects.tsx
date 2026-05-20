@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
     PlusIcon,
     XMarkIcon,
@@ -231,17 +232,15 @@ const TeamProjects: React.FC<Props> = ({ teamId, maxHeight = null }) => {
                                 </h3>
 
                                 <div className={styles.projectButtons}>
-                                    <button
-                                        type="button"
+                                    <Link
+                                        to={`/teams/${teamId}/projects/${project.id}`}
                                         className={styles.openButton}
-                                        disabled
-                                        aria-disabled="true"
                                     >
                                         <span className={styles.projectButtonIconBox} aria-hidden="true">
                                             <ArrowTopRightOnSquareIcon className={styles.projectButtonIcon} />
                                         </span>
                                         Open
-                                    </button>
+                                    </Link>
 
                                     <button
                                         type="button"

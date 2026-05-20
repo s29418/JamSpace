@@ -28,6 +28,13 @@ public class TeamMemberRepository : ITeamMemberRepository
             .FirstOrDefaultAsync(m => m.TeamId == teamId && m.UserId == userId, ct);
     }
 
+    public async Task<List<TeamMember>> GetByTeamIdAsync(Guid teamId, CancellationToken ct)
+    {
+        return await _db.TeamMembers
+            .Where(m => m.TeamId == teamId)
+            .ToListAsync(ct);
+    }
+
     public async Task<List<TeamMember>> GetLeadersAsync(Guid teamId, CancellationToken ct)
     {
         return await _db.TeamMembers

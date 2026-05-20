@@ -48,16 +48,26 @@ public class GetProjectNotesHandler : IRequestHandler<GetProjectNotesQuery, IRea
                 request.ProjectId,
                 request.AudioVersionId.Value,
                 ct);
+            var musicalRoles = await GetMusicalRolesAsync(request.TeamId, ct);
 
             return versionNotes
-                .Select(ProjectNoteMapper.ToDto)
+                .Select(note => ProjectNoteMapper.ToDto(note, musicalRoles))
                 .ToList();
         }
 
         var notes = await _notes.GetByProjectIdAsync(request.ProjectId, ct);
+        var teamMusicalRoles = await GetMusicalRolesAsync(request.TeamId, ct);
 
         return notes
-            .Select(ProjectNoteMapper.ToDto)
+            .Select(note => ProjectNoteMapper.ToDto(note, teamMusicalRoles))
             .ToList();
+    }
+
+    private async Task<IReadOnlyDictionary<Guid, string?>> GetMusicalRolesAsync(Guid teamId, CancellationToken ct)
+    {
+        var members = await _members.GetByTeamIdAsync(teamId, ct);
+        return members
+            .GroupBy(member => member.UserId)
+            .ToDictionary(group => group.Key, group => group.First().MusicalRole);
     }
 }

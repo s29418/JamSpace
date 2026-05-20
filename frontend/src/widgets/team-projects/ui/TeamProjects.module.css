@@ -212,6 +212,7 @@
     padding: 8px 0;
     gap: 8px;
     line-height: 1;
+    text-decoration: none;
 }
 
 .buttonIcon {

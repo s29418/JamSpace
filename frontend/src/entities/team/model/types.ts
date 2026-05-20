@@ -82,9 +82,11 @@ export interface ProjectNote {
     createdById: string;
     createdByDisplayName: string;
     createdByAvatarUrl?: string | null;
+    createdByMusicalRole?: string | null;
     completedById?: string | null;
     completedByDisplayName?: string | null;
     completedByAvatarUrl?: string | null;
+    completedByMusicalRole?: string | null;
     content: string;
     startTimeSeconds?: number | null;
     endTimeSeconds?: number | null;

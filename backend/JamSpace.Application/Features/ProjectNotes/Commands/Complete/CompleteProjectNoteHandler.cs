@@ -52,6 +52,15 @@ public class CompleteProjectNoteHandler : IRequestHandler<CompleteProjectNoteCom
         await _uow.SaveChangesAsync(ct);
 
         var savedNote = await _notes.GetByIdAsync(request.NoteId, ct);
-        return ProjectNoteMapper.ToDto(savedNote!);
+        var musicalRoles = await GetMusicalRolesAsync(request.TeamId, ct);
+        return ProjectNoteMapper.ToDto(savedNote!, musicalRoles);
+    }
+
+    private async Task<IReadOnlyDictionary<Guid, string?>> GetMusicalRolesAsync(Guid teamId, CancellationToken ct)
+    {
+        var members = await _members.GetByTeamIdAsync(teamId, ct);
+        return members
+            .GroupBy(member => member.UserId)
+            .ToDictionary(group => group.Key, group => group.First().MusicalRole);
     }
 }

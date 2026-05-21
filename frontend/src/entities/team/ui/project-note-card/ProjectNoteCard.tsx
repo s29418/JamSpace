@@ -1,7 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
     ArrowUturnLeftIcon,
     CheckCircleIcon,
+    EyeIcon,
     PencilSquareIcon,
     TrashIcon,
 } from '@heroicons/react/24/outline';
@@ -12,7 +14,10 @@ import styles from './ProjectNoteCard.module.css';
 type ProjectNoteCardProps = {
     note: ProjectNote;
     compact?: boolean;
+    previewContent?: boolean;
+    footerDetails?: boolean;
     busy?: boolean;
+    onOpenDetails?: (note: ProjectNote) => void;
     onToggleStatus?: (note: ProjectNote) => void | Promise<void>;
     onEdit?: (note: ProjectNote) => void;
     onDelete?: (note: ProjectNote) => void;
@@ -21,7 +26,10 @@ type ProjectNoteCardProps = {
 const ProjectNoteCard: React.FC<ProjectNoteCardProps> = ({
     note,
     compact = false,
+    previewContent = false,
+    footerDetails = false,
     busy = false,
+    onOpenDetails,
     onToggleStatus,
     onEdit,
     onDelete,
@@ -34,11 +42,18 @@ const ProjectNoteCard: React.FC<ProjectNoteCardProps> = ({
             ? `Version: ${note.audioVersionName}`
             : 'General';
     const toggleActionLabel = isCompleted ? 'Reopen' : 'Complete';
+    const scrollToTop = () => window.setTimeout(() => window.scrollTo({ top: 0, left: 0 }), 0);
 
     return (
-        <article className={`${styles.noteItem} ${isCompleted ? styles.noteItemCompleted : ''} ${compact ? styles.noteItemCompact : ''}`}>
+        <article className={`${styles.noteItem} ${isCompleted ? styles.noteItemCompleted : ''} ${compact ? styles.noteItemCompact : ''} ${previewContent ? styles.noteItemPreview : ''}`}>
             <div className={styles.noteHeader}>
                 <div className={styles.author}>
+                    <Link
+                        to={`/profile/${note.createdById}`}
+                        className={styles.avatarLink}
+                        aria-label={`Open ${note.createdByDisplayName} profile`}
+                        onClick={scrollToTop}
+                    >
                     <div className={styles.avatar}>
                         {note.createdByAvatarUrl ? (
                             <img src={note.createdByAvatarUrl} alt="" />
@@ -46,8 +61,15 @@ const ProjectNoteCard: React.FC<ProjectNoteCardProps> = ({
                             <span>{getProjectFallback(note.createdByDisplayName)}</span>
                         )}
                     </div>
+                    </Link>
                     <div>
-                        <div className={styles.authorName}>{note.createdByDisplayName}</div>
+                        <Link
+                            to={`/profile/${note.createdById}`}
+                            className={styles.authorName}
+                            onClick={scrollToTop}
+                        >
+                            {note.createdByDisplayName}
+                        </Link>
                         {note.createdByMusicalRole && (
                             <div className={styles.role}>{note.createdByMusicalRole}</div>
                         )}
@@ -63,10 +85,35 @@ const ProjectNoteCard: React.FC<ProjectNoteCardProps> = ({
                 </div>
             </div>
 
-            <p className={styles.noteContent}>{note.content}</p>
+            <p className={`${styles.noteContent} ${previewContent ? styles.noteContentPreview : ''}`}>
+                {note.content}
+            </p>
+
+            {previewContent && !footerDetails && (
+                <button
+                    type="button"
+                    className={styles.detailsButton}
+                    onClick={() => onOpenDetails?.(note)}
+                >
+                    <EyeIcon width={17} height={17} />
+                    View details
+                </button>
+            )}
 
             {!compact && (
-                <div className={styles.noteActions}>
+                <div className={styles.noteFooter}>
+                    {previewContent && footerDetails && (
+                        <button
+                            type="button"
+                            className={styles.detailsButton}
+                            onClick={() => onOpenDetails?.(note)}
+                        >
+                            <EyeIcon width={17} height={17} />
+                            View details
+                        </button>
+                    )}
+
+                    <div className={styles.noteActions}>
                     <button
                         type="button"
                         className={styles.iconButton}
@@ -97,6 +144,7 @@ const ProjectNoteCard: React.FC<ProjectNoteCardProps> = ({
                     >
                         <TrashIcon width={18} height={18} />
                     </button>
+                    </div>
                 </div>
             )}
         </article>

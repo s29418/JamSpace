@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
     ChevronDownIcon,
     ChevronLeftIcon,
@@ -11,10 +11,11 @@ import {
 import type { ProjectAudioVersion, ProjectNote } from 'entities/team/model/types';
 import { formatTime } from 'entities/team/lib/teamProjectFormatters';
 import ProjectNoteCard from 'entities/team/ui/project-note-card/ProjectNoteCard';
+import ProjectNoteDetailsModal from 'entities/team/ui/project-note-details-modal/ProjectNoteDetailsModal';
 import styles from './ProjectNotesPanel.module.css';
 
 const INLINE_NOTES_LIMIT = 5;
-const MODAL_NOTES_PAGE_SIZE = 9;
+const MODAL_NOTES_PAGE_SIZE = 6;
 const ALL_FILTER_VALUE = 'all';
 const GENERAL_FILTER_VALUE = 'general';
 const DELETED_VERSION_PREFIX = 'deleted:';
@@ -147,6 +148,8 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
     const [timeStartFilter, setTimeStartFilter] = useState('');
     const [timeEndFilter, setTimeEndFilter] = useState('');
     const [modalPage, setModalPage] = useState(0);
+    const [detailsNote, setDetailsNote] = useState<ProjectNote | null>(null);
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const inlineNotes = notes.slice(0, INLINE_NOTES_LIMIT);
 
@@ -214,6 +217,20 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
         setIsModalOpen(true);
     };
 
+    const handleEdit = (note: ProjectNote) => {
+        setIsModalOpen(false);
+        setDetailsNote(null);
+        onEdit(note);
+    };
+
+    useEffect(() => {
+        if (!formOpen || !editingNote) return;
+
+        window.setTimeout(() => {
+            formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 0);
+    }, [editingNote, formOpen]);
+
     return (
         <section className={styles.notesPanel}>
             <div className={styles.sectionHeader}>
@@ -231,7 +248,7 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
             </button>
 
             {formOpen && (
-                <form className={styles.noteForm} onSubmit={onSubmit}>
+                <form ref={formRef} className={styles.noteForm} onSubmit={onSubmit}>
                     <div className={styles.noteFormHeader}>
                         <div>
                             <h3 className={styles.noteFormTitle}>
@@ -361,7 +378,7 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
                         note={note}
                         busy={updatingNoteId === note.id}
                         onToggleStatus={onToggleStatus}
-                        onEdit={onEdit}
+                        onEdit={handleEdit}
                         onDelete={onDelete}
                     />
                 ))}
@@ -469,9 +486,12 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
                                 <ProjectNoteCard
                                     key={note.id}
                                     note={note}
+                                    previewContent
+                                    footerDetails
+                                    onOpenDetails={setDetailsNote}
                                     busy={updatingNoteId === note.id}
                                     onToggleStatus={onToggleStatus}
-                                    onEdit={onEdit}
+                                    onEdit={handleEdit}
                                     onDelete={onDelete}
                                 />
                             ))}
@@ -503,6 +523,8 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
                     </div>
                 </div>
             )}
+
+            <ProjectNoteDetailsModal note={detailsNote} onClose={() => setDetailsNote(null)} />
         </section>
     );
 };

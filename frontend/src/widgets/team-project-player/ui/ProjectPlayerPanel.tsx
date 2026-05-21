@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import type { ProjectAudioVersion, ProjectNote } from 'entities/team/model/types';
 import ProjectNoteCard from 'entities/team/ui/project-note-card/ProjectNoteCard';
+import ProjectNoteDetailsModal from 'entities/team/ui/project-note-details-modal/ProjectNoteDetailsModal';
 import { AudioWaveformPeaks, PostAudioPlayer } from 'entities/post/ui/PostAudioPlayer';
 import { toMediaProxyUrl } from 'shared/api/media';
 import { formatTime } from 'entities/team/lib/teamProjectFormatters';
@@ -47,7 +48,10 @@ const ProjectPlayerPanel: React.FC<ProjectPlayerPanelProps> = ({
     onToggleOnlySelectedVersionNotes,
     onPreviousDynamicNotes,
     onNextDynamicNotes,
-}) => (
+}) => {
+    const [detailsNote, setDetailsNote] = useState<ProjectNote | null>(null);
+
+    return (
     <section className={styles.playerPanel}>
         <div className={styles.sectionHeader}>
             <div>
@@ -117,12 +121,21 @@ const ProjectPlayerPanel: React.FC<ProjectPlayerPanelProps> = ({
             {dynamicNotesCount > 0 && (
                 <div className={styles.liveNotesScroller}>
                     {visibleDynamicNotes.map(note => (
-                        <ProjectNoteCard key={note.id} note={note} compact />
+                        <ProjectNoteCard
+                            key={note.id}
+                            note={note}
+                            compact
+                            previewContent
+                            onOpenDetails={setDetailsNote}
+                        />
                     ))}
                 </div>
             )}
         </div>
+
+        <ProjectNoteDetailsModal note={detailsNote} onClose={() => setDetailsNote(null)} />
     </section>
-);
+    );
+};
 
 export default ProjectPlayerPanel;

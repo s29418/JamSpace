@@ -9,8 +9,18 @@
 }
 
 .noteItemCompact {
+    grid-template-rows: auto minmax(0, 1fr) auto;
     min-height: 132px;
+    max-height: 260px;
     padding: 14px;
+    overflow: hidden;
+}
+
+.noteItemPreview:not(.noteItemCompact) {
+    min-height: 238px;
+    max-height: 238px;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    overflow: hidden;
 }
 
 .noteItemCompleted {
@@ -29,6 +39,12 @@
     align-items: center;
     gap: 12px;
     min-width: 0;
+}
+
+.avatarLink {
+    flex: 0 0 auto;
+    border-radius: 999px;
+    text-decoration: none;
 }
 
 .avatar {
@@ -52,8 +68,17 @@
 }
 
 .authorName {
+    display: inline-flex;
     color: #ffffff;
     font-weight: 900;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition: color 0.2s ease;
+}
+
+.avatarLink:hover + div .authorName,
+.authorName:hover {
+    color: #26cdd4;
 }
 
 .role,
@@ -100,16 +125,59 @@
 }
 
 .noteContent {
+    margin: 0;
     color: #ecf4f4;
     font-size: 1.02rem;
     line-height: 1.42;
     overflow-wrap: anywhere;
 }
 
+.noteContentPreview {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+.noteItemCompact .noteContentPreview {
+    -webkit-line-clamp: 6;
+}
+
+.detailsButton {
+    width: fit-content;
+    min-height: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 10px;
+    border: 1px solid rgba(38, 205, 212, 0.38);
+    border-radius: 999px;
+    background: rgba(38, 205, 212, 0.08);
+    color: #26cdd4;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.detailsButton:hover {
+    border-color: rgba(38, 205, 212, 0.78);
+    background: rgba(38, 205, 212, 0.16);
+}
+
+.noteFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
 .noteActions {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+    margin-left: auto;
 }
 
 .iconButton {

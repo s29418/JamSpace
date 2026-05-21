@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+    ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    ChevronUpIcon,
     PlusIcon,
     XMarkIcon,
     EyeIcon,
@@ -49,7 +51,53 @@ type NoteAuthorFilter = {
     label: string;
 };
 
+type TimeInputProps = {
+    value: string;
+    onChange: (value: string) => void;
+    disabled?: boolean;
+};
+
 const getDeletedVersionFilterValue = (name: string) => `${DELETED_VERSION_PREFIX}${name}`;
+
+const getNextTimeValue = (value: string, delta: number) => {
+    const currentValue = Number(value);
+    const nextValue = Number.isFinite(currentValue) ? Math.floor(currentValue) + delta : delta;
+    return String(Math.max(nextValue, 0));
+};
+
+const TimeInput: React.FC<TimeInputProps> = ({ value, onChange, disabled = false }) => (
+    <div className={styles.numberStepper}>
+        <input
+            type="number"
+            min="0"
+            step="1"
+            className={`${styles.input} ${styles.stepperInput}`}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            disabled={disabled}
+        />
+        <div className={styles.stepperControls}>
+            <button
+                type="button"
+                className={styles.stepperButton}
+                aria-label="Increase time"
+                onClick={() => onChange(getNextTimeValue(value, 1))}
+                disabled={disabled}
+            >
+                <ChevronUpIcon width={14} height={14} />
+            </button>
+            <button
+                type="button"
+                className={styles.stepperButton}
+                aria-label="Decrease time"
+                onClick={() => onChange(getNextTimeValue(value, -1))}
+                disabled={disabled}
+            >
+                <ChevronDownIcon width={14} height={14} />
+            </button>
+        </div>
+    </div>
+);
 
 const noteOverlapsTimeRange = (note: ProjectNote, filterStart: string, filterEnd: string) => {
     if (!filterStart && !filterEnd) return true;
@@ -253,26 +301,18 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
                             <div className={styles.timeRangeGrid}>
                                 <label className={styles.field}>
                                     <span>Start</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="1"
-                                        className={styles.input}
+                                    <TimeInput
                                         value={startTime}
-                                        onChange={(event) => onStartTimeChange(event.target.value)}
+                                        onChange={onStartTimeChange}
                                         disabled={saving}
                                     />
                                 </label>
 
                                 <label className={styles.field}>
                                     <span>End</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="1"
-                                        className={styles.input}
+                                    <TimeInput
                                         value={endTime}
-                                        onChange={(event) => onEndTimeChange(event.target.value)}
+                                        onChange={onEndTimeChange}
                                         disabled={saving}
                                     />
                                 </label>
@@ -339,8 +379,18 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
             )}
 
             {isModalOpen && (
-                <div className={styles.modalOverlay} role="presentation">
-                    <div className={styles.notesModal} role="dialog" aria-modal="true" aria-labelledby="project-notes-modal-title">
+                <div
+                    className={styles.modalOverlay}
+                    role="presentation"
+                    onClick={() => setIsModalOpen(false)}
+                >
+                    <div
+                        className={styles.notesModal}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="project-notes-modal-title"
+                        onClick={(event) => event.stopPropagation()}
+                    >
                         <div className={styles.modalHeader}>
                             <div>
                                 <h3 id="project-notes-modal-title" className={styles.modalTitle}>All notes</h3>
@@ -398,25 +448,17 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
 
                             <label className={styles.field}>
                                 <span>Time from</span>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    className={styles.input}
+                                <TimeInput
                                     value={timeStartFilter}
-                                    onChange={(event) => updateFilter(() => setTimeStartFilter(event.target.value))}
+                                    onChange={(value) => updateFilter(() => setTimeStartFilter(value))}
                                 />
                             </label>
 
                             <label className={styles.field}>
                                 <span>Time to</span>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    className={styles.input}
+                                <TimeInput
                                     value={timeEndFilter}
-                                    onChange={(event) => updateFilter(() => setTimeEndFilter(event.target.value))}
+                                    onChange={(value) => updateFilter(() => setTimeEndFilter(value))}
                                 />
                             </label>
                         </div>

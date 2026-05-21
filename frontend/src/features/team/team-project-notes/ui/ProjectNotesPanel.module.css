@@ -125,6 +125,73 @@
     outline: none;
 }
 
+.numberStepper {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 34px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 10px;
+    background: #101414;
+}
+
+.numberStepper:focus-within {
+    border-color: #26cdd4;
+    box-shadow: 0 0 0 3px rgba(38, 205, 212, 0.12);
+}
+
+.stepperInput {
+    min-height: 36px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.stepperInput:focus {
+    box-shadow: none;
+}
+
+.stepperInput::-webkit-outer-spin-button,
+.stepperInput::-webkit-inner-spin-button {
+    margin: 0;
+    appearance: none;
+}
+
+.stepperInput {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.stepperControls {
+    display: grid;
+    border-left: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.stepperButton {
+    width: 34px;
+    min-height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: rgba(38, 205, 212, 0.08);
+    color: #26cdd4;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.stepperButton:first-child {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.stepperButton:hover:not(:disabled) {
+    background: rgba(38, 205, 212, 0.2);
+}
+
+.stepperButton:disabled {
+    cursor: default;
+    opacity: 0.48;
+}
+
 .select {
     cursor: pointer;
 }
@@ -150,7 +217,7 @@
     stroke-width: 2px;
 }
 
-.input:focus,
+.input:not(.stepperInput):focus,
 .select:focus,
 .textarea:focus {
     border-color: #26cdd4;

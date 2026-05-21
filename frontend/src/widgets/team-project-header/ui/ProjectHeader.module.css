@@ -28,6 +28,7 @@
 
 .headerText {
     flex: 1;
+    min-width: 0;
 }
 
 .title {
@@ -45,7 +46,8 @@
     color: #c3d6d7;
     font-size: 1.05rem;
     line-height: 1.45;
-    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .meta {

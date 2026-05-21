@@ -32,11 +32,13 @@ export const useProjectAudioVersionPlayback = ({
     const [versionResume, setVersionResume] = useState({ timeSeconds: 0, shouldAutoPlay: false });
     const [waveformCache, setWaveformCache] = useState<Record<string, WaveformCacheEntry>>({});
     const [dynamicNotesPage, setDynamicNotesPage] = useState(0);
+    const [showOnlySelectedVersionNotes, setShowOnlySelectedVersionNotes] = useState(false);
 
     const dynamicTimestampNotes = useMemo(
         () => notes.filter(note => {
             if (note.status !== 'Active') return false;
             if (note.startTimeSeconds === null || note.startTimeSeconds === undefined) return false;
+            if (showOnlySelectedVersionNotes && note.audioVersionId !== selectedVersionId) return false;
 
             const start = note.startTimeSeconds;
             const end = note.endTimeSeconds ?? note.startTimeSeconds;
@@ -45,7 +47,7 @@ export const useProjectAudioVersionPlayback = ({
 
             return currentPlayerSecond >= min && currentPlayerSecond <= max;
         }),
-        [currentPlayerSecond, notes]
+        [currentPlayerSecond, notes, selectedVersionId, showOnlySelectedVersionNotes]
     );
 
     const visibleDynamicNotes = useMemo(
@@ -183,6 +185,8 @@ export const useProjectAudioVersionPlayback = ({
         canShowDynamicNoteControls,
         canGoToPreviousDynamicNotes,
         canGoToNextDynamicNotes,
+        showOnlySelectedVersionNotes,
+        toggleOnlySelectedVersionNotes: () => setShowOnlySelectedVersionNotes(current => !current),
         getCurrentTimeSeconds: () => playbackRef.current.currentTime,
         handlePlayerTimeUpdate,
         handlePlayerPlaybackStateChange,

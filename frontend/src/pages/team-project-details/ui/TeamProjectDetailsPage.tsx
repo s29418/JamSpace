@@ -135,8 +135,10 @@ const TeamProjectDetailsPage: React.FC = () => {
                         canShowDynamicNoteControls={playback.canShowDynamicNoteControls}
                         canGoToPreviousDynamicNotes={playback.canGoToPreviousDynamicNotes}
                         canGoToNextDynamicNotes={playback.canGoToNextDynamicNotes}
+                        showOnlySelectedVersionNotes={playback.showOnlySelectedVersionNotes}
                         onTimeUpdate={playback.handlePlayerTimeUpdate}
                         onPlaybackStateChange={playback.handlePlayerPlaybackStateChange}
+                        onToggleOnlySelectedVersionNotes={playback.toggleOnlySelectedVersionNotes}
                         onPreviousDynamicNotes={playback.showPreviousDynamicNotes}
                         onNextDynamicNotes={playback.showNextDynamicNotes}
                     />

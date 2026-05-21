@@ -22,6 +22,7 @@
     color: #ffffff;
     font-size: 22px;
     line-height: 1.15;
+    overflow-wrap: anywhere;
 }
 
 .content {
@@ -29,6 +30,8 @@
     color: #aaaaaa;
     font-size: 16px;
     line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .actions {

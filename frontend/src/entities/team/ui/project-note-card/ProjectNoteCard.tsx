@@ -33,6 +33,7 @@ const ProjectNoteCard: React.FC<ProjectNoteCardProps> = ({
         : note.audioVersionName
             ? `Version: ${note.audioVersionName}`
             : 'General';
+    const toggleActionLabel = isCompleted ? 'Reopen' : 'Complete';
 
     return (
         <article className={`${styles.noteItem} ${isCompleted ? styles.noteItemCompleted : ''} ${compact ? styles.noteItemCompact : ''}`}>
@@ -69,7 +70,8 @@ const ProjectNoteCard: React.FC<ProjectNoteCardProps> = ({
                     <button
                         type="button"
                         className={styles.iconButton}
-                        aria-label={isCompleted ? 'Reopen note' : 'Complete note'}
+                        aria-label={`${toggleActionLabel} note`}
+                        data-tooltip={toggleActionLabel}
                         onClick={() => onToggleStatus?.(note)}
                         disabled={busy}
                     >
@@ -79,6 +81,7 @@ const ProjectNoteCard: React.FC<ProjectNoteCardProps> = ({
                         type="button"
                         className={styles.iconButton}
                         aria-label="Edit note"
+                        data-tooltip="Edit"
                         onClick={() => onEdit?.(note)}
                         disabled={busy}
                     >
@@ -88,6 +91,7 @@ const ProjectNoteCard: React.FC<ProjectNoteCardProps> = ({
                         type="button"
                         className={`${styles.iconButton} ${styles.dangerButton}`}
                         aria-label="Delete note"
+                        data-tooltip="Delete"
                         onClick={() => onDelete?.(note)}
                         disabled={busy}
                     >

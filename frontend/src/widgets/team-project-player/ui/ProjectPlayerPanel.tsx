@@ -20,8 +20,10 @@ type ProjectPlayerPanelProps = {
     canShowDynamicNoteControls: boolean;
     canGoToPreviousDynamicNotes: boolean;
     canGoToNextDynamicNotes: boolean;
+    showOnlySelectedVersionNotes: boolean;
     onTimeUpdate: (seconds: number) => void;
     onPlaybackStateChange: (isPlaying: boolean) => void;
+    onToggleOnlySelectedVersionNotes: () => void;
     onPreviousDynamicNotes: () => void;
     onNextDynamicNotes: () => void;
 };
@@ -39,8 +41,10 @@ const ProjectPlayerPanel: React.FC<ProjectPlayerPanelProps> = ({
     canShowDynamicNoteControls,
     canGoToPreviousDynamicNotes,
     canGoToNextDynamicNotes,
+    showOnlySelectedVersionNotes,
     onTimeUpdate,
     onPlaybackStateChange,
+    onToggleOnlySelectedVersionNotes,
     onPreviousDynamicNotes,
     onNextDynamicNotes,
 }) => (
@@ -74,6 +78,14 @@ const ProjectPlayerPanel: React.FC<ProjectPlayerPanelProps> = ({
             <div className={styles.liveNotesHeader}>
                 <h3 className={styles.subTitle}>Current notes</h3>
                 <div className={styles.liveNotesControls}>
+                    <button
+                        type="button"
+                        className={`${styles.versionFilterButton} ${showOnlySelectedVersionNotes ? styles.versionFilterButtonActive : ''}`}
+                        onClick={onToggleOnlySelectedVersionNotes}
+                        disabled={!selectedVersion}
+                    >
+                        Current version notes only
+                    </button>
                     {canShowDynamicNoteControls && (
                         <>
                             <button

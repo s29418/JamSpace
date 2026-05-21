@@ -113,6 +113,7 @@
 }
 
 .iconButton {
+    position: relative;
     width: 34px;
     height: 34px;
     display: inline-flex;
@@ -124,6 +125,33 @@
     color: #b7dadd;
     cursor: pointer;
     transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.iconButton::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    z-index: 10;
+    padding: 5px 8px;
+    border: 1px solid rgba(38, 205, 212, 0.35);
+    border-radius: 8px;
+    background: #101617;
+    color: #d9ffff;
+    font-size: 0.76rem;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 4px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.iconButton:hover::after,
+.iconButton:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
 }
 
 .iconButton:hover {

@@ -1,83 +1,22 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import {
-    ArrowLeftIcon,
-    ArrowUturnLeftIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    CheckCircleIcon,
-    Cog6ToothIcon,
-    PencilSquareIcon,
-    PlusIcon,
-    TrashIcon,
-} from '@heroicons/react/24/outline';
-import WaveSurfer from 'wavesurfer.js';
-import { AudioWaveformPeaks, PostAudioPlayer } from 'entities/post/ui/PostAudioPlayer';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useTeamProjectWorkspace } from 'features/team/team-projects/model/useTeamProjectWorkspace';
-import { toMediaProxyUrl } from 'shared/api/media';
-import { isApiError } from 'shared/api/base';
+import { useProjectAudioVersionForm } from 'features/team/team-project-audio-versions/model/useProjectAudioVersionForm';
+import { useProjectAudioVersionPlayback } from 'features/team/team-project-audio-versions/model/useProjectAudioVersionPlayback';
+import { useProjectNoteForm } from 'features/team/team-project-notes/model/useProjectNoteForm';
 import ConfirmDialog from 'shared/ui/confirm-dialog/ConfirmDialog';
 import ProjectEditModal from 'widgets/team-projects/ui/ProjectEditModal';
-import type { ProjectAudioVersion, ProjectNote } from 'entities/team/model/types';
+import ProjectNotesPanel from 'features/team/team-project-notes/ui/ProjectNotesPanel';
+import ProjectVersionsPanel from 'features/team/team-project-audio-versions/ui/ProjectVersionsPanel';
+import ProjectHeader from 'widgets/team-project-header/ui/ProjectHeader';
+import ProjectPlayerPanel from 'widgets/team-project-player/ui/ProjectPlayerPanel';
 import styles from './TeamProjectDetailsPage.module.css';
-
-const formatDate = (value: string) =>
-    new Intl.DateTimeFormat('en', { day: 'numeric', month: 'short' }).format(new Date(value));
-
-const formatTime = (seconds?: number | null) => {
-    if (seconds === null || seconds === undefined) return null;
-
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
-};
-
-const formatRange = (note: ProjectNote) => {
-    const start = formatTime(note.startTimeSeconds);
-    const end = formatTime(note.endTimeSeconds);
-
-    if (!start) return null;
-    return end ? `${start} - ${end}` : start;
-};
-
-const getProjectFallback = (name?: string | null) => name?.trim().charAt(0).toUpperCase() || '?';
-const getErrorMessage = (error: unknown, fallback: string) =>
-    isApiError(error) ? error.message : fallback;
-const PRELOAD_VERSION_LIMIT = 6;
-
-type WaveformCacheEntry = {
-    peaks: AudioWaveformPeaks;
-    duration: number;
-};
 
 const TeamProjectDetailsPage: React.FC = () => {
     const { teamId, projectId } = useParams<{ teamId: string; projectId: string }>();
     const navigate = useNavigate();
-    const audioFileInputRef = useRef<HTMLInputElement | null>(null);
-    const playbackRef = useRef({ currentTime: 0, isPlaying: false });
-    const [currentPlayerSecond, setCurrentPlayerSecond] = useState(0);
     const [editOpen, setEditOpen] = useState(false);
-    const [versionResume, setVersionResume] = useState({ timeSeconds: 0, shouldAutoPlay: false });
-    const [isVersionFormOpen, setIsVersionFormOpen] = useState(false);
-    const [versionName, setVersionName] = useState('');
-    const [versionFile, setVersionFile] = useState<File | null>(null);
-    const [versionError, setVersionError] = useState<string | null>(null);
-    const [savingVersion, setSavingVersion] = useState(false);
-    const [deletingVersion, setDeletingVersion] = useState(false);
-    const [versionToDelete, setVersionToDelete] = useState<ProjectAudioVersion | null>(null);
-    const [waveformCache, setWaveformCache] = useState<Record<string, WaveformCacheEntry>>({});
-    const [noteFormOpen, setNoteFormOpen] = useState(false);
-    const [editingNote, setEditingNote] = useState<ProjectNote | null>(null);
-    const [noteContent, setNoteContent] = useState('');
-    const [noteAudioVersionId, setNoteAudioVersionId] = useState('');
-    const [attachCurrentTime, setAttachCurrentTime] = useState(false);
-    const [noteStartTime, setNoteStartTime] = useState('');
-    const [noteEndTime, setNoteEndTime] = useState('');
-    const [noteError, setNoteError] = useState<string | null>(null);
-    const [savingNote, setSavingNote] = useState(false);
-    const [updatingNoteId, setUpdatingNoteId] = useState<string | null>(null);
-    const [noteToDelete, setNoteToDelete] = useState<ProjectNote | null>(null);
-    const [dynamicNotesPage, setDynamicNotesPage] = useState(0);
     const {
         project,
         versions,
@@ -99,308 +38,28 @@ const TeamProjectDetailsPage: React.FC = () => {
         removeNote,
     } = useTeamProjectWorkspace(teamId, projectId);
 
-    const dynamicTimestampNotes = useMemo(
-        () => notes.filter(note => {
-            if (note.status !== 'Active') return false;
-            if (note.startTimeSeconds === null || note.startTimeSeconds === undefined) return false;
+    const playback = useProjectAudioVersionPlayback({
+        versions,
+        notes,
+        selectedVersion,
+        selectedVersionId,
+        setSelectedVersionId,
+    });
 
-            const start = note.startTimeSeconds;
-            const end = note.endTimeSeconds ?? note.startTimeSeconds;
-            const min = Math.min(start, end);
-            const max = Math.max(start, end);
+    const audioVersionsForm = useProjectAudioVersionForm({
+        uploadVersion,
+        removeVersion,
+    });
 
-            return currentPlayerSecond >= min && currentPlayerSecond <= max;
-        }),
-        [currentPlayerSecond, notes]
-    );
-    const visibleDynamicNotes = useMemo(
-        () => dynamicTimestampNotes.slice(dynamicNotesPage * 3, dynamicNotesPage * 3 + 3),
-        [dynamicNotesPage, dynamicTimestampNotes]
-    );
-    const dynamicNotesPageCount = Math.ceil(dynamicTimestampNotes.length / 3);
-    const canShowDynamicNoteControls = dynamicNotesPageCount > 1;
-    const canGoToPreviousDynamicNotes = dynamicNotesPage > 0;
-    const canGoToNextDynamicNotes = dynamicNotesPage < dynamicNotesPageCount - 1;
-
-    useEffect(() => {
-        setDynamicNotesPage(current => Math.min(current, Math.max(dynamicNotesPageCount - 1, 0)));
-    }, [dynamicNotesPageCount]);
-
-    useEffect(() => {
-        let cancelled = false;
-        const preloadedIds = new Set(Object.keys(waveformCache));
-        const versionsToPreload = versions
-            .filter(version => !preloadedIds.has(version.id))
-            .slice(0, Math.max(PRELOAD_VERSION_LIMIT - preloadedIds.size, 0));
-
-        if (versionsToPreload.length === 0) return;
-
-        const preloadVersion = (version: ProjectAudioVersion) => new Promise<WaveformCacheEntry | null>((resolve) => {
-            const container = document.createElement('div');
-            container.style.position = 'fixed';
-            container.style.left = '-10000px';
-            container.style.top = '-10000px';
-            container.style.width = '640px';
-            container.style.height = '78px';
-            document.body.appendChild(container);
-
-            const wavesurfer = WaveSurfer.create({
-                container,
-                url: toMediaProxyUrl(version.fileUrl) ?? version.fileUrl,
-                height: 78,
-                waveColor: 'rgba(163,212,216,0.8)',
-                progressColor: '#26cdd4',
-                cursorColor: '#d9ffff',
-                cursorWidth: 2,
-                barWidth: 3,
-                barGap: 2,
-                barRadius: 999,
-                barAlign: 'bottom',
-                barMinHeight: 2,
-                normalize: true,
-                interact: false,
-                hideScrollbar: true,
-                autoScroll: false,
-            });
-
-            const cleanup = () => {
-                wavesurfer.destroy();
-                container.remove();
-            };
-
-            const unsubscribeReady = wavesurfer.on('ready', (duration) => {
-                unsubscribeReady();
-                unsubscribeError();
-
-                const peaks = wavesurfer.exportPeaks({ maxLength: 12000 });
-                cleanup();
-                resolve({ peaks, duration });
-            });
-
-            const unsubscribeError = wavesurfer.on('error', () => {
-                unsubscribeReady();
-                unsubscribeError();
-                cleanup();
-                resolve(null);
-            });
-        });
-
-        (async () => {
-            for (const version of versionsToPreload) {
-                if (cancelled) break;
-
-                const entry = await preloadVersion(version);
-                if (!entry || cancelled) continue;
-
-                setWaveformCache(prev => (
-                    prev[version.id] ? prev : { ...prev, [version.id]: entry }
-                ));
-            }
-        })();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [versions, waveformCache]);
-
-    const handlePlayerTimeUpdate = useCallback((seconds: number) => {
-        playbackRef.current.currentTime = seconds;
-        const nextSecond = Math.floor(seconds);
-        setCurrentPlayerSecond(current => current === nextSecond ? current : nextSecond);
-    }, []);
-
-    const handlePlayerPlaybackStateChange = useCallback((isPlaying: boolean) => {
-        playbackRef.current.isPlaying = isPlaying;
-    }, []);
-
-    const selectVersionAtCurrentPlayback = useCallback((versionId: string) => {
-        if (versionId === selectedVersionId) return;
-
-        setVersionResume({
-            timeSeconds: playbackRef.current.currentTime,
-            shouldAutoPlay: playbackRef.current.isPlaying,
-        });
-        setSelectedVersionId(versionId);
-    }, [selectedVersionId, setSelectedVersionId]);
-
-    const selectedWaveformCache = selectedVersion ? waveformCache[selectedVersion.id] : undefined;
-
-    const openCreateNoteForm = () => {
-        const currentSecond = Math.floor(playbackRef.current.currentTime);
-
-        setEditingNote(null);
-        setNoteContent('');
-        setNoteAudioVersionId(selectedVersionId ?? '');
-        setAttachCurrentTime(false);
-        setNoteStartTime(String(currentSecond));
-        setNoteEndTime(String(currentSecond));
-        setNoteError(null);
-        setNoteFormOpen(true);
-    };
-
-    const openEditNoteForm = (note: ProjectNote) => {
-        setEditingNote(note);
-        setNoteContent(note.content);
-        setNoteAudioVersionId(note.audioVersionId ?? '');
-        setAttachCurrentTime(note.startTimeSeconds !== null && note.startTimeSeconds !== undefined);
-        setNoteStartTime(note.startTimeSeconds !== null && note.startTimeSeconds !== undefined
-            ? String(note.startTimeSeconds)
-            : String(Math.floor(playbackRef.current.currentTime)));
-        setNoteEndTime(note.endTimeSeconds !== null && note.endTimeSeconds !== undefined
-            ? String(note.endTimeSeconds)
-            : String(note.startTimeSeconds ?? Math.floor(playbackRef.current.currentTime)));
-        setNoteError(null);
-        setNoteFormOpen(true);
-    };
-
-    const closeNoteForm = () => {
-        if (savingNote) return;
-
-        setNoteFormOpen(false);
-        setEditingNote(null);
-        setNoteContent('');
-        setNoteAudioVersionId('');
-        setAttachCurrentTime(false);
-        setNoteStartTime('');
-        setNoteEndTime('');
-        setNoteError(null);
-    };
-
-    const handleSaveNote = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setNoteError(null);
-
-        const trimmedContent = noteContent.trim();
-        if (!trimmedContent) {
-            setNoteError('Note content is required.');
-            return;
-        }
-
-        const startTime = Number(noteStartTime);
-        const endTime = Number(noteEndTime || noteStartTime);
-
-        if (attachCurrentTime && (!Number.isInteger(startTime) || startTime < 0)) {
-            setNoteError('Start time must be a non-negative whole second.');
-            return;
-        }
-
-        if (attachCurrentTime && (!Number.isInteger(endTime) || endTime < 0)) {
-            setNoteError('End time must be a non-negative whole second.');
-            return;
-        }
-
-        const selectedNoteAudioVersionId = noteAudioVersionId || null;
-        const timestampPayload = attachCurrentTime
-            ? {
-                audioVersionId: selectedNoteAudioVersionId,
-                startTimeSeconds: Math.min(startTime, endTime),
-                endTimeSeconds: Math.max(startTime, endTime),
-            }
-            : {
-                audioVersionId: selectedNoteAudioVersionId,
-                startTimeSeconds: null,
-                endTimeSeconds: null,
-            };
-
-        try {
-            setSavingNote(true);
-            if (editingNote) {
-                await updateNote(editingNote.id, {
-                    content: trimmedContent,
-                    ...timestampPayload,
-                });
-            } else {
-                await addNote({
-                    content: trimmedContent,
-                    ...timestampPayload,
-                });
-            }
-            closeNoteForm();
-        } catch (e) {
-            setNoteError(getErrorMessage(e, editingNote ? 'Failed to update note.' : 'Failed to add note.'));
-        } finally {
-            setSavingNote(false);
-        }
-    };
-
-    const handleToggleNoteStatus = async (note: ProjectNote) => {
-        try {
-            setUpdatingNoteId(note.id);
-            if (note.status === 'Completed') {
-                await reopenNote(note.id);
-            } else {
-                await completeNote(note.id);
-            }
-        } catch (e) {
-            setNoteError(getErrorMessage(e, 'Failed to update note status.'));
-        } finally {
-            setUpdatingNoteId(null);
-        }
-    };
-
-    const handleDeleteNote = async () => {
-        if (!noteToDelete) return;
-
-        try {
-            setUpdatingNoteId(noteToDelete.id);
-            await removeNote(noteToDelete.id);
-            setNoteToDelete(null);
-        } catch (e) {
-            setNoteError(getErrorMessage(e, 'Failed to delete note.'));
-            setNoteToDelete(null);
-        } finally {
-            setUpdatingNoteId(null);
-        }
-    };
-
-    const resetVersionForm = () => {
-        setIsVersionFormOpen(false);
-        setVersionName('');
-        setVersionFile(null);
-        setVersionError(null);
-        if (audioFileInputRef.current) audioFileInputRef.current.value = '';
-    };
-
-    const handleUploadVersion = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setVersionError(null);
-
-        const trimmedName = versionName.trim();
-        if (!trimmedName) {
-            setVersionError('Version name is required.');
-            return;
-        }
-
-        if (!versionFile) {
-            setVersionError('Audio file is required.');
-            return;
-        }
-
-        try {
-            setSavingVersion(true);
-            await uploadVersion({ name: trimmedName, file: versionFile });
-            resetVersionForm();
-        } catch (e) {
-            setVersionError(getErrorMessage(e, 'Failed to upload audio version.'));
-        } finally {
-            setSavingVersion(false);
-        }
-    };
-
-    const handleDeleteVersion = async () => {
-        if (!versionToDelete) return;
-
-        try {
-            setDeletingVersion(true);
-            await removeVersion(versionToDelete.id);
-            setVersionToDelete(null);
-        } catch (e) {
-            setVersionError(getErrorMessage(e, 'Failed to delete audio version.'));
-            setVersionToDelete(null);
-        } finally {
-            setDeletingVersion(false);
-        }
-    };
+    const noteForm = useProjectNoteForm({
+        selectedVersionId,
+        getCurrentTimeSeconds: playback.getCurrentTimeSeconds,
+        addNote,
+        updateNote,
+        completeNote,
+        reopenNote,
+        removeNote,
+    });
 
     if (loading) {
         return <main className={styles.page}><p className={styles.state}>Loading project...</p></main>;
@@ -421,32 +80,7 @@ const TeamProjectDetailsPage: React.FC = () => {
                 Team
             </Link>
 
-            <header className={styles.header}>
-                <div className={styles.projectArtwork}>
-                    {project.pictureUrl ? (
-                        <img src={project.pictureUrl} alt={project.name} />
-                    ) : (
-                        <span>{getProjectFallback(project.name)}</span>
-                    )}
-                </div>
-
-                <div className={styles.headerText}>
-                    <h1 className={styles.title}>{project.name}</h1>
-                    {project.description && <p className={styles.description}>{project.description}</p>}
-                    <p className={styles.meta}>Updated {formatDate(project.updatedAt)}</p>
-
-                    <button
-                        type="button"
-                        className={styles.editProjectButton}
-                        onClick={() => setEditOpen(true)}
-                    >
-                        <Cog6ToothIcon width={20} height={20} />
-                        Edit
-                    </button>
-                </div>
-
-
-            </header>
+            <ProjectHeader project={project} onEdit={() => setEditOpen(true)} />
 
             <ProjectEditModal
                 isOpen={editOpen}
@@ -465,478 +99,93 @@ const TeamProjectDetailsPage: React.FC = () => {
             />
 
             <ConfirmDialog
-                isOpen={!!versionToDelete}
+                isOpen={!!audioVersionsForm.versionToDelete}
                 title="Delete version"
-                message={`Are you sure you want to delete "${versionToDelete?.name ?? 'this version'}"?`}
+                message={`Are you sure you want to delete "${audioVersionsForm.versionToDelete?.name ?? 'this version'}"?`}
                 confirmLabel="Delete"
-                loading={deletingVersion}
-                onConfirm={handleDeleteVersion}
-                onCancel={() => {
-                    if (!deletingVersion) setVersionToDelete(null);
-                }}
+                loading={audioVersionsForm.deleting}
+                onConfirm={audioVersionsForm.deleteSelectedVersion}
+                onCancel={audioVersionsForm.cancelDeleteVersion}
             />
 
             <ConfirmDialog
-                isOpen={!!noteToDelete}
+                isOpen={!!noteForm.noteToDelete}
                 title="Delete note"
                 message="Are you sure you want to delete this note?"
                 confirmLabel="Delete"
-                loading={updatingNoteId === noteToDelete?.id}
-                onConfirm={handleDeleteNote}
-                onCancel={() => {
-                    if (!updatingNoteId) setNoteToDelete(null);
-                }}
+                loading={noteForm.updatingNoteId === noteForm.noteToDelete?.id}
+                onConfirm={noteForm.deleteSelectedNote}
+                onCancel={noteForm.cancelDeleteNote}
             />
 
             <section className={styles.workspace}>
                 <div className={styles.mainColumn}>
-                    <section className={styles.playerPanel}>
-                        <div className={styles.sectionHeader}>
-                            <div>
-                                <h2 className={styles.sectionTitle}>Current version</h2>
-                                <p className={styles.sectionMeta}>
-                                    {selectedVersion ? selectedVersion.name : 'No audio version selected'}
-                                </p>
-                            </div>
-                        </div>
+                    <ProjectPlayerPanel
+                        selectedVersion={selectedVersion}
+                        artworkUrl={project.pictureUrl}
+                        waveformPeaks={playback.selectedWaveformCache?.peaks}
+                        waveformDuration={playback.selectedWaveformCache?.duration}
+                        resumeTimeSeconds={playback.versionResume.timeSeconds}
+                        shouldAutoPlay={playback.versionResume.shouldAutoPlay}
+                        currentPlayerSecond={playback.currentPlayerSecond}
+                        visibleDynamicNotes={playback.visibleDynamicNotes}
+                        dynamicNotesCount={playback.dynamicTimestampNotes.length}
+                        canShowDynamicNoteControls={playback.canShowDynamicNoteControls}
+                        canGoToPreviousDynamicNotes={playback.canGoToPreviousDynamicNotes}
+                        canGoToNextDynamicNotes={playback.canGoToNextDynamicNotes}
+                        onTimeUpdate={playback.handlePlayerTimeUpdate}
+                        onPlaybackStateChange={playback.handlePlayerPlaybackStateChange}
+                        onPreviousDynamicNotes={playback.showPreviousDynamicNotes}
+                        onNextDynamicNotes={playback.showNextDynamicNotes}
+                    />
 
-                        {selectedVersion ? (
-                            <PostAudioPlayer
-                                src={toMediaProxyUrl(selectedVersion.fileUrl) ?? selectedVersion.fileUrl}
-                                title={selectedVersion.name}
-                                artworkUrl={project.pictureUrl}
-                                precomputedPeaks={selectedWaveformCache?.peaks}
-                                precomputedDuration={selectedWaveformCache?.duration}
-                                initialTimeSeconds={versionResume.timeSeconds}
-                                autoPlayOnReady={versionResume.shouldAutoPlay}
-                                onTimeUpdate={handlePlayerTimeUpdate}
-                                onPlaybackStateChange={handlePlayerPlaybackStateChange}
-                            />
-                        ) : (
-                            <div className={styles.emptyPlayer}>Upload a version to start listening.</div>
-                        )}
-
-                        <div className={styles.liveNotes}>
-                            <div className={styles.liveNotesHeader}>
-                                <h3 className={styles.subTitle}>Current notes</h3>
-                                <div className={styles.liveNotesControls}>
-                                    {canShowDynamicNoteControls && (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className={styles.liveNotePageButton}
-                                                aria-label="Show previous current notes"
-                                                onClick={() => setDynamicNotesPage(current => Math.max(current - 1, 0))}
-                                                disabled={!canGoToPreviousDynamicNotes}
-                                            >
-                                                <ChevronLeftIcon width={18} height={18} />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={styles.liveNotePageButton}
-                                                aria-label="Show next current notes"
-                                                onClick={() => setDynamicNotesPage(current => Math.min(current + 1, dynamicNotesPageCount - 1))}
-                                                disabled={!canGoToNextDynamicNotes}
-                                            >
-                                                <ChevronRightIcon width={18} height={18} />
-                                            </button>
-                                        </>
-                                    )}
-                                    <span className={styles.liveTime}>{formatTime(currentPlayerSecond)}</span>
-                                </div>
-                            </div>
-                            {dynamicTimestampNotes.length === 0 && (
-                                <p className={styles.muted}>No active notes at this time.</p>
-                            )}
-                            {dynamicTimestampNotes.length > 0 && (
-                                <div className={styles.liveNotesScroller}>
-                                    {visibleDynamicNotes.map(note => (
-                                        <NoteRow key={note.id} note={note} compact />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </section>
-
-                    <section className={styles.notesPanel}>
-                        <div className={styles.sectionHeader}>
-                            <h2 className={styles.sectionTitle}>All notes</h2>
-                            <span className={styles.count}>{notes.length}</span>
-                        </div>
-
-                        <button
-                            type="button"
-                            className={styles.addVersionButton}
-                            onClick={openCreateNoteForm}
-                        >
-                            <PlusIcon width={20} height={20} />
-                            Add note
-                        </button>
-
-                        {noteFormOpen && (
-                            <form className={styles.noteForm} onSubmit={handleSaveNote}>
-                                <div className={styles.noteFormHeader}>
-                                    <div>
-                                        <h3 className={styles.noteFormTitle}>
-                                            {editingNote ? 'Edit note' : 'Add note'}
-                                        </h3>
-                                        <p className={styles.noteFormMeta}>
-                                            {attachCurrentTime ? 'Timestamp note' : 'Project note'}
-                                        </p>
-                                    </div>
-
-                                    {attachCurrentTime && (
-                                        <span className={styles.noteTimeBadge}>
-                                            {formatTime(Number(noteStartTime) || 0)}
-                                            {' - '}
-                                            {formatTime(Number(noteEndTime || noteStartTime) || 0)}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <label className={styles.versionField}>
-                                    <span>Content</span>
-                                    <textarea
-                                        className={styles.noteTextarea}
-                                        value={noteContent}
-                                        onChange={(event) => setNoteContent(event.target.value)}
-                                        rows={4}
-                                        maxLength={2000}
-                                        disabled={savingNote}
-                                        required
-                                    />
-                                </label>
-
-                                <div className={styles.noteOptionsGrid}>
-                                    <label className={styles.versionField}>
-                                        <span>Source version</span>
-                                        <select
-                                            className={styles.versionSelect}
-                                            value={noteAudioVersionId}
-                                            onChange={(event) => setNoteAudioVersionId(event.target.value)}
-                                            disabled={savingNote}
-                                        >
-                                            <option value="">General</option>
-                                            {versions.map(version => (
-                                                <option key={version.id} value={version.id}>
-                                                    {version.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
-
-                                    <label className={`${styles.timestampToggle} ${attachCurrentTime ? styles.timestampToggleActive : ''}`}>
-                                        <input
-                                            type="checkbox"
-                                            checked={attachCurrentTime}
-                                            onChange={(event) => {
-                                                const checked = event.target.checked;
-                                                setAttachCurrentTime(checked);
-                                                if (checked && !noteStartTime) {
-                                                    const currentSecond = Math.floor(playbackRef.current.currentTime);
-                                                    setNoteStartTime(String(currentSecond));
-                                                    setNoteEndTime(String(currentSecond));
-                                                }
-                                            }}
-                                            disabled={savingNote}
-                                        />
-                                        <span>
-                                            <strong>Timestamp</strong>
-                                            <small>{attachCurrentTime ? 'Shown near player time' : 'No player time'}</small>
-                                        </span>
-                                    </label>
-                                </div>
-
-                                {attachCurrentTime && (
-                                    <div className={styles.timeRangePanel}>
-                                        <div className={styles.timeRangeGrid}>
-                                            <label className={styles.versionField}>
-                                                <span>Start</span>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    step="1"
-                                                    className={styles.versionInput}
-                                                    value={noteStartTime}
-                                                    onChange={(event) => setNoteStartTime(event.target.value)}
-                                                    disabled={savingNote}
-                                                />
-                                            </label>
-
-                                            <label className={styles.versionField}>
-                                                <span>End</span>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    step="1"
-                                                    className={styles.versionInput}
-                                                    value={noteEndTime}
-                                                    onChange={(event) => setNoteEndTime(event.target.value)}
-                                                    disabled={savingNote}
-                                                />
-                                            </label>
-
-                                            <button
-                                                type="button"
-                                                className={styles.versionSecondaryButton}
-                                                onClick={() => {
-                                                    const currentSecond = Math.floor(playbackRef.current.currentTime);
-                                                    setNoteStartTime(String(currentSecond));
-                                                    setNoteEndTime(String(currentSecond));
-                                                }}
-                                                disabled={savingNote}
-                                            >
-                                                Use player time
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {noteError && <p className={styles.versionError}>{noteError}</p>}
-
-                                <div className={styles.versionFormActions}>
-                                    <button
-                                        type="button"
-                                        className={styles.versionSecondaryButton}
-                                        onClick={closeNoteForm}
-                                        disabled={savingNote}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className={styles.versionPrimaryButton}
-                                        disabled={savingNote}
-                                    >
-                                        {savingNote ? 'Saving...' : editingNote ? 'Save note' : 'Add note'}
-                                    </button>
-                                </div>
-                            </form>
-                        )}
-
-                        {!noteFormOpen && noteError && <p className={styles.versionError}>{noteError}</p>}
-
-                        <div className={styles.notesList}>
-                            {notes.length === 0 && <p className={styles.muted}>No notes yet.</p>}
-                            {notes.map(note => (
-                                <NoteRow
-                                    key={note.id}
-                                    note={note}
-                                    busy={updatingNoteId === note.id}
-                                    onToggleStatus={handleToggleNoteStatus}
-                                    onEdit={openEditNoteForm}
-                                    onDelete={setNoteToDelete}
-                                />
-                            ))}
-                        </div>
-                    </section>
+                    <ProjectNotesPanel
+                        notes={notes}
+                        versions={versions}
+                        formOpen={noteForm.formOpen}
+                        editingNote={noteForm.editingNote}
+                        content={noteForm.content}
+                        audioVersionId={noteForm.audioVersionId}
+                        attachCurrentTime={noteForm.attachCurrentTime}
+                        startTime={noteForm.startTime}
+                        endTime={noteForm.endTime}
+                        error={noteForm.error}
+                        saving={noteForm.saving}
+                        updatingNoteId={noteForm.updatingNoteId}
+                        onOpenCreate={noteForm.openCreateForm}
+                        onSubmit={noteForm.saveNote}
+                        onContentChange={noteForm.setContent}
+                        onAudioVersionChange={noteForm.setAudioVersionId}
+                        onAttachCurrentTimeChange={noteForm.setAttachCurrentTime}
+                        onStartTimeChange={noteForm.setStartTime}
+                        onEndTimeChange={noteForm.setEndTime}
+                        onUsePlayerTime={noteForm.setCurrentTimeRange}
+                        onCloseForm={noteForm.closeForm}
+                        onToggleStatus={noteForm.toggleStatus}
+                        onEdit={noteForm.openEditForm}
+                        onDelete={noteForm.requestDeleteNote}
+                    />
                 </div>
 
-                <aside className={styles.versionsPanel}>
-                    <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>Versions</h2>
-                        <span className={styles.count}>{versions.length}</span>
-                    </div>
-
-                    <button
-                        type="button"
-                        className={styles.addVersionButton}
-                        onClick={() => {
-                            setVersionError(null);
-                            setIsVersionFormOpen(current => !current);
-                        }}
-                    >
-                        <PlusIcon width={20} height={20} />
-                        Add new version
-                    </button>
-
-                    {isVersionFormOpen && (
-                        <form className={styles.versionForm} onSubmit={handleUploadVersion}>
-                            <label className={styles.versionField}>
-                                <span>Name</span>
-                                <input
-                                    className={styles.versionInput}
-                                    value={versionName}
-                                    onChange={(event) => setVersionName(event.target.value)}
-                                    maxLength={100}
-                                    disabled={savingVersion}
-                                    required
-                                />
-                            </label>
-
-                            <div className={styles.versionField}>
-                                <span>Audio file</span>
-                                <input
-                                    ref={audioFileInputRef}
-                                    type="file"
-                                    accept="audio/*"
-                                    className={styles.hiddenInput}
-                                    onChange={(event) => setVersionFile(event.target.files?.[0] ?? null)}
-                                />
-                                <button
-                                    type="button"
-                                    className={styles.fileButton}
-                                    onClick={() => audioFileInputRef.current?.click()}
-                                    disabled={savingVersion}
-                                >
-                                    {versionFile ? 'Change file' : 'Choose file'}
-                                </button>
-                                {versionFile && <span className={styles.fileName}>{versionFile.name}</span>}
-                            </div>
-
-                            {versionError && <p className={styles.versionError}>{versionError}</p>}
-
-                            <div className={styles.versionFormActions}>
-                                <button
-                                    type="button"
-                                    className={styles.versionSecondaryButton}
-                                    onClick={resetVersionForm}
-                                    disabled={savingVersion}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className={styles.versionPrimaryButton}
-                                    disabled={savingVersion}
-                                >
-                                    {savingVersion ? 'Uploading...' : 'Upload'}
-                                </button>
-                            </div>
-                        </form>
-                    )}
-
-                    {!isVersionFormOpen && versionError && <p className={styles.versionError}>{versionError}</p>}
-
-                    <div className={styles.versionsList}>
-                        {versions.length === 0 && <p className={styles.muted}>No versions yet.</p>}
-                        {versions.map(version => {
-                            const isActive = version.id === selectedVersionId;
-
-                            return (
-                                <article
-                                    key={version.id}
-                                    role="button"
-                                    tabIndex={0}
-                                    className={`${styles.versionItem} ${isActive ? styles.versionItemActive : ''}`}
-                                    onClick={() => selectVersionAtCurrentPlayback(version.id)}
-                                    onKeyDown={(event) => {
-                                        if (event.key === 'Enter' || event.key === ' ') {
-                                            event.preventDefault();
-                                            selectVersionAtCurrentPlayback(version.id);
-                                        }
-                                    }}
-                                >
-                                    <span className={styles.versionName}>{version.name}</span>
-                                    <span className={styles.versionDate}>{formatDate(version.createdAt)}</span>
-                                    <button
-                                        type="button"
-                                        className={styles.deleteVersionButton}
-                                        aria-label={`Delete ${version.name}`}
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            setVersionToDelete(version);
-                                        }}
-                                    >
-                                        <TrashIcon width={18} height={18} />
-                                    </button>
-                                </article>
-                            );
-                        })}
-                    </div>
-                </aside>
+                <ProjectVersionsPanel
+                    versions={versions}
+                    selectedVersionId={selectedVersionId}
+                    isFormOpen={audioVersionsForm.isFormOpen}
+                    name={audioVersionsForm.name}
+                    file={audioVersionsForm.file}
+                    error={audioVersionsForm.error}
+                    saving={audioVersionsForm.saving}
+                    fileInputRef={audioVersionsForm.fileInputRef}
+                    onToggleForm={audioVersionsForm.toggleForm}
+                    onNameChange={audioVersionsForm.setName}
+                    onFileChange={audioVersionsForm.setFile}
+                    onSubmit={audioVersionsForm.submit}
+                    onCancel={audioVersionsForm.resetForm}
+                    onSelectVersion={playback.selectVersionAtCurrentPlayback}
+                    onDeleteVersion={audioVersionsForm.requestDeleteVersion}
+                />
             </section>
         </main>
-    );
-};
-
-type NoteRowProps = {
-    note: ProjectNote;
-    compact?: boolean;
-    busy?: boolean;
-    onToggleStatus?: (note: ProjectNote) => void | Promise<void>;
-    onEdit?: (note: ProjectNote) => void;
-    onDelete?: (note: ProjectNote) => void;
-};
-
-const NoteRow: React.FC<NoteRowProps> = ({
-    note,
-    compact = false,
-    busy = false,
-    onToggleStatus,
-    onEdit,
-    onDelete,
-}) => {
-    const range = formatRange(note);
-    const isCompleted = note.status === 'Completed';
-    const sourceLabel = note.isAudioVersionDeleted
-        ? `Deleted version: ${note.audioVersionName ?? 'Unknown'}`
-        : note.audioVersionName
-            ? `Version: ${note.audioVersionName}`
-            : 'General';
-
-    return (
-        <article className={`${styles.noteItem} ${isCompleted ? styles.noteItemCompleted : ''} ${compact ? styles.noteItemCompact : ''}`}>
-            <div className={styles.noteHeader}>
-                <div className={styles.author}>
-                    <div className={styles.avatar}>
-                        {note.createdByAvatarUrl ? (
-                            <img src={note.createdByAvatarUrl} alt="" />
-                        ) : (
-                            <span>{getProjectFallback(note.createdByDisplayName)}</span>
-                        )}
-                    </div>
-                    <div>
-                        <div className={styles.authorName}>{note.createdByDisplayName}</div>
-                        {note.createdByMusicalRole && (
-                            <div className={styles.role}>{note.createdByMusicalRole}</div>
-                        )}
-                        <span className={`${styles.sourceTag} ${note.isAudioVersionDeleted ? styles.sourceTagDeleted : ''}`}>
-                            {sourceLabel}
-                        </span>
-                    </div>
-                </div>
-
-                <div className={styles.noteMeta}>
-                    {range && <span className={styles.range}>{range}</span>}
-                    <span>{formatDate(note.createdAt)}</span>
-                </div>
-            </div>
-
-            <p className={styles.noteContent}>{note.content}</p>
-
-            {!compact && (
-                <div className={styles.noteActions}>
-                    <button
-                        type="button"
-                        className={styles.iconButton}
-                        aria-label={isCompleted ? 'Reopen note' : 'Complete note'}
-                        onClick={() => onToggleStatus?.(note)}
-                        disabled={busy}
-                    >
-                        {isCompleted ? <ArrowUturnLeftIcon width={18} height={18} /> : <CheckCircleIcon width={18} height={18} />}
-                    </button>
-                    <button
-                        type="button"
-                        className={styles.iconButton}
-                        aria-label="Edit note"
-                        onClick={() => onEdit?.(note)}
-                        disabled={busy}
-                    >
-                        <PencilSquareIcon width={18} height={18} />
-                    </button>
-                    <button
-                        type="button"
-                        className={`${styles.iconButton} ${styles.dangerButton}`}
-                        aria-label="Delete note"
-                        onClick={() => onDelete?.(note)}
-                        disabled={busy}
-                    >
-                        <TrashIcon width={18} height={18} />
-                    </button>
-                </div>
-            )}
-        </article>
     );
 };
 

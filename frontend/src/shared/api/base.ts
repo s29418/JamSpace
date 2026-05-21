@@ -5,10 +5,15 @@ export const API_BASE_URL = "http://localhost:5072";
 
 type ProblemDetails = {
     type?: string;
+    Type?: string;
     title?: string;
+    Title?: string;
     status?: number;
+    Status?: number;
     detail?: string;
+    Detail?: string;
     errors?: Record<string, string[]>;
+    Errors?: Record<string, string[]>;
 };
 
 export class ApiError extends Error {
@@ -101,9 +106,9 @@ api.interceptors.response.use(
 
             if (data && typeof data === 'object') {
                 const pd = data as ProblemDetails;
-                details = pd.errors;
+                details = pd.errors || pd.Errors;
                 const first = details ? Object.values(details).flat()[0] : undefined;
-                message = first || pd.detail || pd.title || data?.message || error.response.statusText || message;
+                message = first || pd.detail || pd.Detail || pd.title || pd.Title || data?.message || error.response.statusText || message;
             } else if (typeof data === 'string' && data.trim()) {
                 message = data;
             }

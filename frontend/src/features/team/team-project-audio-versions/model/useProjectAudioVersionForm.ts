@@ -7,6 +7,32 @@ type UseProjectAudioVersionFormParams = {
     removeVersion: (versionId: string) => Promise<void>;
 };
 
+const readAudioDurationSeconds = (file: File): Promise<number | null> => new Promise((resolve) => {
+    const audio = document.createElement('audio');
+    const objectUrl = URL.createObjectURL(file);
+
+    const cleanup = () => {
+        URL.revokeObjectURL(objectUrl);
+        audio.removeAttribute('src');
+        audio.load();
+    };
+
+    audio.preload = 'metadata';
+    audio.onloadedmetadata = () => {
+        const duration = Number.isFinite(audio.duration)
+            ? Math.ceil(audio.duration)
+            : null;
+
+        cleanup();
+        resolve(duration);
+    };
+    audio.onerror = () => {
+        cleanup();
+        resolve(null);
+    };
+    audio.src = objectUrl;
+});
+
 export const useProjectAudioVersionForm = ({
     uploadVersion,
     removeVersion,
@@ -50,7 +76,13 @@ export const useProjectAudioVersionForm = ({
 
         try {
             setSaving(true);
-            await uploadVersion({ name: trimmedName, file });
+            const durationSeconds = await readAudioDurationSeconds(file);
+            if (!durationSeconds || durationSeconds <= 0) {
+                setError('Could not read audio duration from this file.');
+                return;
+            }
+
+            await uploadVersion({ name: trimmedName, file, durationSeconds });
             resetForm();
         } catch (e) {
             setError(getErrorMessage(e, 'Failed to upload audio version.'));

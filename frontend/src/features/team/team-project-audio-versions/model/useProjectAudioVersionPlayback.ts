@@ -163,11 +163,21 @@ export const useProjectAudioVersionPlayback = ({
     }, [selectedVersionId, setSelectedVersionId]);
 
     const selectedWaveformCache = selectedVersion ? waveformCache[selectedVersion.id] : undefined;
+    const versionDurationSecondsById = useMemo(
+        () => Object.fromEntries(
+            Object.entries(waveformCache).map(([versionId, entry]) => [
+                versionId,
+                Math.ceil(entry.duration),
+            ])
+        ),
+        [waveformCache]
+    );
 
     return {
         currentPlayerSecond,
         versionResume,
         selectedWaveformCache,
+        versionDurationSecondsById,
         dynamicTimestampNotes,
         visibleDynamicNotes,
         canShowDynamicNoteControls,

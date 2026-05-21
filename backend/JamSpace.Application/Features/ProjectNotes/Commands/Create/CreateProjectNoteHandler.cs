@@ -6,6 +6,8 @@ using JamSpace.Application.Features.ProjectNotes.Mappers;
 using JamSpace.Domain.Entities;
 using JamSpace.Domain.Enums;
 using MediatR;
+using FluentValidation;
+using FluentValidation.Results;
 
 namespace JamSpace.Application.Features.ProjectNotes.Commands.Create;
 
@@ -51,6 +53,8 @@ public class CreateProjectNoteHandler : IRequestHandler<CreateProjectNoteCommand
                 throw new NotFoundException("Audio version not found.");
         }
 
+        await ValidateTimestampRangeAsync(request.ProjectId, request.StartTimeSeconds, request.EndTimeSeconds, audioVersion, ct);
+
         var now = DateTimeOffset.UtcNow;
         var noteId = Guid.NewGuid();
         var note = new ProjectNote
@@ -82,5 +86,45 @@ public class CreateProjectNoteHandler : IRequestHandler<CreateProjectNoteCommand
         return members
             .GroupBy(member => member.UserId)
             .ToDictionary(group => group.Key, group => group.First().MusicalRole);
+    }
+
+    private async Task ValidateTimestampRangeAsync(
+        Guid projectId,
+        int? startTimeSeconds,
+        int? endTimeSeconds,
+        ProjectAudioVersion? audioVersion,
+        CancellationToken ct)
+    {
+        if (!startTimeSeconds.HasValue) return;
+
+        var noteEnd = endTimeSeconds ?? startTimeSeconds.Value;
+        int? maxEnd;
+
+        if (audioVersion is not null)
+        {
+            maxEnd = audioVersion.DurationSeconds;
+        }
+        else
+        {
+            var versions = await _versions.GetByProjectIdAsync(projectId, ct);
+            maxEnd = versions
+                .Where(version => version.DurationSeconds.HasValue)
+                .Select(version => version.DurationSeconds!.Value)
+                .DefaultIfEmpty()
+                .Max();
+        }
+
+        if (!maxEnd.HasValue || maxEnd.Value <= 0)
+            return;
+
+        if (noteEnd > maxEnd.Value)
+            throw new ValidationException(new[]
+            {
+                new ValidationFailure(
+                    nameof(CreateProjectNoteCommand.EndTimeSeconds),
+                    audioVersion is not null
+                        ? $"Note end time is outside the selected audio version duration. Maximum allowed end time is {maxEnd.Value} seconds."
+                        : $"Note end time is outside the longest project audio version duration. Maximum allowed end time is {maxEnd.Value} seconds.")
+            });
     }
 }

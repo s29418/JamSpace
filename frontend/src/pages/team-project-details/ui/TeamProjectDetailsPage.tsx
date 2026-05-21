@@ -52,6 +52,8 @@ const TeamProjectDetailsPage: React.FC = () => {
     });
 
     const noteForm = useProjectNoteForm({
+        versions,
+        versionDurationSecondsById: playback.versionDurationSecondsById,
         selectedVersionId,
         getCurrentTimeSeconds: playback.getCurrentTimeSeconds,
         addNote,

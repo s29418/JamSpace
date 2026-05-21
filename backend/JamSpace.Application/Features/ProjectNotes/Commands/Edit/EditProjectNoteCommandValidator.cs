@@ -25,10 +25,7 @@ public class EditProjectNoteCommandValidator : AbstractValidator<EditProjectNote
 
         RuleFor(x => x)
             .Must(x => !x.StartTimeSeconds.HasValue || !x.EndTimeSeconds.HasValue || x.EndTimeSeconds >= x.StartTimeSeconds)
-            .WithMessage("End time must be greater than or equal to start time.");
+            .WithMessage("Start time cannot be later than end time.");
 
-        RuleFor(x => x)
-            .Must(x => !x.StartTimeSeconds.HasValue && !x.EndTimeSeconds.HasValue || x.AudioVersionId.HasValue)
-            .WithMessage("Audio version is required for timestamped notes.");
     }
 }

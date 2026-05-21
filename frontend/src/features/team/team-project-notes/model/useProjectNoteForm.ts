@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import type { CreateProjectNoteRequest, EditProjectNoteRequest, ProjectNote } from 'entities/team/model/types';
-import { getErrorMessage } from 'entities/team/lib/teamProjectFormatters';
+import type {
+    CreateProjectNoteRequest,
+    EditProjectNoteRequest,
+    ProjectAudioVersion,
+    ProjectNote,
+} from 'entities/team/model/types';
+import { formatTime, getErrorMessage } from 'entities/team/lib/teamProjectFormatters';
 
 type UseProjectNoteFormParams = {
+    versions: ProjectAudioVersion[];
+    versionDurationSecondsById?: Record<string, number>;
     selectedVersionId?: string | null;
     getCurrentTimeSeconds: () => number;
     addNote: (request: CreateProjectNoteRequest) => Promise<ProjectNote>;
@@ -13,6 +20,8 @@ type UseProjectNoteFormParams = {
 };
 
 export const useProjectNoteForm = ({
+    versions,
+    versionDurationSecondsById = {},
     selectedVersionId,
     getCurrentTimeSeconds,
     addNote,
@@ -32,6 +41,21 @@ export const useProjectNoteForm = ({
     const [saving, setSaving] = useState(false);
     const [updatingNoteId, setUpdatingNoteId] = useState<string | null>(null);
     const [noteToDelete, setNoteToDelete] = useState<ProjectNote | null>(null);
+
+    const getMaxEndTimeSeconds = (selectedAudioVersionId: string | null) => {
+        if (selectedAudioVersionId) {
+            const selectedVersion = versions.find(version => version.id === selectedAudioVersionId);
+            return selectedVersion?.durationSeconds
+                ?? versionDurationSecondsById[selectedAudioVersionId]
+                ?? null;
+        }
+
+        const durations = versions
+            .map(version => version.durationSeconds ?? versionDurationSecondsById[version.id])
+            .filter((duration): duration is number => typeof duration === 'number' && Number.isFinite(duration));
+
+        return durations.length > 0 ? Math.max(...durations) : null;
+    };
 
     const setCurrentTimeRange = () => {
         const currentSecond = Math.floor(getCurrentTimeSeconds());
@@ -113,11 +137,27 @@ export const useProjectNoteForm = ({
         }
 
         const selectedAudioVersionId = audioVersionId || null;
+        if (attachCurrentTime) {
+            if (parsedStartTime > parsedEndTime) {
+                setError('Start time cannot be later than end time.');
+                return;
+            }
+
+            const maxEndTimeSeconds = getMaxEndTimeSeconds(selectedAudioVersionId);
+
+            if (maxEndTimeSeconds !== null && maxEndTimeSeconds > 0 && parsedEndTime > maxEndTimeSeconds) {
+                setError(selectedAudioVersionId
+                    ? `End time ${formatTime(parsedEndTime)} is outside the selected version duration (${formatTime(maxEndTimeSeconds)}).`
+                    : `End time ${formatTime(parsedEndTime)} is outside the longest version duration (${formatTime(maxEndTimeSeconds)}).`);
+                return;
+            }
+        }
+
         const timestampPayload = attachCurrentTime
             ? {
                 audioVersionId: selectedAudioVersionId,
-                startTimeSeconds: Math.min(parsedStartTime, parsedEndTime),
-                endTimeSeconds: Math.max(parsedStartTime, parsedEndTime),
+                startTimeSeconds: parsedStartTime,
+                endTimeSeconds: parsedEndTime,
             }
             : {
                 audioVersionId: selectedAudioVersionId,

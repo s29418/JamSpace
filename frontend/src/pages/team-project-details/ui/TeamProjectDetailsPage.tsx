@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
     ArrowLeftIcon,
     ArrowUturnLeftIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
     CheckCircleIcon,
     Cog6ToothIcon,
     PencilSquareIcon,
@@ -53,6 +55,7 @@ const TeamProjectDetailsPage: React.FC = () => {
     const navigate = useNavigate();
     const audioFileInputRef = useRef<HTMLInputElement | null>(null);
     const playbackRef = useRef({ currentTime: 0, isPlaying: false });
+    const [currentPlayerSecond, setCurrentPlayerSecond] = useState(0);
     const [editOpen, setEditOpen] = useState(false);
     const [versionResume, setVersionResume] = useState({ timeSeconds: 0, shouldAutoPlay: false });
     const [isVersionFormOpen, setIsVersionFormOpen] = useState(false);
@@ -71,6 +74,7 @@ const TeamProjectDetailsPage: React.FC = () => {
     const [savingNote, setSavingNote] = useState(false);
     const [updatingNoteId, setUpdatingNoteId] = useState<string | null>(null);
     const [noteToDelete, setNoteToDelete] = useState<ProjectNote | null>(null);
+    const [dynamicNotesPage, setDynamicNotesPage] = useState(0);
     const {
         project,
         versions,
@@ -92,10 +96,32 @@ const TeamProjectDetailsPage: React.FC = () => {
         removeNote,
     } = useTeamProjectWorkspace(teamId, projectId);
 
-    const activeTimestampNotes = useMemo(
-        () => notes.filter(note => note.status === 'Active' && note.startTimeSeconds !== null && note.startTimeSeconds !== undefined),
-        [notes]
+    const dynamicTimestampNotes = useMemo(
+        () => notes.filter(note => {
+            if (note.status !== 'Active') return false;
+            if (note.startTimeSeconds === null || note.startTimeSeconds === undefined) return false;
+
+            const start = note.startTimeSeconds;
+            const end = note.endTimeSeconds ?? note.startTimeSeconds;
+            const min = Math.min(start, end);
+            const max = Math.max(start, end);
+
+            return currentPlayerSecond >= min && currentPlayerSecond <= max;
+        }),
+        [currentPlayerSecond, notes]
     );
+    const visibleDynamicNotes = useMemo(
+        () => dynamicTimestampNotes.slice(dynamicNotesPage * 3, dynamicNotesPage * 3 + 3),
+        [dynamicNotesPage, dynamicTimestampNotes]
+    );
+    const dynamicNotesPageCount = Math.ceil(dynamicTimestampNotes.length / 3);
+    const canShowDynamicNoteControls = dynamicNotesPageCount > 1;
+    const canGoToPreviousDynamicNotes = dynamicNotesPage > 0;
+    const canGoToNextDynamicNotes = dynamicNotesPage < dynamicNotesPageCount - 1;
+
+    useEffect(() => {
+        setDynamicNotesPage(current => Math.min(current, Math.max(dynamicNotesPageCount - 1, 0)));
+    }, [dynamicNotesPageCount]);
 
     useEffect(() => {
         let cancelled = false;
@@ -176,6 +202,8 @@ const TeamProjectDetailsPage: React.FC = () => {
 
     const handlePlayerTimeUpdate = useCallback((seconds: number) => {
         playbackRef.current.currentTime = seconds;
+        const nextSecond = Math.floor(seconds);
+        setCurrentPlayerSecond(current => current === nextSecond ? current : nextSecond);
     }, []);
 
     const handlePlayerPlaybackStateChange = useCallback((isPlaying: boolean) => {
@@ -458,13 +486,44 @@ const TeamProjectDetailsPage: React.FC = () => {
                         )}
 
                         <div className={styles.liveNotes}>
-                            <h3 className={styles.subTitle}>Active timestamp notes</h3>
-                            {activeTimestampNotes.length === 0 && (
-                                <p className={styles.muted}>No active timestamp notes yet.</p>
+                            <div className={styles.liveNotesHeader}>
+                                <h3 className={styles.subTitle}>Current notes</h3>
+                                <div className={styles.liveNotesControls}>
+                                    {canShowDynamicNoteControls && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                className={styles.liveNotePageButton}
+                                                aria-label="Show previous current notes"
+                                                onClick={() => setDynamicNotesPage(current => Math.max(current - 1, 0))}
+                                                disabled={!canGoToPreviousDynamicNotes}
+                                            >
+                                                <ChevronLeftIcon width={18} height={18} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={styles.liveNotePageButton}
+                                                aria-label="Show next current notes"
+                                                onClick={() => setDynamicNotesPage(current => Math.min(current + 1, dynamicNotesPageCount - 1))}
+                                                disabled={!canGoToNextDynamicNotes}
+                                            >
+                                                <ChevronRightIcon width={18} height={18} />
+                                            </button>
+                                        </>
+                                    )}
+                                    <span className={styles.liveTime}>{formatTime(currentPlayerSecond)}</span>
+                                </div>
+                            </div>
+                            {dynamicTimestampNotes.length === 0 && (
+                                <p className={styles.muted}>No active notes at this time.</p>
                             )}
-                            {activeTimestampNotes.slice(0, 3).map(note => (
-                                <NoteRow key={note.id} note={note} compact />
-                            ))}
+                            {dynamicTimestampNotes.length > 0 && (
+                                <div className={styles.liveNotesScroller}>
+                                    {visibleDynamicNotes.map(note => (
+                                        <NoteRow key={note.id} note={note} compact />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </section>
 

@@ -290,7 +290,8 @@
     font-weight: 800;
 }
 
-.versionInput {
+.versionInput,
+.versionSelect {
     width: 100%;
     min-height: 38px;
     padding: 0 10px;
@@ -300,6 +301,10 @@
     color: #ffffff;
     font: inherit;
     outline: none;
+}
+
+.versionSelect {
+    cursor: pointer;
 }
 
 .noteTextarea {
@@ -317,6 +322,7 @@
 }
 
 .versionInput:focus,
+.versionSelect:focus,
 .noteTextarea:focus {
     border-color: #26cdd4;
     box-shadow: 0 0 0 3px rgba(38, 205, 212, 0.12);
@@ -334,6 +340,13 @@
     width: 18px;
     height: 18px;
     accent-color: #26cdd4;
+}
+
+.timeRangeGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: end;
 }
 
 .hiddenInput {
@@ -468,6 +481,29 @@
 
 .role {
     font-size: 0.88rem;
+}
+
+.sourceTag {
+    width: fit-content;
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 5px;
+    padding: 3px 8px;
+    border: 1px solid rgba(38, 205, 212, 0.3);
+    border-radius: 999px;
+    color: #a8dfe2;
+    background: rgba(38, 205, 212, 0.08);
+    font-size: 0.78rem;
+    font-weight: 900;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
+
+.sourceTagDeleted {
+    border-color: rgba(255, 95, 95, 0.38);
+    color: #ffaaaa;
+    background: rgba(255, 95, 95, 0.1);
 }
 
 .noteMeta {
@@ -641,6 +677,10 @@
     }
 
     .liveNotesScroller {
+        grid-template-columns: 1fr;
+    }
+
+    .timeRangeGrid {
         grid-template-columns: 1fr;
     }
 }

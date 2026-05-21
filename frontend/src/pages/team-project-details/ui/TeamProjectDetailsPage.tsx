@@ -69,7 +69,10 @@ const TeamProjectDetailsPage: React.FC = () => {
     const [noteFormOpen, setNoteFormOpen] = useState(false);
     const [editingNote, setEditingNote] = useState<ProjectNote | null>(null);
     const [noteContent, setNoteContent] = useState('');
+    const [noteAudioVersionId, setNoteAudioVersionId] = useState('');
     const [attachCurrentTime, setAttachCurrentTime] = useState(false);
+    const [noteStartTime, setNoteStartTime] = useState('');
+    const [noteEndTime, setNoteEndTime] = useState('');
     const [noteError, setNoteError] = useState<string | null>(null);
     const [savingNote, setSavingNote] = useState(false);
     const [updatingNoteId, setUpdatingNoteId] = useState<string | null>(null);
@@ -223,9 +226,14 @@ const TeamProjectDetailsPage: React.FC = () => {
     const selectedWaveformCache = selectedVersion ? waveformCache[selectedVersion.id] : undefined;
 
     const openCreateNoteForm = () => {
+        const currentSecond = Math.floor(playbackRef.current.currentTime);
+
         setEditingNote(null);
         setNoteContent('');
+        setNoteAudioVersionId(selectedVersionId ?? '');
         setAttachCurrentTime(false);
+        setNoteStartTime(String(currentSecond));
+        setNoteEndTime(String(currentSecond));
         setNoteError(null);
         setNoteFormOpen(true);
     };
@@ -233,7 +241,14 @@ const TeamProjectDetailsPage: React.FC = () => {
     const openEditNoteForm = (note: ProjectNote) => {
         setEditingNote(note);
         setNoteContent(note.content);
+        setNoteAudioVersionId(note.audioVersionId ?? '');
         setAttachCurrentTime(note.startTimeSeconds !== null && note.startTimeSeconds !== undefined);
+        setNoteStartTime(note.startTimeSeconds !== null && note.startTimeSeconds !== undefined
+            ? String(note.startTimeSeconds)
+            : String(Math.floor(playbackRef.current.currentTime)));
+        setNoteEndTime(note.endTimeSeconds !== null && note.endTimeSeconds !== undefined
+            ? String(note.endTimeSeconds)
+            : String(note.startTimeSeconds ?? Math.floor(playbackRef.current.currentTime)));
         setNoteError(null);
         setNoteFormOpen(true);
     };
@@ -244,7 +259,10 @@ const TeamProjectDetailsPage: React.FC = () => {
         setNoteFormOpen(false);
         setEditingNote(null);
         setNoteContent('');
+        setNoteAudioVersionId('');
         setAttachCurrentTime(false);
+        setNoteStartTime('');
+        setNoteEndTime('');
         setNoteError(null);
     };
 
@@ -258,15 +276,28 @@ const TeamProjectDetailsPage: React.FC = () => {
             return;
         }
 
-        const currentSecond = Math.floor(playbackRef.current.currentTime);
+        const startTime = Number(noteStartTime);
+        const endTime = Number(noteEndTime || noteStartTime);
+
+        if (attachCurrentTime && (!Number.isInteger(startTime) || startTime < 0)) {
+            setNoteError('Start time must be a non-negative whole second.');
+            return;
+        }
+
+        if (attachCurrentTime && (!Number.isInteger(endTime) || endTime < 0)) {
+            setNoteError('End time must be a non-negative whole second.');
+            return;
+        }
+
+        const selectedNoteAudioVersionId = noteAudioVersionId || null;
         const timestampPayload = attachCurrentTime
             ? {
-                audioVersionId: selectedVersionId,
-                startTimeSeconds: currentSecond,
-                endTimeSeconds: currentSecond,
+                audioVersionId: selectedNoteAudioVersionId,
+                startTimeSeconds: Math.min(startTime, endTime),
+                endTimeSeconds: Math.max(startTime, endTime),
             }
             : {
-                audioVersionId: null,
+                audioVersionId: selectedNoteAudioVersionId,
                 startTimeSeconds: null,
                 endTimeSeconds: null,
             };
@@ -557,15 +588,83 @@ const TeamProjectDetailsPage: React.FC = () => {
                                     />
                                 </label>
 
+                                <label className={styles.versionField}>
+                                    <span>Source version</span>
+                                    <select
+                                        className={styles.versionSelect}
+                                        value={noteAudioVersionId}
+                                        onChange={(event) => setNoteAudioVersionId(event.target.value)}
+                                        disabled={savingNote}
+                                    >
+                                        <option value="">General</option>
+                                        {versions.map(version => (
+                                            <option key={version.id} value={version.id}>
+                                                {version.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
                                 <label className={styles.checkboxRow}>
                                     <input
                                         type="checkbox"
                                         checked={attachCurrentTime}
-                                        onChange={(event) => setAttachCurrentTime(event.target.checked)}
-                                        disabled={savingNote || !selectedVersionId}
+                                        onChange={(event) => {
+                                            const checked = event.target.checked;
+                                            setAttachCurrentTime(checked);
+                                            if (checked && !noteStartTime) {
+                                                const currentSecond = Math.floor(playbackRef.current.currentTime);
+                                                setNoteStartTime(String(currentSecond));
+                                                setNoteEndTime(String(currentSecond));
+                                            }
+                                        }}
+                                        disabled={savingNote}
                                     />
                                     <span>Attach current player time</span>
                                 </label>
+
+                                {attachCurrentTime && (
+                                    <div className={styles.timeRangeGrid}>
+                                        <label className={styles.versionField}>
+                                            <span>Start</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="1"
+                                                className={styles.versionInput}
+                                                value={noteStartTime}
+                                                onChange={(event) => setNoteStartTime(event.target.value)}
+                                                disabled={savingNote}
+                                            />
+                                        </label>
+
+                                        <label className={styles.versionField}>
+                                            <span>End</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="1"
+                                                className={styles.versionInput}
+                                                value={noteEndTime}
+                                                onChange={(event) => setNoteEndTime(event.target.value)}
+                                                disabled={savingNote}
+                                            />
+                                        </label>
+
+                                        <button
+                                            type="button"
+                                            className={styles.versionSecondaryButton}
+                                            onClick={() => {
+                                                const currentSecond = Math.floor(playbackRef.current.currentTime);
+                                                setNoteStartTime(String(currentSecond));
+                                                setNoteEndTime(String(currentSecond));
+                                            }}
+                                            disabled={savingNote}
+                                        >
+                                            Use current time
+                                        </button>
+                                    </div>
+                                )}
 
                                 {noteError && <p className={styles.versionError}>{noteError}</p>}
 
@@ -744,6 +843,11 @@ const NoteRow: React.FC<NoteRowProps> = ({
 }) => {
     const range = formatRange(note);
     const isCompleted = note.status === 'Completed';
+    const sourceLabel = note.isAudioVersionDeleted
+        ? `Deleted version: ${note.audioVersionName ?? 'Unknown'}`
+        : note.audioVersionName
+            ? `Version: ${note.audioVersionName}`
+            : 'General';
 
     return (
         <article className={`${styles.noteItem} ${isCompleted ? styles.noteItemCompleted : ''} ${compact ? styles.noteItemCompact : ''}`}>
@@ -761,6 +865,9 @@ const NoteRow: React.FC<NoteRowProps> = ({
                         {note.createdByMusicalRole && (
                             <div className={styles.role}>{note.createdByMusicalRole}</div>
                         )}
+                        <span className={`${styles.sourceTag} ${note.isAudioVersionDeleted ? styles.sourceTagDeleted : ''}`}>
+                            {sourceLabel}
+                        </span>
                     </div>
                 </div>
 

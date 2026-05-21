@@ -575,6 +575,25 @@ const TeamProjectDetailsPage: React.FC = () => {
 
                         {noteFormOpen && (
                             <form className={styles.noteForm} onSubmit={handleSaveNote}>
+                                <div className={styles.noteFormHeader}>
+                                    <div>
+                                        <h3 className={styles.noteFormTitle}>
+                                            {editingNote ? 'Edit note' : 'Add note'}
+                                        </h3>
+                                        <p className={styles.noteFormMeta}>
+                                            {attachCurrentTime ? 'Timestamp note' : 'Project note'}
+                                        </p>
+                                    </div>
+
+                                    {attachCurrentTime && (
+                                        <span className={styles.noteTimeBadge}>
+                                            {formatTime(Number(noteStartTime) || 0)}
+                                            {' - '}
+                                            {formatTime(Number(noteEndTime || noteStartTime) || 0)}
+                                        </span>
+                                    )}
+                                </div>
+
                                 <label className={styles.versionField}>
                                     <span>Content</span>
                                     <textarea
@@ -588,81 +607,88 @@ const TeamProjectDetailsPage: React.FC = () => {
                                     />
                                 </label>
 
-                                <label className={styles.versionField}>
-                                    <span>Source version</span>
-                                    <select
-                                        className={styles.versionSelect}
-                                        value={noteAudioVersionId}
-                                        onChange={(event) => setNoteAudioVersionId(event.target.value)}
-                                        disabled={savingNote}
-                                    >
-                                        <option value="">General</option>
-                                        {versions.map(version => (
-                                            <option key={version.id} value={version.id}>
-                                                {version.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
-
-                                <label className={styles.checkboxRow}>
-                                    <input
-                                        type="checkbox"
-                                        checked={attachCurrentTime}
-                                        onChange={(event) => {
-                                            const checked = event.target.checked;
-                                            setAttachCurrentTime(checked);
-                                            if (checked && !noteStartTime) {
-                                                const currentSecond = Math.floor(playbackRef.current.currentTime);
-                                                setNoteStartTime(String(currentSecond));
-                                                setNoteEndTime(String(currentSecond));
-                                            }
-                                        }}
-                                        disabled={savingNote}
-                                    />
-                                    <span>Attach current player time</span>
-                                </label>
-
-                                {attachCurrentTime && (
-                                    <div className={styles.timeRangeGrid}>
-                                        <label className={styles.versionField}>
-                                            <span>Start</span>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="1"
-                                                className={styles.versionInput}
-                                                value={noteStartTime}
-                                                onChange={(event) => setNoteStartTime(event.target.value)}
-                                                disabled={savingNote}
-                                            />
-                                        </label>
-
-                                        <label className={styles.versionField}>
-                                            <span>End</span>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="1"
-                                                className={styles.versionInput}
-                                                value={noteEndTime}
-                                                onChange={(event) => setNoteEndTime(event.target.value)}
-                                                disabled={savingNote}
-                                            />
-                                        </label>
-
-                                        <button
-                                            type="button"
-                                            className={styles.versionSecondaryButton}
-                                            onClick={() => {
-                                                const currentSecond = Math.floor(playbackRef.current.currentTime);
-                                                setNoteStartTime(String(currentSecond));
-                                                setNoteEndTime(String(currentSecond));
-                                            }}
+                                <div className={styles.noteOptionsGrid}>
+                                    <label className={styles.versionField}>
+                                        <span>Source version</span>
+                                        <select
+                                            className={styles.versionSelect}
+                                            value={noteAudioVersionId}
+                                            onChange={(event) => setNoteAudioVersionId(event.target.value)}
                                             disabled={savingNote}
                                         >
-                                            Use current time
-                                        </button>
+                                            <option value="">General</option>
+                                            {versions.map(version => (
+                                                <option key={version.id} value={version.id}>
+                                                    {version.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+
+                                    <label className={`${styles.timestampToggle} ${attachCurrentTime ? styles.timestampToggleActive : ''}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={attachCurrentTime}
+                                            onChange={(event) => {
+                                                const checked = event.target.checked;
+                                                setAttachCurrentTime(checked);
+                                                if (checked && !noteStartTime) {
+                                                    const currentSecond = Math.floor(playbackRef.current.currentTime);
+                                                    setNoteStartTime(String(currentSecond));
+                                                    setNoteEndTime(String(currentSecond));
+                                                }
+                                            }}
+                                            disabled={savingNote}
+                                        />
+                                        <span>
+                                            <strong>Timestamp</strong>
+                                            <small>{attachCurrentTime ? 'Shown near player time' : 'No player time'}</small>
+                                        </span>
+                                    </label>
+                                </div>
+
+                                {attachCurrentTime && (
+                                    <div className={styles.timeRangePanel}>
+                                        <div className={styles.timeRangeGrid}>
+                                            <label className={styles.versionField}>
+                                                <span>Start</span>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    className={styles.versionInput}
+                                                    value={noteStartTime}
+                                                    onChange={(event) => setNoteStartTime(event.target.value)}
+                                                    disabled={savingNote}
+                                                />
+                                            </label>
+
+                                            <label className={styles.versionField}>
+                                                <span>End</span>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    className={styles.versionInput}
+                                                    value={noteEndTime}
+                                                    onChange={(event) => setNoteEndTime(event.target.value)}
+                                                    disabled={savingNote}
+                                                />
+                                            </label>
+
+                                            <button
+                                                type="button"
+                                                className={styles.versionSecondaryButton}
+                                                onClick={() => {
+                                                    const currentSecond = Math.floor(playbackRef.current.currentTime);
+                                                    setNoteStartTime(String(currentSecond));
+                                                    setNoteEndTime(String(currentSecond));
+                                                }}
+                                                disabled={savingNote}
+                                            >
+                                                Use player time
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
 

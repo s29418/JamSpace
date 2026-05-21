@@ -62,7 +62,7 @@ const ProjectVersionsPanel: React.FC<ProjectVersionsPanelProps> = ({
                         className={styles.input}
                         value={name}
                         onChange={(event) => onNameChange(event.target.value)}
-                        maxLength={100}
+                        maxLength={25}
                         disabled={saving}
                         required
                     />

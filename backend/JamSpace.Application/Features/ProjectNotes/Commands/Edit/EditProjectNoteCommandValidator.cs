@@ -8,7 +8,8 @@ public class EditProjectNoteCommandValidator : AbstractValidator<EditProjectNote
     {
         RuleFor(x => x.Content)
             .NotEmpty()
-            .MaximumLength(2000);
+            .MaximumLength(750)
+            .WithMessage("Note content cannot be longer than 750 characters.");
 
         RuleFor(x => x.StartTimeSeconds)
             .GreaterThanOrEqualTo(0)

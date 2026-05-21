@@ -21,7 +21,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
         builder.Property(p => p.Description)
             .IsRequired(false)
-            .HasMaxLength(1000);
+            .HasMaxLength(200);
 
         builder.Property(p => p.PictureUrl)
             .IsRequired(false)

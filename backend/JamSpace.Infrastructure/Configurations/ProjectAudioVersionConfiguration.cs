@@ -14,7 +14,7 @@ public class ProjectAudioVersionConfiguration : IEntityTypeConfiguration<Project
 
         builder.Property(v => v.Name)
             .IsRequired()
-            .HasMaxLength(100);
+            .HasMaxLength(25);
 
         builder.Property(v => v.FileUrl)
             .IsRequired()

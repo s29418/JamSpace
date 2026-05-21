@@ -5,6 +5,7 @@ using JamSpace.Application.Common.Services;
 using JamSpace.Application.Features.Conversations.Strategies;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 
 namespace JamSpace.Application;
 
@@ -12,6 +13,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        ValidatorOptions.Global.LanguageManager.Culture = CultureInfo.GetCultureInfo("en");
+
         services.AddScoped<IConversationCardStrategy, DirectConversationCardStrategy>();
         services.AddScoped<IConversationCardStrategy, TeamConversationCardStrategy>();
         services.AddScoped<IConversationCardStrategyResolver, ConversationCardStrategyResolver>();

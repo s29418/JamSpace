@@ -15,7 +15,7 @@ public class ProjectNoteConfiguration : IEntityTypeConfiguration<ProjectNote>
 
         builder.Property(n => n.Content)
             .IsRequired()
-            .HasMaxLength(2000);
+            .HasMaxLength(750);
 
         builder.Property(n => n.StartTimeSeconds)
             .IsRequired(false);
@@ -25,7 +25,7 @@ public class ProjectNoteConfiguration : IEntityTypeConfiguration<ProjectNote>
 
         builder.Property(n => n.AudioVersionNameSnapshot)
             .IsRequired(false)
-            .HasMaxLength(100);
+            .HasMaxLength(25);
 
         builder.Property(n => n.IsAudioVersionDeleted)
             .IsRequired()

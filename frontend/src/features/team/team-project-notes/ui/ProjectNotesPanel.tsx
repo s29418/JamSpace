@@ -210,7 +210,7 @@ const ProjectNotesPanel: React.FC<ProjectNotesPanelProps> = ({
                             value={content}
                             onChange={(event) => onContentChange(event.target.value)}
                             rows={4}
-                            maxLength={2000}
+                            maxLength={750}
                             disabled={saving}
                             required
                         />

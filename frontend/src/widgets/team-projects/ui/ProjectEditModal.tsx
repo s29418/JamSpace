@@ -195,7 +195,7 @@ const ProjectEditModal: React.FC<Props> = ({
                             className={styles.input}
                             value={name}
                             onChange={(event) => setName(event.target.value)}
-                            maxLength={80}
+                            maxLength={25}
                             disabled={saving || deleting}
                             required
                         />
@@ -207,7 +207,7 @@ const ProjectEditModal: React.FC<Props> = ({
                             className={styles.textarea}
                             value={description}
                             onChange={(event) => setDescription(event.target.value)}
-                            maxLength={500}
+                            maxLength={200}
                             disabled={saving || deleting}
                             rows={4}
                         />

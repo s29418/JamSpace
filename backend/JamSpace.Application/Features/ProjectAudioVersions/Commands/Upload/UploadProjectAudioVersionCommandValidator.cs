@@ -9,7 +9,8 @@ public class UploadProjectAudioVersionCommandValidator : AbstractValidator<Uploa
     {
         RuleFor(x => x.Name)
             .NotEmpty()
-            .MaximumLength(100);
+            .MaximumLength(25)
+            .WithMessage("Audio version name cannot be longer than 25 characters.");
 
         RuleFor(x => x.DurationSeconds)
             .GreaterThan(0)

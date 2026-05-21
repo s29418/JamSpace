@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon } from '@heroicons/react/24/outline';
 import type { TeamProject } from 'entities/team/model/types';
 import { formatDate, getProjectFallback } from 'entities/team/lib/teamProjectFormatters';
 import styles from './ProjectHeader.module.css';
@@ -29,7 +29,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project, onEdit }) => (
                 className={styles.editProjectButton}
                 onClick={onEdit}
             >
-                <Cog6ToothIcon width={20} height={20} />
+                <PencilSquareIcon className={styles.icon} />
                 Edit
             </button>
         </div>

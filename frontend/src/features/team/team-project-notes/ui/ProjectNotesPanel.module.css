@@ -132,6 +132,7 @@
 .textarea {
     width: 100%;
     min-height: 112px;
+    max-height: 224px;
     resize: vertical;
     padding: 10px;
     border: 1px solid rgba(255, 255, 255, 0.24);
@@ -141,6 +142,12 @@
     font: inherit;
     line-height: 1.4;
     outline: none;
+}
+
+.icon{
+    width: 20px;
+    height: 20px;
+    stroke-width: 2px;
 }
 
 .input:focus,
@@ -237,6 +244,7 @@
     border: 1px solid rgba(255, 255, 255, 0.24);
     background: rgba(255, 255, 255, 0.06);
     color: #ffffff;
+    padding: 0 12px;
 }
 
 .primaryButton {
@@ -278,6 +286,161 @@
     gap: 12px;
 }
 
+.viewAllButton {
+    width: 100%;
+    min-height: 40px;
+    gap: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 14px;
+    border: 1px solid rgba(38, 205, 212, 0.52);
+    border-radius: 12px;
+    background: rgba(38, 205, 212, 0.07);
+    color: #26cdd4;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.viewAllButton:hover {
+    border-color: rgba(38, 205, 212, 0.86);
+    background: rgba(38, 205, 212, 0.16);
+}
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    background: rgba(0, 0, 0, 0.72);
+}
+
+.notesModal {
+    width: min(1280px, 100%);
+    max-height: min(900px, calc(100vh - 56px));
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 18px;
+    padding: 22px;
+    border: 1px solid rgba(99, 115, 117, 0.86);
+    border-radius: 18px;
+    background: #121617;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.52);
+}
+
+.modalHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.modalTitle {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.45rem;
+    font-weight: 900;
+}
+
+.modalMeta {
+    margin: 5px 0 0;
+    color: #8ea5a7;
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.modalCloseButton {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.modalCloseButton:hover {
+    border-color: rgba(38, 205, 212, 0.58);
+    background: rgba(38, 205, 212, 0.12);
+}
+
+.filtersGrid {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.2fr) minmax(160px, 1fr) minmax(110px, 0.7fr) minmax(110px, 0.7fr);
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid rgba(95, 113, 115, 0.68);
+    border-radius: 14px;
+    background: rgba(13, 18, 19, 0.82);
+}
+
+.modalNotesGrid {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, auto);
+    gap: 12px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.modalPagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pageButton {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 14px;
+    border: 1px solid rgba(38, 205, 212, 0.5);
+    border-radius: 999px;
+    background: rgba(38, 205, 212, 0.08);
+    color: #26cdd4;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.pageButton:hover:not(:disabled) {
+    background: rgba(38, 205, 212, 0.18);
+}
+
+.pageButton:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+.pageIndicator {
+    color: #cfe4e5;
+    font-weight: 900;
+}
+
+@media (max-width: 1100px) {
+    .modalNotesGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filtersGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 720px) {
     .notesPanel {
         padding: 16px;
@@ -299,5 +462,29 @@
 
     .timeRangeGrid {
         grid-template-columns: 1fr;
+    }
+
+    .modalOverlay {
+        padding: 12px;
+    }
+
+    .notesModal {
+        max-height: calc(100vh - 24px);
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .filtersGrid,
+    .modalNotesGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .modalPagination {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .pageButton {
+        width: 100%;
     }
 }

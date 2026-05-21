@@ -76,6 +76,12 @@
     transform: translateY(-1px);
 }
 
+.icon{
+    width: 20px;
+    height: 20px;
+    stroke-width: 2px;
+}
+
 @media (max-width: 720px) {
     .header {
         align-items: flex-start;

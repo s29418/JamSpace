@@ -33,6 +33,7 @@ public sealed class JamSpaceDbContext : DbContext
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<ConversationParticipant> ConversationParticipants => Set<ConversationParticipant>();
     public DbSet<Conversation> Conversations => Set<Conversation>();
+    public DbSet<Notification> Notifications => Set<Notification>();
     
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();
@@ -63,6 +64,7 @@ public sealed class JamSpaceDbContext : DbContext
         modelBuilder.ApplyConfiguration(new MessageConfiguration());
         modelBuilder.ApplyConfiguration(new ConversationParticipantConfiguration());
         modelBuilder.ApplyConfiguration(new ConversationConfiguration());
+        modelBuilder.ApplyConfiguration(new NotificationConfiguration());
         modelBuilder.ApplyConfiguration(new TeamConfiguration());
         modelBuilder.ApplyConfiguration(new TeamMemberConfiguration());
         modelBuilder.ApplyConfiguration(new TeamInviteConfiguration());

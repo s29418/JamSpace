@@ -52,6 +52,7 @@ public static class DependencyInjection
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IConversationParticipantRepository, ConversationParticipantRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
 
         services.AddSingleton(_ =>
         {
